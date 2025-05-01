@@ -18,29 +18,37 @@ const StatsWithLineChart = ({
   statTitle,
   series,
   options,
+  cardHeight,
   type,
   height,
+  cardWidth, 
+  headerFlexDirection, 
   ...rest
 }) => {
   return (
-    <Card {...rest}>
-      <CardHeader className="align-items-start pb-0">
-        <div>
-          <h2 className="fw-bolder">{stats}</h2>
-          <CardText>{statTitle}</CardText>
-        </div>
+    <Card style={{ width: cardWidth || "140px", height: cardHeight || "210px", margin: 0 }}>
+      <CardHeader
+        className="text-center"
+        style={{
+          display: "flex",
+          flexDirection: headerFlexDirection || "column", // جهت flex را از پراپس می‌گیرد
+          gap: "50px",
+          alignItems: "center",
+        }}
+      >
         <Avatar
-          className="avatar-stats p-50 m-0"
+          className="avatar-stats m-0 p-50"
           color={`light-${color}`}
           icon={icon}
         />
+        <div>
+          <h2 className="fw-bolder">{stats}</h2>
+          <CardText className="fs-5 font-bold">{statTitle}</CardText>
+        </div>
       </CardHeader>
-      <Chart
-        options={options}
-        series={series}
-        type={type}
-        height={height ? height : 100}
-      />
+      <div style={{ minHeight: height || "60px" }}>
+        <Chart options={options} series={series} type={type} height={height || "60"} />
+      </div>
     </Card>
   );
 };
@@ -57,10 +65,14 @@ StatsWithLineChart.propTypes = {
   stats: PropTypes.string.isRequired,
   series: PropTypes.array.isRequired,
   statTitle: PropTypes.string.isRequired,
+  cardWidth: PropTypes.string, // پراپس جدید برای عرض
+  headerFlexDirection: PropTypes.string, // پراپس جدید برای جهت flex
 };
 
 // ** Default Props
 StatsWithLineChart.defaultProps = {
   options: lineChartOptions,
   color: "primary",
+  cardWidth: "140px", // مقدار پیش‌فرض برای عرض
+  headerFlexDirection: "column", // مقدار پیش‌فرض برای جهت flex
 };

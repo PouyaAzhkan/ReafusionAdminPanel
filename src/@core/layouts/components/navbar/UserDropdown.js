@@ -1,6 +1,5 @@
 // ** React Imports
 import { Link } from "react-router-dom";
-
 // ** Custom Components
 import Avatar from "@components/avatar";
 
@@ -23,11 +22,17 @@ import {
   DropdownToggle,
   DropdownItem,
 } from "reactstrap";
+import { GetUserInfo } from "../../../Services/Api/GetUserInfo";
 
 // ** Default Avatar Image
-import defaultAvatar from "@src/assets/images/portrait/small/avatar-s-11.jpg";
+import UnKnownUser from '../../../../assets/images/element/UnKnownUser.jpg'
 
 const UserDropdown = () => {
+
+  const { data, isLoading, error } = GetUserInfo();
+  if (isLoading) return <p> در حال بارگزاری </p>
+  if (error) return <p> خطا در بارگزاری </p>
+
   return (
     <UncontrolledDropdown tag="li" className="dropdown-user nav-item">
       <DropdownToggle
@@ -37,11 +42,11 @@ const UserDropdown = () => {
         onClick={(e) => e.preventDefault()}
       >
         <div className="user-nav d-sm-flex d-none">
-          <span className="user-name fw-bold">John Doe</span>
+          <span className="user-name fw-bold">{data?.fName || "بدون نام"} {data?.lName || []}</span>
           <span className="user-status">Admin</span>
         </div>
         <Avatar
-          img={defaultAvatar}
+          img={data.currentPictureAddress || UnKnownUser}
           imgHeight="40"
           imgWidth="40"
           status="online"

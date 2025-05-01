@@ -439,11 +439,7 @@
   .revenue-report-wrapper {
     padding: 1.286rem 1.5rem;
 
-    @include media-breakpoint-up(md) {
-      border-right: 1px solid $border-color;
-    }
-
-    #revenue-report-chart {
+    #revenue-report-chart {  
       .apexcharts-series {
         &[seriesName='Earning'] {
           transform: scaleY(0.965);
@@ -476,6 +472,7 @@
 
 // Earnings Card
 .earnings-card {
+  width: 412px;
   .apexcharts-canvas .apexcharts-pie {
     .apexcharts-datalabel-label {
       font-size: 0.8rem;

@@ -1,35 +1,25 @@
-// ** React Imports
-import { useState, useEffect } from 'react'
-
-// ** Third Party Components
 import Chart from 'react-apexcharts'
-
-// ** Reactstrap Imports
+import '../../../assets/scss/PanelResponsive/Dashboard.scss'
+import { NavLink } from 'react-router-dom'
 import { Row, Col, Card, CardTitle } from 'reactstrap'
-import { GetCourseGroup } from '../../Services/Api/DashboardPanel/GetCourseGroup'
 
-const RevenueReport = () => {
-  const { data, isLoading, error } = GetCourseGroup()
-  if (isLoading) return <p>در حال دریافت اطلاعات...</p>
-  if (error) return <p>خطا در دریافت اطلاعات</p>
+const RevenueReport = ({ title, apiData, valueKey , labelKey, color, hasMore = false }) => {
+  if (!apiData) return <p>اطلاعاتی موجود نیست</p>
 
-  const categories = data.courseGroupDtos.map(group => group.groupName)
-  const capacities = data.courseGroupDtos.map(group => group.groupCapacity)
+  const categories = apiData.map(group => group[labelKey])
+  const values = apiData.map(group => group[valueKey])
 
-  const revenueOptions = {
+  const options = {
     chart: {
       stacked: true,
       type: 'bar',
       toolbar: { show: false }
     },
     tooltip: {
-      custom: function({ series, seriesIndex, dataPointIndex, w }) {
+      custom: function({ series, seriesIndex, dataPointIndex }) {
         const groupName = categories[dataPointIndex]
         const value = series[seriesIndex][dataPointIndex]
-        return `<div class="apex-tooltip text-center p-50">
-                  <strong>${groupName}</strong><br/>
-                  ظرفیت: ${value}
-                </div>`
+        return `<div class="apex-tooltip text-center p-50"><strong>${groupName}</strong><br/> ظرفیت: ${value}</div>`
       }
     },
     grid: {
@@ -48,8 +38,7 @@ const RevenueReport = () => {
         formatter: value => (value.length > 6 ? value.slice(0, 6) + '…' : value),
         style: {
           colors: '#000',
-          fontSize: '0.86rem',
-          textAlign: 'center'
+          fontSize: '0.86rem'
         }
       },
       axisTicks: { show: false },
@@ -57,7 +46,7 @@ const RevenueReport = () => {
     },
     legend: { show: false },
     dataLabels: { enabled: false },
-    colors: ['#6459e2'],
+    colors: [color],
     plotOptions: {
       bar: {
         columnWidth: '30%',
@@ -76,28 +65,44 @@ const RevenueReport = () => {
       }
     }
   }
-  
-  const revenueSeries = [
+
+  const series = [
     {
       name: 'ظرفیت',
-      data: capacities
+      data: values
     }
   ]
 
   return (
-    <Card className='card-revenue-budget' style={{ width: '600px' }}>
+    <Card className="card-revenue-budget w-xl-auto revenue-card">
       <Row>
-        <Col className='revenue-report-wrapper' md='8' xs='12' style={{ width: '100%' }}>
+        <Col className='revenue-report-wrapper' md='12' xs='12'>
           <div className='d-sm-flex justify-content-between align-items-center mb-1'>
-            <CardTitle className='mb-50 mb-sm-0 p-1 text-dark'>نمودار گروه‌های دوره</CardTitle>
-            <div className='d-flex align-items-center'>
+            <CardTitle className='mb-50 mb-sm-0 p-1 text-dark'>{title}</CardTitle>
+            <div className='d-flex align-items-center gap-1'>
+              {hasMore && (   
+                    <NavLink to="/d" className="btn btn-sm"
+                    style={{ border: '1px solid #32bce4', backgroundColor: 'transparent', borderRadius: '6px',
+                      fontWeight: 'bold', padding: '5px 12px', transition: 'all 0.3s ease'}}
+                    onMouseOver={e => {
+                      e.target.style.backgroundColor = '#32bce4'
+                      e.target.style.color = '#fff'
+                    }}
+                    onMouseOut={e => {
+                      e.target.style.backgroundColor = 'transparent'
+                      e.target.style.color = '#32bce4'
+                    }}
+                  >
+                    نمایش بیشتر
+                  </NavLink>
+              )}
               <div className='d-flex align-items-center me-2'>
-                <span className='bullet bullet-primary me-50 cursor-pointer'></span>
+                <span className='bullet me-50 cursor-pointer' style={{ backgroundColor: color }}></span>
                 <span className='text-dark'>ظرفیت</span>
               </div>
             </div>
           </div>
-          <Chart id='revenue-report-chart' type='bar' height='230' options={revenueOptions} series={revenueSeries} />
+          <Chart type='bar' height='230' options={options} series={series} />
         </Col>
       </Row>
     </Card>

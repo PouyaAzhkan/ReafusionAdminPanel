@@ -1,0 +1,144 @@
+/* استایل‌های اصلی */
+.revenue-card {
+  width: 595px;
+}
+
+.StatusCard {
+  width: 800px;
+}
+
+.aztiveUser {
+  width: 424px; /* عرض پیش‌فرض */
+  display: block; /* چیدمان کنار هم */
+  flex-wrap: wrap; /* برای ریسپانسیو بودن */
+  gap: 10px; /* فاصله بین کارت‌ها */
+}
+
+.card-item {
+  flex: 1; /* تقسیم مساوی فضا */
+  min-width: 0; /* جلوگیری از سرریز */
+}
+
+.dashboard-site-traffic {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* عرض پیش‌فرض کارت‌ها */
+.dashboard-site-traffic .stats-card {
+  width: 383px; /* عرض پیش‌فرض مطابق درخواست */
+  min-width: 0; /* جلوگیری از سرریز شدن */
+}
+
+.dashboard-goals-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem; /* فاصله بین کارت‌ها */
+
+  .goal-card {
+    width: 32%;
+  }
+
+  .sales-card {
+    width: 32%;
+  }
+}
+/* قوانین رسانه‌ای */
+@media (max-width: 1280px) {
+  .lastChart {
+    width: 100%;
+    display: flex; /* اطمینان از این که flex هست */
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+  }
+
+  .revenue-card {
+    width: 100%;
+    margin: 0 auto; /* وسط‌چین کردن کارت */
+  }
+
+  .statusSite {
+    display: flex;
+    flex-wrap: wrap !important;
+  }
+
+  .StatusCard {
+    width: 100%;
+  }
+  .earnings-chart {
+    height:187px;
+  }
+  .aztiveUser {
+    width: 100%; /* طبق استایل اولیه */
+    display: flex;
+    justify-content: space-between; /* فاصله یکنواخت */
+  }
+
+  .card-item {
+    width: 48%;
+  }
+
+  .dashboard-site-traffic {
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 1400px) {
+  .dashboard-goals-section .goal-card {
+    width: 48%;
+  }
+
+  .dashboard-goals-section .sales-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 780px) {
+  .dashboard-site-traffic {
+    justify-content: space-between;
+  }
+  .dashboard-site-traffic .stats-card:nth-child(1),
+  .dashboard-site-traffic .stats-card:nth-child(2) {
+    width: 100%; /* دو کارت اول 48% */
+  }
+  .dashboard-site-traffic .stats-card:nth-child(3) {
+    width: 100%; /* کارت سوم 100% و زیر دوتای دیگه */
+    margin-top: 1rem; /* فاصله از بالا */
+  }
+  .earnings-chart {
+    height:125px;
+  }
+}
+
+/* هماهنگی با استایل‌های قبلی */
+@media (max-width: 1280px) {
+  .dashboard-site-traffic {
+    justify-content: space-around; /* هماهنگ با استایل‌های ارسالی */
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-goals-section .goal-card,
+  .dashboard-goals-section .sales-card {
+    width: 100%;
+  }
+  .aztiveUser {
+    display: block;
+  }
+  .card-item {
+    width: 100%;
+  }
+}
+
+@media (max-width: 840px) {
+  .dashboard-site-traffic .stats-card {
+    width: 100%; /* همه کارت‌ها 100% و عمودی */
+    margin-top: 1rem;
+  }
+  .dashboard-site-traffic .stats-card:first-child {
+    margin-top: 0; /* اولین کارت حاشیه بالا نداشته باشه */
+  }
+}

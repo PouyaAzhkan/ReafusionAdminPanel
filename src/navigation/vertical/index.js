@@ -1,4 +1,4 @@
-import { Mail, Home, Airplay, Circle } from "react-feather";
+import { Mail, Home, Airplay, Circle, Book } from "react-feather";
 
 export default [
   {
@@ -6,12 +6,6 @@ export default [
     title: "داشبورد",
     icon: <Home size={20} />,
     navLink: "/home",
-  },
-  {
-    id: "secondPage",
-    title: "Second Page",
-    icon: <Mail size={20} />,
-    navLink: "/second-page",
   },
   {
     id: "smaplePage",
@@ -24,6 +18,19 @@ export default [
         title: "لیست کاربران",
         icon: <Circle size={12} />,
         navLink: "/UserList",
+      },
+    ],
+  },
+  {
+    id: "weblog",
+    title: "مدیریت اخبار مقالات",
+    icon: <Book size={20} />,
+    children: [
+      {
+        id: "weblogList",
+        title: "لیست اخبار مقالات",
+        icon: <Circle size={12} />,
+        navLink: "/WeblogAndNewsList",
       },
     ],
   },

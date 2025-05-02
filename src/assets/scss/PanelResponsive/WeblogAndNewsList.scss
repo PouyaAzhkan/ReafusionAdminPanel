@@ -1,0 +1,27 @@
+.weblog {
+   display: flex;
+}
+.weblogList {
+  width: 857px;
+}
+@media (max-width: 950px) {
+   .weblog {
+      display: block;
+   }
+   .WeblogAndNewsInfo {
+     width: 100%;
+   }
+   .weblogList {
+     width: 100%;
+   }
+}
+@media (max-width: 600px) {
+  .WeblogCard {
+    width: 350px;
+    height: 400px;
+    margin-top: 15px;
+  }
+  .card-Img {
+    height: 180px;
+  }
+}

@@ -1,0 +1,31 @@
+.WeblogAndNewsInfo {
+  width: 350px;
+}
+.select1{
+  width: 70px;
+}
+.WeblogCard {
+  width: 270px;
+  margin-top: 15px;
+}
+.card-Img {
+  height: 151px;
+}
+.truncate-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%; // یا مثلاً 200px بسته به نیاز
+  position: relative;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.6;
+  max-height: calc(1.6em * 3); // 3 خط با line-height 1.6
+}
+

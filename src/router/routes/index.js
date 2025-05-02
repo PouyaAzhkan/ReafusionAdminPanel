@@ -12,6 +12,7 @@ import PublicRoute from "@components/routes/PublicRoute";
 
 // ** Utils
 import { isObjEmpty } from "@utils";
+import { UserList } from "../../pages/UserList";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -86,6 +87,10 @@ const Routes = [
     meta: {
       layout: "blank",
     },
+  },
+  {
+    path: "UserList",
+    element: <UserList />,
   },
 ];
 

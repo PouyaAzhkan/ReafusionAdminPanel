@@ -2,26 +2,27 @@
 import { useEffect, useState } from "react";
 
 // ** Third Party Components
-import Proptypes from "prop-types";
+import PropTypes from "prop-types";
 
-const ScrollTop = (props) => {
-  // ** Props
-  const { showOffset, scrollBehaviour, children, ...rest } = props;
-
+const ScrollTop = ({
+  showOffset,
+  scrollBehaviour = "smooth", // ✅ استفاده از پارامتر پیش‌فرض
+  children,
+  ...rest
+}) => {
   // ** State
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (window) {
-      window.addEventListener("scroll", () => {
-        if (window.pageYOffset >= showOffset) {
-          setVisible(true);
-        } else {
-          setVisible(false);
-        }
-      });
-    }
-  }, []);
+    const handleScroll = () => {
+      setVisible(window.pageYOffset >= showOffset);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Clean up event listener on unmount
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [showOffset]);
 
   const handleScrollToTop = () => {
     window.scroll({ top: 0, behavior: scrollBehaviour });
@@ -40,11 +41,7 @@ export default ScrollTop;
 
 // ** PropTypes
 ScrollTop.propTypes = {
-  showOffset: Proptypes.number,
-  children: Proptypes.any.isRequired,
-  scrollBehaviour: Proptypes.oneOf(["smooth", "instant", "auto"]),
-};
-
-ScrollTop.defaultProps = {
-  scrollBehaviour: "smooth",
+  showOffset: PropTypes.number.isRequired,
+  children: PropTypes.node.isRequired,
+  scrollBehaviour: PropTypes.oneOf(["smooth", "instant", "auto"]),
 };

@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import Table from '../components/Table/TableWithButtons';
+import Table from '../components/user/UserListTable';
 
 const UserList = () => {
   return (

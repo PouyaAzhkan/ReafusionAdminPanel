@@ -19,60 +19,115 @@ import {
   DropdownToggle,
   UncontrolledDropdown,
 } from "reactstrap";
+import { GetUserList } from "../../@core/Services/Api/UserManage/user";
+import moment from "moment-jalaali"; // Import moment-jalaali
 
-// Sample static data
-const data = [
-  {
-    id: 1,
-    userName: "متین",
-    img: "https://i.pravatar.cc/40?img=1",
-    post: "Developer",
-    email: "john@example.com",
-    sex: "مرد",
-    registerDate: "2023-01-15",
-    status: 1,
-  },
-];
-
+// Status map for badges
 const statusMap = {
-  1: { title: "فعال", color: "light-success" },
-  2: { title: "غیرفعال", color: "light-danger" },
+  "True": { title: "فعال", color: "light-success" },
+  "False": { title: "غیرفعال", color: "light-danger" },
 };
 
+// Mapping roles to Persian names
+const roleMap = {
+  "Administrator": "مدیر",
+  "Teacher": "معلم",
+  "Employee.Admin": "مدیر کارمند",
+  "Employee.Writer": "نویسنده کارمند",
+  "Student": "دانش‌آموز",
+  "CourseAssistance": "کمک آموزشی",
+  "TournamentAdmin": "مدیر مسابقات",
+  "Referee": "داور",
+  "TournamentMentor": "مربی مسابقات",
+  "Support": "پشتیبانی",
+};
+
+// Table columns definition
 const columns = [
   {
     name: "نام کاربر",
     sortable: true,
-    selector: (row) => row.userName,
+    selector: (row) => row.fname,
     cell: (row) => (
       <div className="d-flex align-items-center">
         <img
           className="me-1 rounded-circle"
-          src={row.img}
+          src={row.pictureAddress || "https://i.pravatar.cc/40?img=1"}
           alt="avatar"
           height="32"
           width="32"
         />
-        <span className="fw-bold">{row.userName}</span>
+        <span className="fw-bold">
+          {row.fname || "بدون نام"} {row.lname || "بدون نام خانوادگی"}
+        </span>
       </div>
     ),
+    minWidth: "200px"
   },
-  { name: "نفش", selector: (row) => row.post, sortable: true },
-  { name: "ایمیل", selector: (row) => row.email, sortable: true, minWidth: "250px" },
-  { name: "جنسیت", selector: (row) => row.sex, sortable: true, width: "100px" },
-  { name: "تاریخ عضویت", selector: (row) => row.registerDate, sortable: true, minWidth: "200px" },
   {
-    name: "وضعیت",
-    selector: (row) => row.status,
-    cell: (row) => (
-      <span className={`badge badge-${statusMap[row.status].color}`}>
-        {statusMap[row.status].title}
-      </span>
-    ),
+    name: "نقش",
+    selector: (row) => row.userRoles,
+    cell: (row) => {
+      const roles = row.userRoles?.split(",") || [];
+      if (roles.length === 0) {
+        return <span>بدون نقش</span>;
+      }
+
+      return (
+        <div style={{ whiteSpace: "nowrap" }}>
+          {roles.slice(0, 2).map((role, index) => (
+            <span key={index}>
+              {roleMap[role.trim()] || role}
+              {index < roles.length - 1 && ", "}
+            </span>
+          ))}
+          {roles.length > 2 && <span>...</span>}
+        </div>
+      );
+    },
+    width: "200px"
+  },
+  {
+    name: "ایمیل",
+    selector: (row) => row.gmail,
+    sortable: true,
+    minWidth: "250px"
+  },
+  {
+    name: "جنسیت",
+    selector: (row) => row.gender,
+    sortable: true,
+    cell: (row) => <span>{row.gender ? "مرد" : "زن"}</span>,
     width: "100px"
   },
   {
-    name: "عملیت",
+    name: "تاریخ عضویت",
+    selector: (row) => row.insertDate,
+    sortable: true,
+    width: "150px",
+    cell: (row) => {
+      // Convert date to Persian (Jalali) format using moment-jalaali
+      const date = moment(row.insertDate).format("jYYYY/jMM/jDD");
+      return <span>{date}</span>;
+    },
+  },
+  {
+    name: "وضعیت",
+    selector: (row) => row.active,
+    cell: (row) => {
+      const status = row.active === "True" ? "فعال" : "غیرفعال";
+      const color = row.active === "True" ? "light-success" : "light-danger";
+      
+      return (
+        <span className={`badge badge-${color}`}>
+          {status}
+        </span>
+      );
+    },
+    width: "100px",
+  },
+  {
+    name: "عملیات",
     allowOverflow: true,
     cell: (row) => (
       <div className="d-flex align-items-center gap-1 z-3">
@@ -91,16 +146,18 @@ const columns = [
   },
 ];
 
+// UserListTable component
 const UserListTable = () => {
+  const { data, isLoading, isError } = GetUserList(); // Fetch data from your API
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 7;
 
-  const filteredData = data.filter(
+  const filteredData = (data?.listUser || []).filter(
     (item) =>
-      item.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.post.toLowerCase().includes(searchQuery.toLowerCase())
+      (item.fname?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+      (item.gmail?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+      (item.userRoles?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
   );
 
   const paginatedData = filteredData.slice(
@@ -139,15 +196,14 @@ const UserListTable = () => {
     />
   );
 
+  if (isLoading) return <div>در حال بارگذاری...</div>;
+  if (isError) return <div>خطا در بارگذاری داده‌ها</div>;
+
   return (
     <Fragment>
       <Card>
         <Row className="justify-content-between mx-0 py-2">
-          <Col
-            className="d-flex align-items-center"
-            md="6"
-            sm="12"
-          >
+          <Col className="d-flex align-items-center" md="6" sm="12">
             <Label className="me-1" for="search-input">
               جستجو :
             </Label>
@@ -161,13 +217,9 @@ const UserListTable = () => {
             />
           </Col>
 
-          <Col
-            className="d-flex align-items-center justify-content-end"
-            md="6"
-            sm="12"
-          >
+          <Col className="d-flex align-items-center justify-content-end" md="6" sm="12">
             <Button className="" color="primary">
-              <span className="align-middle">اضافه کردن کابر جدید</span>
+              <span className="align-middle">اضافه کردن کاربر جدید</span>
               <Plus size={15} />
             </Button>
           </Col>

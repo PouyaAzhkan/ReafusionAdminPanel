@@ -1,21 +1,7 @@
-// ** React Imports
-import { Fragment, useState, forwardRef } from "react";
-
-// ** Table Data & Columns
-import { data, columns } from "./data";
-
-// ** Add New Modal Component
-import AddNewModal from "./AddNewModal";
-
-// ** Third Party Components
-import ReactPaginate from "react-paginate";
-import DataTable from "react-data-table-component";
-import {
-  ChevronDown,
-  Plus,
-} from "react-feather";
-
-// ** Reactstrap Imports
+import { Fragment, useState } from 'react'
+import DataTable from 'react-data-table-component'
+import ReactPaginate from 'react-paginate'
+import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Edit } from 'react-feather'
 import {
   Row,
   Col,
@@ -25,199 +11,199 @@ import {
   Button,
   CardTitle,
   CardHeader,
-} from "reactstrap";
+  DropdownMenu,
+  DropdownItem,
+  DropdownToggle,
+  UncontrolledDropdown,
+  UncontrolledButtonDropdown
+} from 'reactstrap'
 
-// ** Bootstrap Checkbox Component
-const BootstrapCheckbox = forwardRef((props, ref) => (
-  <div className="form-check">
-    <Input type="checkbox" ref={ref} {...props} />
-  </div>
-));
+// Sample static data
+const data = [
+  { id: 1, full_name: 'John Doe', avatar: 'https://i.pravatar.cc/40?img=1', post: 'Developer', email: 'john@example.com', age: '30', salary: '$70,000', start_date: '2023-01-15', status: 1 },
+  { id: 2, full_name: 'Jane Smith', avatar: 'https://i.pravatar.cc/40?img=2', post: 'Designer', email: 'jane@example.com', age: '28', salary: '$65,000', start_date: '2022-11-20', status: 2 },
+  { id: 3, full_name: 'Bob Johnson', avatar: 'https://i.pravatar.cc/40?img=3', post: 'Manager', email: 'bob@example.com', age: '35', salary: '$80,000', start_date: '2021-09-10', status: 3 },
+  // می‌تونی دیتاهای بیشتر هم اضافه کنی برای تست صفحه‌بندی
+]
+
+const statusMap = {
+  1: { title: 'Current', color: 'light-primary' },
+  2: { title: 'Professional', color: 'light-success' },
+  3: { title: 'Rejected', color: 'light-danger' },
+  4: { title: 'Resigned', color: 'light-warning' },
+  5: { title: 'Applied', color: 'light-info' }
+}
+
+const columns = [
+  {
+    name: 'Full Name',
+    sortable: true,
+    selector: row => row.full_name,
+    cell: row => (
+      <div className='d-flex align-items-center'>
+        <img
+          className='me-1 rounded-circle'
+          src={row.avatar}
+          alt='avatar'
+          height='32'
+          width='32'
+        />
+        <span className='fw-bold'>{row.full_name}</span>
+      </div>
+    )
+  },
+  { name: 'Post', selector: row => row.post, sortable: true },
+  { name: 'Email', selector: row => row.email, sortable: true },
+  { name: 'Age', selector: row => row.age, sortable: true },
+  { name: 'Salary', selector: row => row.salary, sortable: true },
+  { name: 'Start Date', selector: row => row.start_date, sortable: true },
+  {
+    name: 'Status',
+    selector: row => row.status,
+    cell: row => (
+      <span className={`badge badge-${statusMap[row.status].color}`}>
+        {statusMap[row.status].title}
+      </span>
+    )
+  },
+  {
+    name: 'Actions',
+    allowOverflow: true,
+    cell: row => (
+      <div className='d-flex align-items-center gap-1'>
+        <Button color='link' className='p-0'>
+          <Edit size={16} className='text-primary' />
+        </Button>
+        <UncontrolledDropdown>
+          <DropdownToggle tag='button' className='btn btn-link p-0'>
+            <MoreVertical size={16} className='text-secondary' />
+          </DropdownToggle>
+          <DropdownMenu end>
+            <DropdownItem>Edit</DropdownItem>
+            <DropdownItem>Delete</DropdownItem>
+          </DropdownMenu>
+        </UncontrolledDropdown>
+      </div>
+    )
+  }  
+]
 
 const DataTableWithButtons = () => {
-  // ** States
-  const [modal, setModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [searchValue, setSearchValue] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const itemsPerPage = 7
 
-  // ** Function to handle Modal toggle
-  const handleModal = () => setModal(!modal);
+  const filteredData = data.filter(
+    item => 
+      item.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.post.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
-  // ** Function to handle filter
-  const handleFilter = (e) => {
-    const value = e.target.value;
-    let updatedData = [];
-    setSearchValue(value);
+  const paginatedData = filteredData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
 
-    const status = {
-      1: { title: "Current", color: "light-primary" },
-      2: { title: "Professional", color: "light-success" },
-      3: { title: "Rejected", color: "light-danger" },
-      4: { title: "Resigned", color: "light-warning" },
-      5: { title: "Applied", color: "light-info" },
-    };
+  const handlePagination = page => {
+    setCurrentPage(page.selected)
+  }
 
-    if (value.length) {
-      updatedData = data.filter((item) => {
-        const startsWith =
-          item.full_name.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.post.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.email.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.age.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
-          status[item.status].title
-            .toLowerCase()
-            .startsWith(value.toLowerCase());
+  const handleSearch = event => {
+    setSearchQuery(event.target.value)
+  }
 
-        const includes =
-          item.full_name.toLowerCase().includes(value.toLowerCase()) ||
-          item.post.toLowerCase().includes(value.toLowerCase()) ||
-          item.email.toLowerCase().includes(value.toLowerCase()) ||
-          item.age.toLowerCase().includes(value.toLowerCase()) ||
-          item.salary.toLowerCase().includes(value.toLowerCase()) ||
-          item.start_date.toLowerCase().includes(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().includes(value.toLowerCase());
-
-        if (startsWith) {
-          return startsWith;
-        } else if (!startsWith && includes) {
-          return includes;
-        } else return null;
-      });
-      setFilteredData(updatedData);
-      setSearchValue(value);
-    }
-  };
-
-  // ** Function to handle Pagination
-  const handlePagination = (page) => {
-    setCurrentPage(page.selected);
-  };
-
-  // ** Custom Pagination
   const CustomPagination = () => (
     <ReactPaginate
-      previousLabel=""
-      nextLabel=""
+      previousLabel=''
+      nextLabel=''
       forcePage={currentPage}
-      onPageChange={(page) => handlePagination(page)}
-      pageCount={
-        searchValue.length
-          ? Math.ceil(filteredData.length / 7)
-          : Math.ceil(data.length / 7) || 1
-      }
-      breakLabel="..."
+      onPageChange={handlePagination}
+      pageCount={Math.ceil(filteredData.length / itemsPerPage)}
+      breakLabel='...'
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
-      activeClassName="active"
-      pageClassName="page-item"
-      breakClassName="page-item"
-      nextLinkClassName="page-link"
-      pageLinkClassName="page-link"
-      breakLinkClassName="page-link"
-      previousLinkClassName="page-link"
-      nextClassName="page-item next-item"
-      previousClassName="page-item prev-item"
-      containerClassName="pagination react-paginate separated-pagination pagination-sm justify-content-end pe-1 mt-1"
+      activeClassName='active'
+      pageClassName='page-item'
+      breakClassName='page-item'
+      nextLinkClassName='page-link'
+      pageLinkClassName='page-link'
+      breakLinkClassName='page-link'
+      previousLinkClassName='page-link'
+      nextClassName='page-item next-item'
+      previousClassName='page-item prev-item'
+      containerClassName='pagination react-paginate separated-pagination pagination-sm justify-content-end pe-1 mt-1'
     />
-  );
-
-  // ** Converts table to CSV
-  function convertArrayOfObjectsToCSV(array) {
-    let result;
-
-    const columnDelimiter = ",";
-    const lineDelimiter = "\n";
-    const keys = Object.keys(data[0]);
-
-    result = "";
-    result += keys.join(columnDelimiter);
-    result += lineDelimiter;
-
-    array.forEach((item) => {
-      let ctr = 0;
-      keys.forEach((key) => {
-        if (ctr > 0) result += columnDelimiter;
-
-        result += item[key];
-
-        ctr++;
-      });
-      result += lineDelimiter;
-    });
-
-    return result;
-  }
-
-  // ** Downloads CSV
-  function downloadCSV(array) {
-    const link = document.createElement("a");
-    let csv = convertArrayOfObjectsToCSV(array);
-    if (csv === null) return;
-
-    const filename = "export.csv";
-
-    if (!csv.match(/^data:text\/csv/i)) {
-      csv = `data:text/csv;charset=utf-8,${csv}`;
-    }
-
-    link.setAttribute("href", encodeURI(csv));
-    link.setAttribute("download", filename);
-    link.click();
-  }
+  )
 
   return (
     <Fragment>
       <Card>
-        <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-          <CardTitle tag="h4">DataTable with Buttons</CardTitle>
-          <div className="d-flex mt-md-0 mt-1">
-            <Button className="ms-2" color="primary" onClick={handleModal}>
+        <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
+          <CardTitle tag='h4'>DataTable with Buttons</CardTitle>
+          <div className='d-flex mt-md-0 mt-1'>
+            <UncontrolledButtonDropdown>
+              <DropdownToggle color='secondary' caret outline>
+                <Share size={15} />
+                <span className='align-middle ms-50'>Export</span>
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem className='w-100' disabled>
+                  <Printer size={15} />
+                  <span className='align-middle ms-50'>Print</span>
+                </DropdownItem>
+                <DropdownItem className='w-100' disabled>
+                  <FileText size={15} />
+                  <span className='align-middle ms-50'>CSV</span>
+                </DropdownItem>
+                <DropdownItem className='w-100' disabled>
+                  <Grid size={15} />
+                  <span className='align-middle ms-50'>Excel</span>
+                </DropdownItem>
+                <DropdownItem className='w-100' disabled>
+                  <File size={15} />
+                  <span className='align-middle ms-50'>PDF</span>
+                </DropdownItem>
+                <DropdownItem className='w-100' disabled>
+                  <Copy size={15} />
+                  <span className='align-middle ms-50'>Copy</span>
+                </DropdownItem>
+              </DropdownMenu>
+            </UncontrolledButtonDropdown>
+            <Button className='ms-2' color='primary'>
               <Plus size={15} />
-              <span className="align-middle ms-50">Add Record</span>
+              <span className='align-middle ms-50'>Add Record</span>
             </Button>
           </div>
         </CardHeader>
-        <Row className="justify-content-end mx-0">
-          <Col
-            className="d-flex align-items-center justify-content-end mt-1"
-            md="6"
-            sm="12"
-          >
-            <Label className="me-1" for="search-input">
+        <Row className='justify-content-end mx-0'>
+          <Col className='d-flex align-items-center justify-content-end mt-1' md='6' sm='12'>
+            <Label className='me-1' for='search-input'>
               Search
             </Label>
             <Input
-              className="dataTable-filter mb-50"
-              type="text"
-              bsSize="sm"
-              id="search-input"
-              value={searchValue}
-              onChange={handleFilter}
+              className='dataTable-filter mb-50'
+              type='text'
+              bsSize='sm'
+              id='search-input'
+              value={searchQuery}
+              onChange={handleSearch}
             />
           </Col>
         </Row>
-        <div className="react-dataTable react-dataTable-selectable-rows">
+        <div className='react-dataTable react-dataTable-selectable-rows'>
           <DataTable
             noHeader
             pagination
-            selectableRows
             columns={columns}
-            paginationPerPage={7}
-            className="react-dataTable"
+            paginationPerPage={itemsPerPage}
+            className='react-dataTable'
             sortIcon={<ChevronDown size={10} />}
             paginationComponent={CustomPagination}
             paginationDefaultPage={currentPage + 1}
-            selectableRowsComponent={BootstrapCheckbox}
-            data={searchValue.length ? filteredData : data}
+            data={paginatedData}
           />
         </div>
       </Card>
-      <AddNewModal open={modal} handleModal={handleModal} />
     </Fragment>
-  );
-};
+  )
+}
 
-export default DataTableWithButtons;
+export default DataTableWithButtons

@@ -15,15 +15,15 @@ export default [
   },
   {
     id: "smaplePage",
-    title: "Sample Page",
+    title: "مدیریت کاربر",
     icon: <Airplay size={20} />,
     // navLink: "/sample",
     children: [
       {
         id: "invoiceList",
-        title: "List",
+        title: "لیست کاربران",
         icon: <Circle size={12} />,
-        navLink: "/apps/invoice/list",
+        navLink: "/UserList",
       },
     ],
   },

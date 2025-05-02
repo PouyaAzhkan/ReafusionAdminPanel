@@ -1,0 +1,86 @@
+@font-face {
+    /* tailwind css font weight is font-black */
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 900;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_Black.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-bold */
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 700;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_Bold.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-medium */
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 500;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_Medium.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-normal */
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 400;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-light */
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 300;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_Light.woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-extralight */
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 200;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_UltraLight.woff2') format('woff2');
+}
+/*=================================================FARSI NUMERAL==========================================*/
+
+@font-face {
+    /* tailwind css font weight is font-black */
+    font-family: IRANSans_FarsiNumeral;
+    font-style: normal;
+    font-weight: 900;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_FaNum_Black.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-bold */
+    font-family: IRANSans_FarsiNumeral;
+    font-style: normal;
+    font-weight: 700;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_FaNum_Bold.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-medium */
+    font-family: IRANSans_FarsiNumeral;
+    font-style: normal;
+    font-weight: 500;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_FaNum_Medium.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-normal */
+    font-family: IRANSans_FarsiNumeral;
+    font-style: normal;
+    font-weight: 400;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_FaNum.woff2') format('woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-light */
+    font-family: IRANSans_FarsiNumeral;
+    font-style: normal;
+    font-weight: 300;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_FaNum_Light.woff2');
+}
+@font-face {
+    /* tailwind css font weight is font-extralight */
+    font-family: IRANSans_FarsiNumeral;
+    font-style: normal;
+    font-weight: 200;
+    src: url('src/@core/assets/fonts/iransans/IRANSansWeb_FaNum_UltraLight.woff2') format('woff2');
+}

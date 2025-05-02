@@ -22,68 +22,61 @@ const LayoutWrapper = (props) => {
   // ** Props
   const { children, routeMeta } = props;
 
-  // ** Store Vars
+  // ** Store
   const dispatch = useDispatch();
-  const store = useSelector((state) => state);
+  const navbarStore = useSelector((state) => state.navbar);
+  const layoutStored = useSelector((state) => state.layout.layout);
+  const contentWidth = useSelector((state) => state.layout.contentWidth);
+  const menuCollapsed = useSelector((state) => state.layout.menuCollapsed);
+  const menuHidden = useSelector((state) => state.layout.menuHidden);
 
-  const navbarStore = store.navbar;
-  const layoutStored = store.layout.layout;
-  const contentWidth = store.layout.contentWidth;
-  //** Vars
+  // ** Layout conditions
   const appLayoutCondition =
-    (layoutStored.layout === "horizontal" && !routeMeta) ||
-    (layoutStored.layout === "horizontal" && routeMeta && !routeMeta.appLayout);
+    (layoutStored === "horizontal" && !routeMeta) ||
+    (layoutStored === "horizontal" && routeMeta && !routeMeta.appLayout);
+
   const Tag = appLayoutCondition ? "div" : Fragment;
 
-  // ** Clean Up Function
+  // ** Clean up on unmount
   const cleanUp = () => {
     if (routeMeta) {
-      if (
-        routeMeta.contentWidth &&
-        routeMeta.contentWidth === store.layout.contentWidth
-      ) {
+      if (routeMeta.contentWidth === contentWidth) {
         dispatch(handleContentWidth(themeConfig.layout.contentWidth));
       }
-      if (
-        routeMeta.menuCollapsed &&
-        routeMeta.menuCollapsed === store.layout.menuCollapsed
-      ) {
-        dispatch(handleMenuCollapsed(!store.layout.menuCollapsed));
+      if (routeMeta.menuCollapsed === menuCollapsed) {
+        dispatch(handleMenuCollapsed(!menuCollapsed));
       }
-      if (
-        routeMeta.menuHidden &&
-        routeMeta.menuHidden === store.layout.menuHidden
-      ) {
-        dispatch(handleMenuHidden(!store.layout.menuHidden));
+      if (routeMeta.menuHidden === menuHidden) {
+        dispatch(handleMenuHidden(!menuHidden));
       }
     }
   };
 
-  // ** ComponentDidMount
+  // ** Handle layout meta settings
   useEffect(() => {
     if (routeMeta) {
       if (routeMeta.contentWidth) {
         dispatch(handleContentWidth(routeMeta.contentWidth));
       }
-      if (routeMeta.menuCollapsed) {
+      if (routeMeta.menuCollapsed !== undefined) {
         dispatch(handleMenuCollapsed(routeMeta.menuCollapsed));
       }
-      if (routeMeta.menuHidden) {
+      if (routeMeta.menuHidden !== undefined) {
         dispatch(handleMenuHidden(routeMeta.menuHidden));
       }
     }
+
     return () => cleanUp();
   }, [routeMeta]);
 
   return (
     <div
       className={classnames("app-content content overflow-hidden", {
-        [routeMeta ? routeMeta.className : ""]:
-          routeMeta && routeMeta.className,
-        "show-overlay": navbarStore.query.length,
+        [routeMeta?.className || ""]: routeMeta?.className,
+        "show-overlay": navbarStore.query?.length,
       })}
     >
-      <div className="content-overlay"></div>
+      <div className="content-overlay" />
       <div className="header-navbar-shadow" />
       <div
         className={classnames({

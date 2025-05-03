@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState, useRef } from "react";
 import DataTable from "react-data-table-component";
 import ReactPaginate from "react-paginate";
 import {
@@ -41,7 +41,7 @@ const roleMap = {
 };
 
 const roleOptions = Object.keys(roleMap).map((key) => ({
-  value: roleMap[key],
+  value: key,
   label: key,
 }));
 
@@ -50,37 +50,67 @@ const statusOptions = [
   { value: "False", label: "غیرفعال" },
 ];
 
-const dateOptions = [
-  { value: "newest", label: "جدیدترین" },
-  { value: "oldest", label: "قدیمی‌ترین" },
-];
-
 const UserListTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRole, setSelectedRole] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const [dateFilter, setDateFilter] = useState(null); // اضافه کردن فیلتر تاریخ
+  const [tableLoading, setTableLoading] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
 
-  const { data, isLoading, isError } = GetUserList(
+  const debounceTimer = useRef(null);
+
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+  }, [searchQuery]);
+
+  const { data, isLoading, isError, refetch, isFetching } = GetUserList(
     null,
     null,
-    searchQuery,
+    debouncedSearch,
     currentPage + 1,
     itemsPerPage,
     selectedStatus?.value,
     false,
-    selectedRole,
-    dateFilter
+    selectedRole ? roleMap[selectedRole.value] : null, 
+    null
   );
 
-  const handlePagination = (page) => setCurrentPage(page.selected);
+  useEffect(() => {
+    setTableLoading(true);
+    const refetchData = async () => {
+      await refetch();
+      setTableLoading(false);
+    };
+    refetchData();
+  }, [debouncedSearch, itemsPerPage, currentPage, selectedStatus, selectedRole]);
+
+  // Filter data based on role
+  useEffect(() => {
+    if (data?.listUser) {
+      const filtered = data.listUser.filter((user) => {
+        if (selectedRole) {
+          return user.userRoles?.includes(selectedRole.value);
+        }
+        return true; // If no role filter, show all users
+      });
+      setFilteredData(filtered);
+    }
+  }, [selectedRole, data]);
+
   const handleSearch = (e) => setSearchQuery(e.target.value);
+
   const handlePerPageChange = (e) => {
     setItemsPerPage(Number(e.target.value));
     setCurrentPage(0);
   };
+
+  const handlePagination = (page) => setCurrentPage(page.selected);
 
   const handleRoleChange = (option) => {
     setSelectedRole(option);
@@ -89,11 +119,6 @@ const UserListTable = () => {
 
   const handleStatusChange = (option) => {
     setSelectedStatus(option);
-    setCurrentPage(0);
-  };
-
-  const handleDateChange = (option) => {
-    setDateFilter(option?.value);
     setCurrentPage(0);
   };
 
@@ -195,7 +220,7 @@ const UserListTable = () => {
       nextLabel=""
       forcePage={currentPage}
       onPageChange={handlePagination}
-      pageCount={Math.ceil((data?.listUser.length || 0) / itemsPerPage)}
+      pageCount={Math.ceil((data?.totalCount || 0) / itemsPerPage)}
       breakLabel="..."
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
@@ -212,9 +237,6 @@ const UserListTable = () => {
     />
   );
 
-  if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (isError) return <div>خطا در بارگذاری داده‌ها</div>;
-
   return (
     <Fragment>
       <Card>
@@ -229,6 +251,9 @@ const UserListTable = () => {
               bsSize="sm"
               placeholder="نام، ایمیل یا نقش..."
             />
+          </Col>
+
+          <Col md="6" sm="12" className="d-flex justify-content-end gap-2 align-items-center">
             <Input
               type="select"
               value={itemsPerPage}
@@ -240,9 +265,6 @@ const UserListTable = () => {
               <option value={20}>20</option>
               <option value={50}>50</option>
             </Input>
-          </Col>
-
-          <Col md="6" sm="12" className="d-flex justify-content-end gap-2 align-items-center">
             <Select
               placeholder="فیلتر نقش"
               options={roleOptions}
@@ -261,15 +283,6 @@ const UserListTable = () => {
               className="react-select w-25"
               classNamePrefix="select"
             />
-            <Select
-              placeholder="فیلتر تاریخ"
-              options={dateOptions}
-              value={dateFilter}
-              onChange={handleDateChange}
-              isClearable
-              className="react-select w-25"
-              classNamePrefix="select"
-            />
             <Button color="primary">
               <span className="align-middle">اضافه کردن کاربر جدید</span>
               <Plus size={15} />
@@ -277,17 +290,24 @@ const UserListTable = () => {
           </Col>
         </Row>
 
-        <div className="react-dataTable">
+        <div className="react-dataTable position-relative">
+          {tableLoading && (
+            <div className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50 zindex-2" style={{ top: 0, left: 0 }}>
+              <span>در حال بارگذاری...</span>
+            </div>
+          )}
           <DataTable
             noHeader
             pagination
-            columns={columns}
+            paginationServer
+            paginationTotalRows={filteredData.length}
             paginationPerPage={itemsPerPage}
-            className="react-dataTable"
+            paginationDefaultPage={currentPage + 1}
+            columns={columns}
+            data={filteredData || []}
             sortIcon={<ChevronDown size={10} />}
             paginationComponent={CustomPagination}
-            paginationDefaultPage={currentPage + 1}
-            data={data?.listUser || []}
+            progressPending={isLoading || tableLoading}
           />
         </div>
       </Card>

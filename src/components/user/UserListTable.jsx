@@ -117,7 +117,7 @@ const columns = [
     cell: (row) => {
       const status = row.active === "True" ? "فعال" : "غیرفعال";
       const color = row.active === "True" ? "light-success" : "light-danger";
-      
+
       return (
         <span className={`badge badge-${color}`}>
           {status}

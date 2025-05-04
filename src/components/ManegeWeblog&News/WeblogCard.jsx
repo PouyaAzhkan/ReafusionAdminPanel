@@ -4,15 +4,26 @@ import { Star } from "react-feather";
 import {Card, CardBody, CardFooter, CardImg,CardText, CardTitle } from "reactstrap";
 import EmptyImageForWeblog from "../../assets/images/element/weblogImage.jpg";
 import { Calendar, Eye } from "react-feather";
+import { NavLink } from "react-router-dom";
+
 
 const WeblogCard = ({ Api }) => {
   return (
     <>
-      {Api?.news?.map((item) => (
-        
-        <Card className="WeblogCard">
-          <CardImg className="card-Img" src={ !item.currentImageAddressTumb || item.currentImageAddressTumb === "null"
-          ? EmptyImageForWeblog : item.currentImageAddressTumb } alt="card1" />
+      {Api?.news?.map((item) => (    
+        <Card key={item.id} className="WeblogCard">
+        <NavLink
+            to={`/WeblogAndNewsList/${item.id}`}
+            onClick={(e) => {
+              if (!item.isActive) {
+                e.preventDefault()
+                alert("این خبر غیر فعال است و امکان مشاهده جزئیات وجود ندارد.")
+              }
+            }}
+            >
+            <CardImg className="card-Img" src={ !item.currentImageAddressTumb || item.currentImageAddressTumb === "null"
+            ? EmptyImageForWeblog : item.currentImageAddressTumb } alt="card1" />
+          </NavLink>
           {/* بخش ستاره‌ها */}
           <div className="d-flex pt-1 px-2">
             {[...Array(5)].map((_, index) =>

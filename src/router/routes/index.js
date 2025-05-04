@@ -14,6 +14,7 @@ import PublicRoute from "@components/routes/PublicRoute";
 import { isObjEmpty } from "@utils";
 import { UserList } from "../../pages/UserList";
 import ManegeWeblogNews from "../../components/ManegeWeblog&News/ManegeWeblog&News";
+import WeblogAndNewsDetail from "../../components/ManegeWeblog&News/Weblog&NewsDetail";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -96,6 +97,10 @@ const Routes = [
   {
     path: "/WeblogAndNewsList",
     element: <ManegeWeblogNews />,
+  },
+  {
+    path: "/WeblogAndNewsList/:id",
+    element: <WeblogAndNewsDetail />,
   },
 ];
 

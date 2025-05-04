@@ -111,11 +111,9 @@ const ManegeWeblogNews = () => {
             setCurrentPage(1)
           }}
         />
-
         <div className='mt-1 d-flex justify-content-around flex-wrap'>
           <WeblogCard Api={{ news: paginatedData }} />
         </div>
-
         {sortedWeblogData.length > rowsPerPage && (
           <ReactPaginate
             previousLabel='قبلی'

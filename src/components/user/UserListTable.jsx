@@ -26,8 +26,8 @@ import {
 } from "reactstrap";
 import Select from "react-select";
 import { GetUserList, useDeleteUser } from "../../@core/Services/Api/UserManage/user";
-import moment from "moment-jalaali"; // اصلاح import به moment-jalaali
 import AddNewModal from './AddUserModal';
+import moment from "moment/moment";
 
 const statusMap = {
   "True": { title: "فعال", color: "light-success" },

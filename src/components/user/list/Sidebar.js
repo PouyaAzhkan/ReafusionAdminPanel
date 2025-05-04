@@ -15,10 +15,6 @@ import { useForm, Controller } from 'react-hook-form'
 // ** Reactstrap Imports
 import { Button, Label, FormText, Form, Input } from 'reactstrap'
 
-// ** Store & Actions
-import { addUser } from '../store'
-import { useDispatch } from 'react-redux'
-
 const defaultValues = {
   email: '',
   contact: '',
@@ -60,15 +56,10 @@ const checkIsValid = data => {
 }
 
 const SidebarNewUsers = ({ open, toggleSidebar }) => {
-  // ** States
   const [data, setData] = useState(null)
   const [plan, setPlan] = useState('basic')
   const [role, setRole] = useState('subscriber')
 
-  // ** Store Vars
-  const dispatch = useDispatch()
-
-  // ** Vars
   const {
     control,
     setValue,
@@ -77,26 +68,23 @@ const SidebarNewUsers = ({ open, toggleSidebar }) => {
     formState: { errors }
   } = useForm({ defaultValues })
 
-  // ** Function to handle form submit
   const onSubmit = data => {
     setData(data)
     if (checkIsValid(data)) {
       toggleSidebar()
-      dispatch(
-        addUser({
-          role,
-          avatar: '',
-          status: 'active',
-          email: data.email,
-          currentPlan: plan,
-          billing: 'auto debit',
-          company: data.company,
-          contact: data.contact,
-          fullName: data.fullName,
-          username: data.username,
-          country: data.country.value
-        })
-      )
+      console.log({
+        role,
+        avatar: '',
+        status: 'active',
+        email: data.email,
+        currentPlan: plan,
+        billing: 'auto debit',
+        company: data.company,
+        contact: data.contact,
+        fullName: data.fullName,
+        username: data.username,
+        country: data.country.value
+      })
     } else {
       for (const key in data) {
         if (data[key] === null) {
@@ -175,7 +163,6 @@ const SidebarNewUsers = ({ open, toggleSidebar }) => {
           />
           <FormText color='muted'>You can use letters, numbers & periods</FormText>
         </div>
-
         <div className='mb-1'>
           <Label className='form-label' for='contact'>
             Contact <span className='text-danger'>*</span>
@@ -208,7 +195,6 @@ const SidebarNewUsers = ({ open, toggleSidebar }) => {
             name='country'
             control={control}
             render={({ field }) => (
-              // <Input id='country' placeholder='Australia' invalid={errors.country && true} {...field} />
               <Select
                 isClearable={false}
                 classNamePrefix='select'
@@ -232,11 +218,17 @@ const SidebarNewUsers = ({ open, toggleSidebar }) => {
             <option value='admin'>Admin</option>
           </Input>
         </div>
-        <div className='mb-1' value={plan} onChange={e => setPlan(e.target.value)}>
+        <div className='mb-1'>
           <Label className='form-label' for='select-plan'>
             Select Plan
           </Label>
-          <Input type='select' id='select-plan' name='select-plan'>
+          <Input
+            type='select'
+            id='select-plan'
+            name='select-plan'
+            value={plan}
+            onChange={e => setPlan(e.target.value)}
+          >
             <option value='basic'>Basic</option>
             <option value='enterprise'>Enterprise</option>
             <option value='company'>Company</option>

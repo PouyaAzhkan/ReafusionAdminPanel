@@ -1,93 +1,9 @@
-// ** React Imports
+import { Archive, FileText, MoreVertical, Trash2 } from "react-feather";
 import { Link } from "react-router-dom";
+import { Badge, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
-// ** Custom Components
-import Avatar from "@components/avatar";
-
-// ** Store & Actions
-import { store } from "@store/store";
-import { getUser, deleteUser } from "../store";
-
-// ** Icons Imports
-import {
-  Slack,
-  User,
-  Settings,
-  Database,
-  Edit2,
-  MoreVertical,
-  FileText,
-  Trash2,
-  Archive,
-} from "react-feather";
-
-// ** Reactstrap Imports
-import {
-  Badge,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from "reactstrap";
-
-// ** Renders Client Columns
-const renderClient = (row) => {
-  if (row.avatar.length) {
-    return <Avatar className="me-1" img={row.avatar} width="32" height="32" />;
-  } else {
-    return (
-      <Avatar
-        initials
-        className="me-1"
-        color={row.avatarColor || "light-primary"}
-        content={row.fullName || "John Doe"}
-      />
-    );
-  }
-};
-
-// ** Renders Role Columns
 const renderRole = (row) => {
-  const roleObj = {
-    subscriber: {
-      class: "text-primary",
-      icon: User,
-    },
-    maintainer: {
-      class: "text-success",
-      icon: Database,
-    },
-    editor: {
-      class: "text-info",
-      icon: Edit2,
-    },
-    author: {
-      class: "text-warning",
-      icon: Settings,
-    },
-    admin: {
-      class: "text-danger",
-      icon: Slack,
-    },
-  };
-
-  const Icon = roleObj[row.role] ? roleObj[row.role].icon : Edit2;
-
-  return (
-    <span className="text-truncate text-capitalize align-middle">
-      <Icon
-        size={18}
-        className={`${roleObj[row.role] ? roleObj[row.role].class : ""} me-50`}
-      />
-      {row.role}
-    </span>
-  );
-};
-
-const statusObj = {
-  pending: "light-warning",
-  active: "light-success",
-  inactive: "light-secondary",
+  return <span className="text-capitalize">{row.role}</span>;
 };
 
 export const columns = [
@@ -98,18 +14,25 @@ export const columns = [
     sortField: "fullName",
     selector: (row) => row.fullName,
     cell: (row) => (
-      <div className="d-flex justify-content-left align-items-center">
-        {renderClient(row)}
-        <div className="d-flex flex-column">
-          <Link
-            to={`/apps/user/view/${row.id}`}
-            className="user_name text-truncate text-body"
-            onClick={() => store.dispatch(getUser(row.id))}
-          >
-            <span className="fw-bolder">{row.fullName}</span>
-          </Link>
-          <small className="text-truncate text-muted mb-0">{row.email}</small>
-        </div>
+      <div className="d-flex">
+         <img
+            src={"../../../assets/images/element/UnKnownUser.jpg"} // Placeholder image
+            className="rounded-circle me-2"
+            width="30"
+            height="30"
+          />
+          <div className="d-flex flex-column">
+            <div className="d-flex align-items-center">
+              {/* You can replace the src with the user's profile picture */}
+              <Link
+                to={`/apps/user/view/${row.id}`}
+                className="user_name text-truncate text-body"
+              >
+                <span className="fw-bolder">{row.fullName}</span>
+              </Link>
+            </div>
+            <small className="text-truncate text-muted mb-0">{row.email}</small>
+          </div>
       </div>
     ),
   },
@@ -135,7 +58,7 @@ export const columns = [
     sortable: true,
     sortField: "billing",
     selector: (row) => row.billing,
-    cell: (row) => <span className="text-capitalize">{row.billing}</span>,
+    cell: (row) => <span className="text-capitalize">22</span>,
   },
   {
     name: "Status",
@@ -144,9 +67,7 @@ export const columns = [
     sortField: "status",
     selector: (row) => row.status,
     cell: (row) => (
-      <Badge className="text-capitalize" color={statusObj[row.status]} pill>
-        {row.status}
-      </Badge>
+      <Badge className="text-capitalize" color={'info'} pill> 22 </Badge>
     ),
   },
   {
@@ -163,7 +84,6 @@ export const columns = [
               tag={Link}
               className="w-100"
               to={`/apps/user/view/${row.id}`}
-              onClick={() => store.dispatch(getUser(row.id))}
             >
               <FileText size={14} className="me-50" />
               <span className="align-middle">Details</span>
@@ -183,7 +103,7 @@ export const columns = [
               className="w-100"
               onClick={(e) => {
                 e.preventDefault();
-                store.dispatch(deleteUser(row.id));
+                // Delete handler can be passed via props or context
               }}
             >
               <Trash2 size={14} className="me-50" />

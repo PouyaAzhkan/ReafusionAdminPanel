@@ -1,17 +1,9 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useState } from 'react'
 
-// ** Invoice List Sidebar
+// ** Components
 import Sidebar from './Sidebar'
-
-// ** Table Columns
 import { columns } from './columns'
-
-// ** Store & Actions
-import { getAllData, getData } from '../store'
-import { useDispatch, useSelector } from 'react-redux'
-
-// ** Third Party Components
 import Select from 'react-select'
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
@@ -41,43 +33,48 @@ import {
 import '@styles/react/libs/react-select/_react-select.scss'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
-// ** Table Header
-const CustomHeader = ({ store, toggleSidebar, handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
-  // ** Converts table to CSV
-  function convertArrayOfObjectsToCSV(array) {
-    let result
+// ** Sample Static Data
+const staticData = [
+  {
+    id: 1,
+    fullName: 'Ali Rezaei',
+    role: 'admin',
+    username: 'alirezaei',
+    currentPlan: 'enterprise',
+    email: 'ali@example.com',
+    status: 'active'
+  },
+  {
+    id: 2,
+    fullName: 'Sara Ahmadi',
+    role: 'editor',
+    username: 'sara_ahmadi',
+    currentPlan: 'team',
+    email: 'sara@example.com',
+    status: 'inactive'
+  }
+]
 
+// ** Table Header
+const CustomHeader = ({ data, toggleSidebar, handlePerPage, rowsPerPage, handleFilter, searchTerm }) => {
+  const convertArrayOfObjectsToCSV = array => {
     const columnDelimiter = ','
     const lineDelimiter = '\n'
-    const keys = Object.keys(store.data[0])
-
-    result = ''
-    result += keys.join(columnDelimiter)
-    result += lineDelimiter
+    const keys = Object.keys(array[0])
+    let result = keys.join(columnDelimiter) + lineDelimiter
 
     array.forEach(item => {
-      let ctr = 0
-      keys.forEach(key => {
-        if (ctr > 0) result += columnDelimiter
-
-        result += item[key]
-
-        ctr++
-      })
-      result += lineDelimiter
+      result += keys.map(key => item[key]).join(columnDelimiter) + lineDelimiter
     })
-
     return result
   }
 
-  // ** Downloads CSV
-  function downloadCSV(array) {
+  const downloadCSV = array => {
     const link = document.createElement('a')
     let csv = convertArrayOfObjectsToCSV(array)
-    if (csv === null) return
+    if (!csv) return
 
     const filename = 'export.csv'
-
     if (!csv.match(/^data:text\/csv/i)) {
       csv = `data:text/csv;charset=utf-8,${csv}`
     }
@@ -86,6 +83,7 @@ const CustomHeader = ({ store, toggleSidebar, handlePerPage, rowsPerPage, handle
     link.setAttribute('download', filename)
     link.click()
   }
+
   return (
     <div className='invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75'>
       <Row>
@@ -135,7 +133,7 @@ const CustomHeader = ({ store, toggleSidebar, handlePerPage, rowsPerPage, handle
                   <Printer className='font-small-4 me-50' />
                   <span className='align-middle'>Print</span>
                 </DropdownItem>
-                <DropdownItem className='w-100' onClick={() => downloadCSV(store.data)}>
+                <DropdownItem className='w-100' onClick={() => downloadCSV(data)}>
                   <FileText className='font-small-4 me-50' />
                   <span className='align-middle'>CSV</span>
                 </DropdownItem>
@@ -165,179 +163,76 @@ const CustomHeader = ({ store, toggleSidebar, handlePerPage, rowsPerPage, handle
 }
 
 const UsersList = () => {
-  // ** Store Vars
-  const dispatch = useDispatch()
-  const store = useSelector(state => state.users)
-
-  // ** States
-  const [sort, setSort] = useState('desc')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortColumn, setSortColumn] = useState('id')
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [currentRole, setCurrentRole] = useState({ value: '', label: 'Select Role' })
   const [currentPlan, setCurrentPlan] = useState({ value: '', label: 'Select Plan' })
   const [currentStatus, setCurrentStatus] = useState({ value: '', label: 'Select Status', number: 0 })
 
-  // ** Function to toggle sidebar
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
 
-  // ** Get data on mount
-  useEffect(() => {
-    dispatch(getAllData())
-    dispatch(
-      getData({
-        sort,
-        sortColumn,
-        q: searchTerm,
-        page: currentPage,
-        perPage: rowsPerPage,
-        role: currentRole.value,
-        status: currentStatus.value,
-        currentPlan: currentPlan.value
-      })
+  const filteredData = staticData.filter(item => {
+    return (
+      item.fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (currentRole.value ? item.role === currentRole.value : true) &&
+      (currentPlan.value ? item.currentPlan === currentPlan.value : true) &&
+      (currentStatus.value ? item.status === currentStatus.value : true)
     )
-  }, [dispatch, store.data.length, sort, sortColumn, currentPage])
+  })
 
-  // ** User filter options
+  const dataToRender = () => {
+    return filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+  }
+
+  const handlePagination = page => setCurrentPage(page.selected + 1)
+
+  const handlePerPage = e => {
+    setRowsPerPage(parseInt(e.currentTarget.value))
+    setCurrentPage(1)
+  }
+
+  const handleFilter = val => {
+    setSearchTerm(val)
+    setCurrentPage(1)
+  }
+
+  const CustomPagination = () => (
+    <ReactPaginate
+      previousLabel={''}
+      nextLabel={''}
+      pageCount={Math.ceil(filteredData.length / rowsPerPage)}
+      activeClassName='active'
+      forcePage={currentPage - 1}
+      onPageChange={handlePagination}
+      pageClassName={'page-item'}
+      nextLinkClassName={'page-link'}
+      nextClassName={'page-item next'}
+      previousClassName={'page-item prev'}
+      previousLinkClassName={'page-link'}
+      pageLinkClassName={'page-link'}
+      containerClassName={'pagination react-paginate justify-content-end my-2 pe-1'}
+    />
+  )
+
   const roleOptions = [
     { value: '', label: 'Select Role' },
     { value: 'admin', label: 'Admin' },
-    { value: 'author', label: 'Author' },
-    { value: 'editor', label: 'Editor' },
-    { value: 'maintainer', label: 'Maintainer' },
-    { value: 'subscriber', label: 'Subscriber' }
+    { value: 'editor', label: 'Editor' }
   ]
 
   const planOptions = [
     { value: '', label: 'Select Plan' },
-    { value: 'basic', label: 'Basic' },
-    { value: 'company', label: 'Company' },
-    { value: 'enterprise', label: 'Enterprise' },
-    { value: 'team', label: 'Team' }
+    { value: 'team', label: 'Team' },
+    { value: 'enterprise', label: 'Enterprise' }
   ]
 
   const statusOptions = [
     { value: '', label: 'Select Status', number: 0 },
-    { value: 'pending', label: 'Pending', number: 1 },
-    { value: 'active', label: 'Active', number: 2 },
-    { value: 'inactive', label: 'Inactive', number: 3 }
+    { value: 'active', label: 'Active', number: 1 },
+    { value: 'inactive', label: 'Inactive', number: 2 }
   ]
-
-  // ** Function in get data on page change
-  const handlePagination = page => {
-    dispatch(
-      getData({
-        sort,
-        sortColumn,
-        q: searchTerm,
-        perPage: rowsPerPage,
-        page: page.selected + 1,
-        role: currentRole.value,
-        status: currentStatus.value,
-        currentPlan: currentPlan.value
-      })
-    )
-    setCurrentPage(page.selected + 1)
-  }
-
-  // ** Function in get data on rows per page
-  const handlePerPage = e => {
-    const value = parseInt(e.currentTarget.value)
-    dispatch(
-      getData({
-        sort,
-        sortColumn,
-        q: searchTerm,
-        perPage: value,
-        page: currentPage,
-        role: currentRole.value,
-        currentPlan: currentPlan.value,
-        status: currentStatus.value
-      })
-    )
-    setRowsPerPage(value)
-  }
-
-  // ** Function in get data on search query change
-  const handleFilter = val => {
-    setSearchTerm(val)
-    dispatch(
-      getData({
-        sort,
-        q: val,
-        sortColumn,
-        page: currentPage,
-        perPage: rowsPerPage,
-        role: currentRole.value,
-        status: currentStatus.value,
-        currentPlan: currentPlan.value
-      })
-    )
-  }
-
-  // ** Custom Pagination
-  const CustomPagination = () => {
-    const count = Number(Math.ceil(store.total / rowsPerPage))
-
-    return (
-      <ReactPaginate
-        previousLabel={''}
-        nextLabel={''}
-        pageCount={count || 1}
-        activeClassName='active'
-        forcePage={currentPage !== 0 ? currentPage - 1 : 0}
-        onPageChange={page => handlePagination(page)}
-        pageClassName={'page-item'}
-        nextLinkClassName={'page-link'}
-        nextClassName={'page-item next'}
-        previousClassName={'page-item prev'}
-        previousLinkClassName={'page-link'}
-        pageLinkClassName={'page-link'}
-        containerClassName={'pagination react-paginate justify-content-end my-2 pe-1'}
-      />
-    )
-  }
-
-  // ** Table data to render
-  const dataToRender = () => {
-    const filters = {
-      role: currentRole.value,
-      currentPlan: currentPlan.value,
-      status: currentStatus.value,
-      q: searchTerm
-    }
-
-    const isFiltered = Object.keys(filters).some(function (k) {
-      return filters[k].length > 0
-    })
-
-    if (store.data.length > 0) {
-      return store.data
-    } else if (store.data.length === 0 && isFiltered) {
-      return []
-    } else {
-      return store.allData.slice(0, rowsPerPage)
-    }
-  }
-
-  const handleSort = (column, sortDirection) => {
-    setSort(sortDirection)
-    setSortColumn(column.sortField)
-    dispatch(
-      getData({
-        sort,
-        sortColumn,
-        q: searchTerm,
-        page: currentPage,
-        perPage: rowsPerPage,
-        role: currentRole.value,
-        status: currentStatus.value,
-        currentPlan: currentPlan.value
-      })
-    )
-  }
 
   return (
     <Fragment>
@@ -356,21 +251,7 @@ const UsersList = () => {
                 className='react-select'
                 classNamePrefix='select'
                 theme={selectThemeColors}
-                onChange={data => {
-                  setCurrentRole(data)
-                  dispatch(
-                    getData({
-                      sort,
-                      sortColumn,
-                      q: searchTerm,
-                      role: data.value,
-                      page: currentPage,
-                      perPage: rowsPerPage,
-                      status: currentStatus.value,
-                      currentPlan: currentPlan.value
-                    })
-                  )
-                }}
+                onChange={data => setCurrentRole(data)}
               />
             </Col>
             <Col className='my-md-0 my-1' md='4'>
@@ -382,21 +263,7 @@ const UsersList = () => {
                 classNamePrefix='select'
                 options={planOptions}
                 value={currentPlan}
-                onChange={data => {
-                  setCurrentPlan(data)
-                  dispatch(
-                    getData({
-                      sort,
-                      sortColumn,
-                      q: searchTerm,
-                      page: currentPage,
-                      perPage: rowsPerPage,
-                      role: currentRole.value,
-                      currentPlan: data.value,
-                      status: currentStatus.value
-                    })
-                  )
-                }}
+                onChange={data => setCurrentPlan(data)}
               />
             </Col>
             <Col md='4'>
@@ -408,21 +275,7 @@ const UsersList = () => {
                 classNamePrefix='select'
                 options={statusOptions}
                 value={currentStatus}
-                onChange={data => {
-                  setCurrentStatus(data)
-                  dispatch(
-                    getData({
-                      sort,
-                      sortColumn,
-                      q: searchTerm,
-                      page: currentPage,
-                      status: data.value,
-                      perPage: rowsPerPage,
-                      role: currentRole.value,
-                      currentPlan: currentPlan.value
-                    })
-                  )
-                }}
+                onChange={data => setCurrentStatus(data)}
               />
             </Col>
           </Row>
@@ -439,14 +292,14 @@ const UsersList = () => {
             responsive
             paginationServer
             columns={columns}
-            onSort={handleSort}
+            onSort={() => {}}
             sortIcon={<ChevronDown />}
             className='react-dataTable'
             paginationComponent={CustomPagination}
             data={dataToRender()}
             subHeaderComponent={
               <CustomHeader
-                store={store}
+                data={filteredData}
                 searchTerm={searchTerm}
                 rowsPerPage={rowsPerPage}
                 handleFilter={handleFilter}

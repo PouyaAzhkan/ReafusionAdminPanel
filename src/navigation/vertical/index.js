@@ -8,16 +8,22 @@ export default [
     navLink: "/home",
   },
   {
-    id: "smaplePage",
+    id: "userManage",
     title: "مدیریت کاربر",
     icon: <Airplay size={20} />,
     // navLink: "/sample",
     children: [
       {
-        id: "invoiceList",
+        id: "userList",
         title: "لیست کاربران",
         icon: <Circle size={12} />,
         navLink: "/UserList",
+      },
+      {
+        id: "allUserList",
+        title: "2 لیست کاربران",
+        icon: <Circle size={12} />,
+        navLink: "/AllUserList",
       },
     ],
   },

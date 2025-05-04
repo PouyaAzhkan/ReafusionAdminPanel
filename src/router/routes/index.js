@@ -14,6 +14,7 @@ import PublicRoute from "@components/routes/PublicRoute";
 import { isObjEmpty } from "@utils";
 import { UserList } from "../../pages/UserList";
 import ManegeWeblogNews from "../../components/ManegeWeblog&News/ManegeWeblog&News";
+import AllUserList from "../../components/user/list/AllUserList";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -27,7 +28,9 @@ const TemplateTitle = "%s - Vuexy React Admin Template";
 // ** Default Route
 const DefaultRoute = "/home";
 
-const Dashboard = lazy(() => import("../../components/DashboardPanel/Dashboard"));
+const Dashboard = lazy(() =>
+  import("../../components/DashboardPanel/Dashboard")
+);
 const SecondPage = lazy(() => import("../../pages/SecondPage"));
 const Login = lazy(() => import("../../pages/Login"));
 const Register = lazy(() => import("../../pages/Register"));
@@ -90,8 +93,12 @@ const Routes = [
     },
   },
   {
-    path: "UserList",
+    path: "/UserList",
     element: <UserList />,
+  },
+  {
+    path: "/AllUserList",
+    element: <AllUserList />,
   },
   {
     path: "/WeblogAndNewsList",

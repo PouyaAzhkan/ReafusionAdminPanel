@@ -5,6 +5,8 @@ import {
   ChevronDown,
   Plus,
   MoreVertical,
+  Edit,
+  Trash,
 } from "react-feather";
 import {
   Row,
@@ -17,10 +19,15 @@ import {
   DropdownItem,
   DropdownToggle,
   UncontrolledDropdown,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "reactstrap";
 import Select from "react-select";
-import { GetUserList } from "../../@core/Services/Api/UserManage/user";
-import moment from "moment-jalaali";
+import { GetUserList, useDeleteUser } from "../../@core/Services/Api/UserManage/user";
+import moment from "moment-jalaali"; // اصلاح import به moment-jalaali
+import AddNewModal from './AddUserModal';
 
 const statusMap = {
   "True": { title: "فعال", color: "light-success" },
@@ -51,6 +58,9 @@ const statusOptions = [
 ];
 
 const UserListTable = () => {
+  const [modal, setModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -61,6 +71,54 @@ const UserListTable = () => {
   const [filteredData, setFilteredData] = useState([]);
 
   const debounceTimer = useRef(null);
+  const { mutate: deleteUser, isLoading: isDeleting } = useDeleteUser();
+
+  const handleModal = () => setModal(!modal);
+
+  const handleDeleteModal = (id) => {
+    console.log("Opening delete modal for id:", id);
+    setUserToDelete(id);
+    setDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      console.log("Attempting to delete user with id:", userToDelete);
+      deleteUser(userToDelete, {
+        onSuccess: (response) => {
+          console.log("API Response (Success):", response);
+          alert("کاربر با موفقیت حذف شد!");
+          setDeleteModal(false);
+          setUserToDelete(null);
+          refetch();
+        },
+        onError: (error) => {
+          // لاگ کامل پاسخ خطای API
+          console.error("API Error Response:", {
+            ErrorType: error.response?.data?.ErrorType,
+            ErrorMessage: error.response?.data?.ErrorMessage,
+            StatusCode: error.response?.data?.StatusCode,
+            FullResponseData: error.response?.data,
+            FullError: error,
+          });
+          // نمایش پیام خطا به کاربر
+          const errorMessage = error.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در حذف کاربر";
+          alert(`خطا در حذف کاربر: ${errorMessage}`);
+          setDeleteModal(false);
+          setUserToDelete(null);
+        },
+      });
+    } else {
+      console.warn("No id provided for deletion");
+      setDeleteModal(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    console.log("Delete cancelled");
+    setDeleteModal(false);
+    setUserToDelete(null);
+  };
 
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -69,7 +127,7 @@ const UserListTable = () => {
     }, 500);
   }, [searchQuery]);
 
-  const { data, isLoading, isError, refetch, isFetching } = GetUserList(
+  const { data, isLoading, refetch } = GetUserList(
     null,
     null,
     debouncedSearch,
@@ -77,7 +135,7 @@ const UserListTable = () => {
     itemsPerPage,
     selectedStatus?.value,
     false,
-    selectedRole ? roleMap[selectedRole.value] : null, 
+    selectedRole ? roleMap[selectedRole.value] : null,
     null
   );
 
@@ -90,14 +148,13 @@ const UserListTable = () => {
     refetchData();
   }, [debouncedSearch, itemsPerPage, currentPage, selectedStatus, selectedRole]);
 
-  // Filter data based on role
   useEffect(() => {
     if (data?.listUser) {
       const filtered = data.listUser.filter((user) => {
         if (selectedRole) {
           return user.userRoles?.includes(selectedRole.value);
         }
-        return true; // If no role filter, show all users
+        return true;
       });
       setFilteredData(filtered);
     }
@@ -140,7 +197,7 @@ const UserListTable = () => {
           </span>
         </div>
       ),
-      minWidth: "200px"
+      minWidth: "200px",
     },
     {
       name: "نقش",
@@ -150,7 +207,14 @@ const UserListTable = () => {
         return roles.length === 0 ? (
           <span>بدون نقش</span>
         ) : (
-          <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "200px" }}>
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "200px",
+            }}
+          >
             {roles.slice(0, 2).map((role, i) => (
               <span key={i}>
                 {role}
@@ -161,57 +225,80 @@ const UserListTable = () => {
           </div>
         );
       },
-      width: "200px"
+      width: "200px",
     },
     {
       name: "ایمیل",
       selector: (row) => row.gmail,
       sortable: true,
-      minWidth: "250px"
+      minWidth: "250px",
     },
     {
       name: "جنسیت",
       selector: (row) => row.gender,
       sortable: true,
       cell: (row) => <span>{row.gender ? "مرد" : "زن"}</span>,
-      width: "100px"
+      width: "100px",
     },
     {
       name: "تاریخ عضویت",
       selector: (row) => row.insertDate,
       sortable: true,
-      cell: (row) => <span>{moment(row.insertDate).format("jYYYY/jMM/jDD")}</span>,
-      width: "150px"
+      cell: (row) => (
+        <span>{moment(row.insertDate).format("jYYYY/jMM/jDD")}</span>
+      ),
+      width: "150px",
     },
     {
       name: "وضعیت",
       selector: (row) => row.active,
       cell: (row) => {
         const isActive = row.active === "True";
-        return <span className={`badge badge-${isActive ? "light-success" : "light-danger"}`}>
-          {isActive ? "فعال" : "غیرفعال"}
-        </span>;
+        return (
+          <span
+            className={`badge badge-${isActive ? "light-success" : "light-danger"}`}
+          >
+            {isActive ? "فعال" : "غیرفعال"}
+          </span>
+        );
       },
-      width: "100px"
+      width: "100px",
     },
     {
       name: "عملیات",
       allowOverflow: true,
       cell: (row) => (
-        <div className="d-flex align-items-center gap-1 z-3">
+        <div className="d-flex">
           <UncontrolledDropdown>
-            <DropdownToggle tag="button" className="btn btn-link p-0">
-              <MoreVertical size={16} className="text-secondary" />
+            <DropdownToggle className="pe-1" tag="span">
+              <MoreVertical size={15} />
             </DropdownToggle>
             <DropdownMenu end>
-              <DropdownItem>ویرایش</DropdownItem>
-              <DropdownItem>حذف</DropdownItem>
+              <DropdownItem
+                tag="a"
+                href="/"
+                onClick={(e) => e.preventDefault()}
+              >
+                <Edit size={15} />
+                <span className="align-middle ms-50">ویرایش</span>
+              </DropdownItem>
+              <DropdownItem
+                tag="a"
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteModal(row.id);
+                }}
+              >
+                <Trash size={15} />
+                <span className="align-middle ms-50">حذف</span>
+              </DropdownItem>
             </DropdownMenu>
           </UncontrolledDropdown>
         </div>
       ),
-      width: "100px"
-    }
+      width: "100px",
+    },
   ];
 
   const CustomPagination = () => (
@@ -241,8 +328,14 @@ const UserListTable = () => {
     <Fragment>
       <Card>
         <Row className="mx-0 py-2 justify-content-between align-items-center">
-          <Col md="6" sm="12" className="d-flex flex-wrap gap-2 align-items-center">
-            <Label className="mb-0" for="search-input">جستجو:</Label>
+          <Col
+            md="6"
+            sm="12"
+            className="d-flex flex-wrap gap-2 align-items-center"
+          >
+            <Label className="mb-0" for="search-input">
+              جستجو:
+            </Label>
             <Input
               id="search-input"
               value={searchQuery}
@@ -252,8 +345,11 @@ const UserListTable = () => {
               placeholder="نام، ایمیل یا نقش..."
             />
           </Col>
-
-          <Col md="6" sm="12" className="d-flex justify-content-end gap-2 align-items-center">
+          <Col
+            md="6"
+            sm="12"
+            className="d-flex justify-content-end gap-2 align-items-center"
+          >
             <Input
               type="select"
               value={itemsPerPage}
@@ -283,16 +379,19 @@ const UserListTable = () => {
               className="react-select w-25"
               classNamePrefix="select"
             />
-            <Button color="primary">
-              <span className="align-middle">اضافه کردن کاربر جدید</span>
+            <Button className="ms-2" color="primary" onClick={handleModal}>
               <Plus size={15} />
+              <span className="align-middle ms-50">افزودن کاربر</span>
             </Button>
           </Col>
         </Row>
 
         <div className="react-dataTable position-relative">
           {tableLoading && (
-            <div className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50 zindex-2" style={{ top: 0, left: 0 }}>
+            <div
+              className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50 zindex-2"
+              style={{ top: 0, left: 0 }}
+            >
               <span>در حال بارگذاری...</span>
             </div>
           )}
@@ -300,7 +399,7 @@ const UserListTable = () => {
             noHeader
             pagination
             paginationServer
-            paginationTotalRows={filteredData.length}
+            paginationTotalRows={data?.totalCount || 0}
             paginationPerPage={itemsPerPage}
             paginationDefaultPage={currentPage + 1}
             columns={columns}
@@ -311,6 +410,27 @@ const UserListTable = () => {
           />
         </div>
       </Card>
+
+      <AddNewModal open={modal} handleModal={handleModal} />
+
+      <Modal isOpen={deleteModal} toggle={handleCancelDelete} centered>
+        <ModalHeader toggle={handleCancelDelete}>تأیید حذف کاربر</ModalHeader>
+        <ModalBody>
+          آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="danger"
+            onClick={handleConfirmDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "در حال حذف..." : "بله"}
+          </Button>
+          <Button color="secondary" onClick={handleCancelDelete} outline>
+            خیر
+          </Button>
+        </ModalFooter>
+      </Modal>
     </Fragment>
   );
 };

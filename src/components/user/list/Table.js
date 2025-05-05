@@ -112,7 +112,7 @@ const UsersList = () => {
       console.log("Debounced search term:", searchQuery);
       setDebouncedSearch(searchQuery);
       setCurrentPage(1); // بازگشت به صفحه اول
-    }, 300);
+    }, 1000);
 
     return () => clearTimeout(timer); // پاکسازی تایمر
   }, [searchQuery]);

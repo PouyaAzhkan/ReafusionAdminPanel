@@ -39,7 +39,7 @@ export const columns = (setDeleteModal, setUserToDelete) => [
         <div className="d-flex flex-column">
           <div className="d-flex align-items-center">
             <Link
-              to={`/apps/user/view/${row.id}`}
+              to={`/users/view/${row.id}`}
               className="user_name text-truncate text-body"
             >
               <span className="fw-bolder">

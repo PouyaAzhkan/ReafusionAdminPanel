@@ -48,3 +48,15 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+// get user detail
+export const useUserDetail = (userId) => {
+  return useQuery({
+    queryKey: ["UserDetail", userId],
+    queryFn: async () => {
+      const response = await api.get(`/User/UserDetails/${userId}`);
+      return response; // فقط داده اصلی رو برگردون، نه کل response
+    },
+    enabled: !!userId,
+  });
+};

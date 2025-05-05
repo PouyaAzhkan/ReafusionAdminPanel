@@ -34,9 +34,11 @@ const Register = lazy(() => import("../../pages/Register"));
 const ForgotPassword = lazy(() => import("../../pages/ForgotPassword"));
 const Error = lazy(() => import("../../pages/Error"));
 const Sample = lazy(() => import("../../pages/Sample"));
-const AllUserList = lazy(() =>
-  import("../../components/user/list/AllUserList")
-);
+
+// users
+const Users = lazy(() => import("../../pages/Users"));
+const UserDetail = lazy(() => import("../../pages/UserDetail"));
+
 const ManegeWeblogNews = lazy(() =>
   import("../../components/ManegeWeblog&News/ManegeWeblog&News")
 );
@@ -96,8 +98,12 @@ const Routes = [
     },
   },
   {
-    path: "/AllUserList",
-    element: <AllUserList />,
+    path: "/users",
+    element: <Users />,
+  },
+  {
+    path: "/users/view/:id",
+    element: <UserDetail />,
   },
   {
     path: "/WeblogAndNewsList",

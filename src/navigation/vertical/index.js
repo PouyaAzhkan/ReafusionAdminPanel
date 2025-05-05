@@ -14,10 +14,10 @@ export default [
     // navLink: "/sample",
     children: [
       {
-        id: "allUserList",
+        id: "users",
         title: "لیست کاربران",
         icon: <Circle size={12} />,
-        navLink: "/AllUserList",
+        navLink: "/users",
       },
     ],
   },

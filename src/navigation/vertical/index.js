@@ -14,14 +14,8 @@ export default [
     // navLink: "/sample",
     children: [
       {
-        id: "userList",
-        title: "لیست کاربران",
-        icon: <Circle size={12} />,
-        navLink: "/UserList",
-      },
-      {
         id: "allUserList",
-        title: "2 لیست کاربران",
+        title: "لیست کاربران",
         icon: <Circle size={12} />,
         navLink: "/AllUserList",
       },

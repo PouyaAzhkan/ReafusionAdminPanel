@@ -19,7 +19,7 @@ import {
 
 // ** Styles
 import '@styles/react/libs/flatpickr/flatpickr.scss'
-import { useCreateUser } from '../../@core/Services/Api/UserManage/user'
+import { useCreateUser } from '../../../@core/Services/Api/UserManage/user'
 
 const AddNewModal = ({ open, handleModal }) => {
   // ** States
@@ -121,6 +121,7 @@ const AddNewModal = ({ open, handleModal }) => {
             {errorMessage}
           </Alert>
         )}
+        {/*fisrt name */}
         <div className='mb-1'>
           <Label className='form-label' for='firstName'>نام</Label>
           <InputGroup>
@@ -128,10 +129,17 @@ const AddNewModal = ({ open, handleModal }) => {
             <Input id='firstName' name='firstName' value={form.firstName} onChange={handleChange} />
           </InputGroup>
         </div>
+
+        {/* last name */}
         <div className='mb-1'>
           <Label className='form-label' for='lastName'>نام خانوادگی</Label>
-          <Input id='lastName' name='lastName' value={form.lastName} onChange={handleChange} />
+          <InputGroup>
+            <InputGroupText><User size={15} /></InputGroupText>
+            <Input id='lastName' name='lastName' value={form.lastName} onChange={handleChange} />
+          </InputGroup>
         </div>
+
+        {/* gmail */}
         <div className='mb-1'>
           <Label className='form-label' for='gmail'>ایمیل</Label>
           <InputGroup>
@@ -139,6 +147,8 @@ const AddNewModal = ({ open, handleModal }) => {
             <Input type='email' id='gmail' name='gmail' value={form.gmail} onChange={handleChange} />
           </InputGroup>
         </div>
+
+        {/* password */}
         <div className='mb-1'>
           <Label className='form-label' for='password'>رمزعبور</Label>
           <InputGroup>
@@ -146,6 +156,8 @@ const AddNewModal = ({ open, handleModal }) => {
             <Input type='password' id='password' name='password' value={form.password} onChange={handleChange} />
           </InputGroup>
         </div>
+
+        {/* phone */}
         <div className='mb-1'>
           <Label className='form-label' for='phoneNumber'>شماره تماس</Label>
           <InputGroup>
@@ -153,17 +165,23 @@ const AddNewModal = ({ open, handleModal }) => {
             <Input type='text' id='phoneNumber' name='phoneNumber' value={form.phoneNumber} onChange={handleChange} />
           </InputGroup>
         </div>
+
+        {/* is student */}
         <div className='form-check mb-1'>
           <Input type='checkbox' id='isStudent' name='isStudent' checked={form.isStudent} onChange={handleChange} />
           <Label className='form-check-label' for='isStudent'>دانشجو هست</Label>
         </div>
+
+        {/* is teacher */}
         <div className='form-check mb-1'>
           <Input type='checkbox' id='isTeacher' name='isTeacher' checked={form.isTeacher} onChange={handleChange} />
           <Label className='form-check-label' for='isTeacher'>مربی هست</Label>
         </div>
+
         <Button className='me-1' color='primary' onClick={handleSubmit} disabled={isLoading}>
           {isLoading ? 'در حال ارسال...' : 'ایجاد کاربر'}
         </Button>
+
         <Button color='secondary' onClick={handleModal} outline>
           انصراف
         </Button>

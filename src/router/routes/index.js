@@ -12,9 +12,6 @@ import PublicRoute from "@components/routes/PublicRoute";
 
 // ** Utils
 import { isObjEmpty } from "@utils";
-import { UserList } from "../../pages/UserList";
-import ManegeWeblogNews from "../../components/ManegeWeblog&News/ManegeWeblog&News";
-import AllUserList from "../../components/user/list/AllUserList";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -37,6 +34,12 @@ const Register = lazy(() => import("../../pages/Register"));
 const ForgotPassword = lazy(() => import("../../pages/ForgotPassword"));
 const Error = lazy(() => import("../../pages/Error"));
 const Sample = lazy(() => import("../../pages/Sample"));
+const AllUserList = lazy(() =>
+  import("../../components/user/list/AllUserList")
+);
+const ManegeWeblogNews = lazy(() =>
+  import("../../components/ManegeWeblog&News/ManegeWeblog&News")
+);
 
 // ** Merge Routes
 const Routes = [
@@ -91,10 +94,6 @@ const Routes = [
     meta: {
       layout: "blank",
     },
-  },
-  {
-    path: "/UserList",
-    element: <UserList />,
   },
   {
     path: "/AllUserList",

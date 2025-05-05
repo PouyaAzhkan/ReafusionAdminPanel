@@ -16,7 +16,7 @@ const renderRole = (row) => {
   );
 };
 
-export const columns = [
+export const columns = (setDeleteModal, setUserToDelete) => [
   {
     name: "نام کاربر",
     sortable: true,
@@ -116,30 +116,26 @@ export const columns = [
           </DropdownToggle>
           <DropdownMenu>
             <DropdownItem
-              tag={Link}
-              className="w-100"
-              to={`/apps/user/view/${row.id}`}
-            >
-              <FileText size={14} className="me-50" />
-              <span className="align-middle">Details</span>
-            </DropdownItem>
-            <DropdownItem
               tag="a"
               href="/"
               className="w-100"
               onClick={(e) => e.preventDefault()}
             >
               <Archive size={14} className="me-50" />
-              <span className="align-middle">Edit</span>
+              <span className="align-middle">ویرایش</span>
             </DropdownItem>
             <DropdownItem
               tag="a"
               href="/"
               className="w-100"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                setDeleteModal(true);
+                setUserToDelete(row.id);
+              }}
             >
               <Trash2 size={14} className="me-50" />
-              <span className="align-middle">Delete</span>
+              <span className="align-middle">حذف</span>
             </DropdownItem>
           </DropdownMenu>
         </UncontrolledDropdown>

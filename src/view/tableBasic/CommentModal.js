@@ -10,6 +10,7 @@ const CommentModal = ({ isOpen, toggle, comment }) => {
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} className='modal-dialog-centered modal-lg'>
+      <ModalHeader tag={'h1'}>پاسخ‌ها</ModalHeader>
       <ModalBody>
         {isLoading ? (
           <p>در حال بارگذاری...</p>

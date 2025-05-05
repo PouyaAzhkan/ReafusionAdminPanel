@@ -1,4 +1,5 @@
-.weblog {
+.weblog,
+.Detailcontainer {
    display: flex;
 }
 .weblogList {
@@ -14,6 +15,13 @@
    .weblogList {
      width: 100%;
    }
+   .Detailcontainer {
+    display: block;
+    }
+    .detailCard,
+    .weblogStatus {
+      width: 100%;
+    }
 }
 @media (max-width: 600px) {
   .WeblogCard {

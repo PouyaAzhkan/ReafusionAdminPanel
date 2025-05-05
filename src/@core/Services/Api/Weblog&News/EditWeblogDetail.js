@@ -5,7 +5,7 @@ export const EditWeblogDetail = () => {
   return useMutation({
       mutationKey: ['EditWeblogDetail'],
       mutationFn: async (formData) => {
-         const response = await Api.get(`/News/UpdateNews`, formData);
+         const response = await Api.put(`/News/UpdateNews`, formData);
 
          return response
       }

@@ -5,7 +5,7 @@ export const EditCategoryWeblog = () => {
   return useMutation({
       mutationKey: ['EditCategoryWeblog'],
       mutationFn: async (formData) => {
-         const response = await Api.get(`/News/UpdateNewsCategory`, formData);
+         const response = await Api.put(`/News/UpdateNewsCategory`, formData);
 
          return response
       }

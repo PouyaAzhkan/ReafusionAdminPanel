@@ -33,7 +33,7 @@ const DataTablesReOrder = ({ CommentData = [] }) => {
   const columns = [
     {
       name: 'نام',
-      selector: row => row.autor,
+      selector: row => row.autor || "بدون نام",
       sortable: true
     },
     {

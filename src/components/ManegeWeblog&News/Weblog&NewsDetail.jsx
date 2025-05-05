@@ -1,5 +1,6 @@
 import React from 'react'
 import '../../assets/scss/PanelStayle/ManageWeblogs.scss'
+import '../../assets/scss/PanelResponsive/WeblogAndNewsList.scss'
 import { Col } from 'reactstrap'
 import InfoCard from './InfoCard'
 import WeblogStatus from './WeblogStatus'
@@ -15,12 +16,12 @@ const WeblogAndNewsDetail = () => {
   console.log(data);
 
   return (
-    <div className='d-flex justify-content-between gap-1'> 
+    <div className='Detailcontainer justify-content-between gap-1'> 
       <Col className='detailCard' xl="4" lg="5" xs={{ order: 1 }} md={{ order: 0, size: 5 }}>
-          <InfoCard  Api1={data?.detailsNewsDto}/>
+          <InfoCard  Api1={data?.detailsNewsDto} id={id}/>
       </Col>
       <Col className='weblogStatus'>
-          <WeblogStatus Api1={data?.detailsNewsDto} CommentData={data?.commentDtos}/> 
+          <WeblogStatus Api1={data?.detailsNewsDto} CommentData={data?.commentDtos} /> 
       </Col>
     </div>
   )

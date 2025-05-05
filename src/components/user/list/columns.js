@@ -1,81 +1,116 @@
 import { Archive, FileText, MoreVertical, Trash2 } from "react-feather";
 import { Link } from "react-router-dom";
-import { Badge, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import {
+  Badge,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  UncontrolledDropdown,
+} from "reactstrap";
 
 const renderRole = (row) => {
-  return <span className="text-capitalize">{row.role}</span>;
+  return (
+    <div className="text-capitalize text-truncate">
+      {row.userRoles || "بدون نقش"}
+    </div>
+  );
 };
 
 export const columns = [
   {
-    name: "User",
+    name: "نام کاربر",
     sortable: true,
-    minWidth: "300px",
-    sortField: "fullName",
-    selector: (row) => row.fullName,
+    width: "320px",
+    sortField: "fname",
+    selector: (row) => row.fname,
     cell: (row) => (
       <div className="d-flex">
-         <img
-            src={"../../../assets/images/element/UnKnownUser.jpg"} // Placeholder image
-            className="rounded-circle me-2"
-            width="30"
-            height="30"
-          />
-          <div className="d-flex flex-column">
-            <div className="d-flex align-items-center">
-              {/* You can replace the src with the user's profile picture */}
-              <Link
-                to={`/apps/user/view/${row.id}`}
-                className="user_name text-truncate text-body"
-              >
-                <span className="fw-bolder">{row.fullName}</span>
-              </Link>
-            </div>
-            <small className="text-truncate text-muted mb-0">{row.email}</small>
+        <img
+          src={
+            row.pictureAddress && row.pictureAddress !== "Not-set"
+              ? row.pictureAddress.replace(/\\/g, "/")
+              : "../../../assets/images/element/UnKnownUser.jpg"
+          }
+          className="rounded-circle me-2"
+          width="30"
+          height="30"
+          alt=""
+        />
+        <div className="d-flex flex-column">
+          <div className="d-flex align-items-center">
+            <Link
+              to={`/apps/user/view/${row.id}`}
+              className="user_name text-truncate text-body"
+            >
+              <span className="fw-bolder">
+                {row.fname || "بدون نام"} {row.lname || "بدون نام خانوادگی"}
+              </span>
+            </Link>
           </div>
+          <small className="text-truncate text-muted mb-0">
+            {row.gmail || "ندارد"}
+          </small>
+        </div>
       </div>
     ),
   },
   {
-    name: "Role",
+    name: "نقش ها",
     sortable: true,
-    minWidth: "172px",
-    sortField: "role",
-    selector: (row) => row.role,
+    width: "250px",
+    sortField: "userRoles",
+    selector: (row) => row.userRoles,
     cell: (row) => renderRole(row),
   },
   {
-    name: "Plan",
-    minWidth: "138px",
+    name: "جنسیت",
+    width: "100px",
     sortable: true,
-    sortField: "currentPlan",
-    selector: (row) => row.currentPlan,
-    cell: (row) => <span className="text-capitalize">{row.currentPlan}</span>,
+    sortField: "gender",
+    selector: (row) => row.gender,
+    cell: (row) => <span>{row.gender === true ? "مرد" : "زن"}</span>,
   },
   {
-    name: "Billing",
-    minWidth: "230px",
+    name: "تاریخ عضویت",
+    width: "150px",
     sortable: true,
-    sortField: "billing",
-    selector: (row) => row.billing,
-    cell: (row) => <span className="text-capitalize">22</span>,
-  },
-  {
-    name: "Status",
-    minWidth: "138px",
-    sortable: true,
-    sortField: "status",
-    selector: (row) => row.status,
+    sortField: "insertDate",
+    selector: (row) => row.insertDate,
     cell: (row) => (
-      <Badge className="text-capitalize" color={'info'} pill> 22 </Badge>
+      <span className="text-capitalize">
+        {row.insertDate?.split("T")[0] || "—"}
+      </span>
     ),
   },
   {
-    name: "Actions",
-    minWidth: "100px",
+    name: "تکمیل پروفایل",
+    width: "130px",
+    sortable: true,
+    sortField: "profileCompletionPercentage",
+    selector: (row) => row.profileCompletionPercentage,
+    cell: (row) => <span>{row.profileCompletionPercentage + "%" || "—"}</span>,
+  },
+  {
+    name: "وضعیت",
+    width: "100px",
+    sortable: true,
+    sortField: "active",
+    selector: (row) => row.active,
+    cell: (row) => (
+      <Badge
+        color={row.active === "True" ? "light-success" : "light-danger"}
+        pill
+      >
+        {row.active === "True" ? "فعال" : "غیرفعال"}
+      </Badge>
+    ),
+  },
+  {
+    name: "عملیات",
+    width: "100px",
     cell: (row) => (
       <div className="column-action">
-        <UncontrolledDropdown>
+        <UncontrolledDropdown className="dropend">
           <DropdownToggle tag="div" className="btn btn-sm">
             <MoreVertical size={14} className="cursor-pointer" />
           </DropdownToggle>
@@ -101,10 +136,7 @@ export const columns = [
               tag="a"
               href="/"
               className="w-100"
-              onClick={(e) => {
-                e.preventDefault();
-                // Delete handler can be passed via props or context
-              }}
+              onClick={(e) => e.preventDefault()}
             >
               <Trash2 size={14} className="me-50" />
               <span className="align-middle">Delete</span>

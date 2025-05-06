@@ -8,6 +8,8 @@ import {
   UncontrolledDropdown,
 } from "reactstrap";
 
+import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
+
 const renderRole = (row) => {
   return (
     <div className="text-capitalize text-truncate">
@@ -29,7 +31,7 @@ export const columns = (setDeleteModal, setUserToDelete) => [
           src={
             row.pictureAddress && row.pictureAddress !== "Not-set"
               ? row.pictureAddress.replace(/\\/g, "/")
-              : "../../../assets/images/element/UnKnownUser.jpg"
+              : emptyUserImg
           }
           className="rounded-circle me-2"
           width="30"

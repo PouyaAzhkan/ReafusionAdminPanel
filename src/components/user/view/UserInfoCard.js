@@ -1,99 +1,40 @@
-// ** React Imports
 import { useState, Fragment } from "react";
-
-// ** Reactstrap Imports
-import {
-  Row,
-  Col,
-  Card,
-  Form,
-  CardBody,
-  Button,
-  Badge,
-  Modal,
-  Input,
-  Label,
-  ModalBody,
-  ModalHeader,
-} from "reactstrap";
-
-// ** Third Party Components
+import { Row, Col, Card, CardBody, Button, Badge } from "reactstrap";
 import Swal from "sweetalert2";
-import Select from "react-select";
-import { Check, Briefcase, X } from "react-feather";
-import { useForm, Controller } from "react-hook-form";
 import withReactContent from "sweetalert2-react-content";
-
-// ** Custom Components
 import Avatar from "@components/avatar";
-
-// ** Utils
-import { selectThemeColors } from "@utils";
-
-// ** Styles
-import "@styles/react/libs/react-select/_react-select.scss";
-
-const statusColors = {
-  active: "light-success",
-  pending: "light-warning",
-  inactive: "light-secondary",
-};
-
-const statusOptions = [
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-  { value: "suspended", label: "Suspended" },
-];
-
-const countryOptions = [
-  { value: "uk", label: "UK" },
-  { value: "usa", label: "USA" },
-  { value: "france", label: "France" },
-  { value: "russia", label: "Russia" },
-  { value: "canada", label: "Canada" },
-];
-
-const languageOptions = [
-  { value: "english", label: "English" },
-  { value: "spanish", label: "Spanish" },
-  { value: "french", label: "French" },
-  { value: "german", label: "German" },
-  { value: "dutch", label: "Dutch" },
-];
+import { Check, Loader } from "react-feather";
+import { changeUserActivity } from "../../../@core/Services/Api/UserManage/user";
+import EditUserInfo from "./EditUserInfo";
 
 const MySwal = withReactContent(Swal);
 
 const UserInfoCard = ({ selectedUser }) => {
-  // ** State
   const [show, setShow] = useState(false);
+  const [userData, setUserData] = useState(selectedUser); // state برای مدیریت کاربر
+  const { mutate: mutateActivity } = changeUserActivity();
 
-  // ** Hook
-  const {
-    reset,
-    control,
-    setError,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      userName: selectedUser.userName,
-      lastName: selectedUser.lName.split(" ")[1],
-      firstName: selectedUser.fName.split(" ")[0],
-    },
-  });
+  // به‌روزرسانی userData وقتی selectedUser تغییر کند
+  useState(() => {
+    setUserData(selectedUser);
+  }, [selectedUser]);
 
-  // ** render user img
+  // تابع برای به‌روزرسانی اطلاعات کاربر پس از ویرایش
+  const handleUserUpdated = (updatedUser) => {
+    setUserData((prevUser) => ({
+      ...prevUser,
+      ...updatedUser,
+    }));
+  };
+
   const renderUserImg = () => {
-    if (selectedUser !== null && selectedUser.currentPictureAddress.length) {
+    if (userData !== null && userData.currentPictureAddress?.length) {
       return (
         <img
           height="110"
           width="110"
-          alt="user-avatar"
-          src={
-            selectedUser.currentPictureAddress ||
-            "../../../assets/images/element/UnKnownUser.jpg"
-          }
+          alt=""
+          src={userData.currentPictureAddress}
           className="img-fluid rounded mt-3 mb-2"
         />
       );
@@ -101,9 +42,8 @@ const UserInfoCard = ({ selectedUser }) => {
       return (
         <Avatar
           initials
-          // color={selectedUser.avatarColor || 'light-primary'}
           className="rounded mt-3 mb-2"
-          content={selectedUser.fName + " " + selectedUser.lName}
+          content={userData?.fName + " " + userData?.lName || "بدون نام"}
           contentStyles={{
             borderRadius: 0,
             fontSize: "calc(48px)",
@@ -119,58 +59,53 @@ const UserInfoCard = ({ selectedUser }) => {
     }
   };
 
-  const onSubmit = (data) => {
-    if (Object.values(data).every((field) => field.length > 0)) {
-      setShow(false);
-    } else {
-      for (const key in data) {
-        if (data[key].length === 0) {
-          setError(key, {
-            type: "manual",
-          });
-        }
-      }
-    }
-  };
-
-  const handleReset = () => {
-    reset({
-      userName: selectedUser.userName,
-      lastName: selectedUser.lName.split(" ")[1],
-      firstName: selectedUser.fName.split(" ")[0],
-    });
-  };
-
-  const handleSuspendedClick = () => {
+  const handleSuspendedClick = (userId) => {
     return MySwal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert user!",
+      title: "از تغییر وضعیت کاربر مطمئن هستید؟",
+      text: "این عملیات وضعیت کاربر را فعال / غیر فعال می‌کند",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, Suspend user!",
+      confirmButtonText: "تغییر وضعیت",
+      cancelButtonText: "انصراف",
       customClass: {
         confirmButton: "btn btn-primary",
         cancelButton: "btn btn-outline-danger ms-1",
       },
       buttonsStyling: false,
-    }).then(function (result) {
-      if (result.value) {
+    }).then((result) => {
+      if (result.isConfirmed) {
+        mutateActivity(
+          { userId },
+          {
+            onSuccess: () => {
+              MySwal.fire({
+                icon: "success",
+                title: "عملیات با موفقیت انجام شد",
+                text: "وضعیت کاربر به فعال / غیرفعال تغییر کرد",
+                customClass: { confirmButton: "btn btn-success" },
+              });
+              // به‌روزرسانی وضعیت کاربر در state
+              setUserData((prevUser) => ({
+                ...prevUser,
+                active: !prevUser.active, // تغییر وضعیت
+              }));
+            },
+            onError: (error) => {
+              MySwal.fire({
+                icon: "error",
+                title: "خطا در تغییر وضعیت",
+                text: error.message || "خطایی رخ داد.",
+                customClass: { confirmButton: "btn btn-danger" },
+              });
+            },
+          }
+        );
+      } else {
         MySwal.fire({
-          icon: "success",
-          title: "Suspended!",
-          text: "User has been suspended.",
-          customClass: {
-            confirmButton: "btn btn-success",
-          },
-        });
-      } else if (result.dismiss === MySwal.DismissReason.cancel) {
-        MySwal.fire({
-          title: "Cancelled",
-          text: "Cancelled Suspension :)",
-          icon: "error",
-          customClass: {
-            confirmButton: "btn btn-success",
-          },
+          title: "انصراف",
+          text: "تغییر وضعیت لغو شد.",
+          icon: "info",
+          customClass: { confirmButton: "btn btn-info" },
         });
       }
     });
@@ -186,15 +121,14 @@ const UserInfoCard = ({ selectedUser }) => {
               <div className="d-flex flex-column align-items-center text-center">
                 <div className="user-info">
                   <h4>
-                    {selectedUser !== null
-                      ? selectedUser.fName + " " + selectedUser.lName
-                      : "Eleanor Aguilar"}
+                    {userData?.fName && userData?.lName
+                      ? `${userData.fName} ${userData.lName}`
+                      : "بدون نام"}
                   </h4>
-
-                  {selectedUser.roles?.map((role, index) => (
+                  {userData?.roles?.map((role, index) => (
                     <Badge
                       key={index}
-                      color={"light-warning"}
+                      color="light-warning"
                       className="text-capitalize me-50 mb-1"
                     >
                       {role.roleName}
@@ -210,67 +144,67 @@ const UserInfoCard = ({ selectedUser }) => {
                 <Check className="font-medium-2" />
               </Badge>
               <div className="ms-75">
-                <h4 className="mb-0">1.23k</h4>
-                <small>Tasks Done</small>
+                <h4 className="mb-0">{userData?.courses?.length || 0}</h4>
+                <small>دوره‌های تأیید شده</small>
               </div>
             </div>
             <div className="d-flex align-items-start">
               <Badge color="light-primary" className="rounded p-75">
-                <Briefcase className="font-medium-2" />
+                <Loader className="font-medium-2" />
               </Badge>
               <div className="ms-75">
-                <h4 className="mb-0">568</h4>
-                <small>Projects Done</small>
+                <h4 className="mb-0">{userData?.coursesReseves?.length || 0}</h4>
+                <small>دوره‌های رزرو شده</small>
               </div>
             </div>
           </div>
           <h4 className="fw-bolder border-bottom pb-50 mb-1">مشخصات</h4>
           <div className="info-container">
-            {selectedUser !== null ? (
+            {userData ? (
               <ul className="list-unstyled">
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">نام کاربری :</span>
-                  <span>{selectedUser.userName}</span>
+                  <span className="fw-bolder me-25">نام کاربری:</span>
+                  <span>{userData.userName}</span>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">جیمیل :</span>
-                  <span>{selectedUser.gmail}</span>
+                  <span className="fw-bolder me-25">ایمیل:</span>
+                  <span>{userData.gmail}</span>
                 </li>
                 <li className="mb-75">
                   <span className="fw-bolder me-25">وضعیت:</span>
                   <Badge
                     className="text-capitalize"
-                    color={selectedUser.active ? "success" : "secondary"}
+                    color={userData.active ? "success" : "secondary"}
                   >
-                    {selectedUser.active ? "فعال" : "غیرفعال"}
+                    {userData.active ? "فعال" : "غیرفعال"}
                   </Badge>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">نقش ها :</span>
+                  <span className="fw-bolder me-25">نقش‌ها:</span>
                   <span className="text-capitalize">
-                    {selectedUser.roles?.map((role, index) => (
+                    {userData.roles?.map((role, index) => (
                       <span key={index}>
                         {role.roleName}
-                        {index < selectedUser.roles.length - 1 && ", "}
+                        {index < userData.roles.length - 1 && ", "}
                       </span>
                     ))}
                   </span>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">کد ملی :</span>
-                  <span>{selectedUser.nationalCode}</span>
+                  <span className="fw-bolder me-25">کد ملی:</span>
+                  <span>{userData.nationalCode}</span>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">تاریخ تولد :</span>
-                  <span>{selectedUser.birthDay.split("T")[0]}</span>
+                  <span className="fw-bolder me-25">تاریخ تولد:</span>
+                  <span>{userData.birthDay?.split("T")[0]}</span>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">شماره موبایل :</span>
-                  <span>{selectedUser.phoneNumber}</span>
+                  <span className="fw-bolder me-25">شماره موبایل:</span>
+                  <span>{userData.phoneNumber}</span>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">آدرس :</span>
-                  <span>{selectedUser.homeAdderess}</span>
+                  <span className="fw-bolder me-25">آدرس:</span>
+                  <span>{userData.homeAdderess}</span>
                 </li>
               </ul>
             ) : null}
@@ -281,220 +215,21 @@ const UserInfoCard = ({ selectedUser }) => {
             </Button>
             <Button
               className="ms-1"
-              color="danger"
+              color="warning"
               outline
-              onClick={handleSuspendedClick}
+              onClick={() => handleSuspendedClick(userData.id)}
             >
-              غیرفعال کردن
+              تغییر وضعیت کاربر
             </Button>
           </div>
         </CardBody>
       </Card>
-
-      {/* Edit user modal */}
-      <Modal
-        isOpen={show}
-        toggle={() => setShow(!show)}
-        className="modal-dialog-centered modal-lg"
-      >
-        <ModalHeader
-          className="bg-transparent"
-          toggle={() => setShow(!show)}
-        ></ModalHeader>
-        <ModalBody className="px-sm-5 pt-50 pb-5">
-          <div className="text-center mb-2">
-            <h1 className="mb-1">Edit User Information</h1>
-            <p>Updating user details will receive a privacy audit.</p>
-          </div>
-          <Form onSubmit={handleSubmit(onSubmit)}>
-            <Row className="gy-1 pt-75">
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="firstName">
-                  First Name
-                </Label>
-                <Controller
-                  defaultValue=""
-                  control={control}
-                  id="firstName"
-                  name="firstName"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="firstName"
-                      placeholder="John"
-                      invalid={errors.firstName && true}
-                    />
-                  )}
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="lastName">
-                  Last Name
-                </Label>
-                <Controller
-                  defaultValue=""
-                  control={control}
-                  id="lastName"
-                  name="lastName"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="lastName"
-                      placeholder="Doe"
-                      invalid={errors.lastName && true}
-                    />
-                  )}
-                />
-              </Col>
-              <Col xs={12}>
-                <Label className="form-label" for="userName">
-                  userName
-                </Label>
-                <Controller
-                  defaultValue=""
-                  control={control}
-                  id="userName"
-                  name="userName"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="userName"
-                      placeholder="john.doe.007"
-                      invalid={errors.userName && true}
-                    />
-                  )}
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="billing-email">
-                  Billing Email
-                </Label>
-                <Input
-                  type="email"
-                  id="billing-email"
-                  defaultValue={selectedUser.email}
-                  placeholder="example@domain.com"
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="status">
-                  Status:
-                </Label>
-                <Select
-                  id="status"
-                  isClearable={false}
-                  className="react-select"
-                  classNamePrefix="select"
-                  options={statusOptions}
-                  theme={selectThemeColors}
-                  defaultValue={
-                    statusOptions[
-                      statusOptions.findIndex(
-                        (i) => i.value === selectedUser.status
-                      )
-                    ]
-                  }
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="tax-id">
-                  Tax ID
-                </Label>
-                <Input
-                  id="tax-id"
-                  placeholder="Tax-1234"
-                  defaultValue={selectedUser.phoneNumber.substr(
-                    selectedUser.phoneNumber.length - 4
-                  )}
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="contact">
-                  Contact
-                </Label>
-                <Input
-                  id="contact"
-                  defaultValue={selectedUser.phoneNumber}
-                  placeholder="+1 609 933 4422"
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="language">
-                  language
-                </Label>
-                <Select
-                  id="language"
-                  isClearable={false}
-                  className="react-select"
-                  classNamePrefix="select"
-                  options={languageOptions}
-                  theme={selectThemeColors}
-                  defaultValue={languageOptions[0]}
-                />
-              </Col>
-              <Col md={6} xs={12}>
-                <Label className="form-label" for="country">
-                  Country
-                </Label>
-                <Select
-                  id="country"
-                  isClearable={false}
-                  className="react-select"
-                  classNamePrefix="select"
-                  options={countryOptions}
-                  theme={selectThemeColors}
-                  defaultValue={countryOptions[0]}
-                />
-              </Col>
-              <Col xs={12}>
-                <div className="d-flex align-items-center mt-1">
-                  <div className="form-switch">
-                    <Input
-                      type="switch"
-                      defaultChecked
-                      id="billing-switch"
-                      name="billing-switch"
-                    />
-                    <Label
-                      className="form-check-label"
-                      htmlFor="billing-switch"
-                    >
-                      <span className="switch-icon-left">
-                        <Check size={14} />
-                      </span>
-                      <span className="switch-icon-right">
-                        <X size={14} />
-                      </span>
-                    </Label>
-                  </div>
-                  <Label
-                    className="form-check-label fw-bolder"
-                    for="billing-switch"
-                  >
-                    Use as a billing address?
-                  </Label>
-                </div>
-              </Col>
-              <Col xs={12} className="text-center mt-2 pt-50">
-                <Button type="submit" className="me-1" color="primary">
-                  Submit
-                </Button>
-                <Button
-                  type="reset"
-                  color="secondary"
-                  outline
-                  onClick={() => {
-                    handleReset();
-                    setShow(false);
-                  }}
-                >
-                  Discard
-                </Button>
-              </Col>
-            </Row>
-          </Form>
-        </ModalBody>
-      </Modal>
+      <EditUserInfo
+        show={show}
+        setShow={setShow}
+        selectedUser={userData}
+        onUserUpdated={handleUserUpdated}
+      />
     </Fragment>
   );
 };

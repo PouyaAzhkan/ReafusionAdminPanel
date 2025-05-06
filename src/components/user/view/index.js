@@ -9,8 +9,6 @@ import { Row, Col, Alert } from "reactstrap";
 import UserTabs from "./Tabs";
 import UserInfoCard from "./UserInfoCard";
 
-// ** Custom Hook
-
 // ** Styles
 import "@styles/react/apps/app-users.scss";
 import { useUserDetail } from "../../../@core/Services/Api/UserManage/user";
@@ -57,7 +55,13 @@ const UserView = () => {
           <UserInfoCard selectedUser={selectedUser} />
         </Col>
         <Col xl="8" lg="7" xs={{ order: 0 }} md={{ order: 1, size: 7 }}>
-          <UserTabs active={active} toggleTab={toggleTab} />
+          <UserTabs
+            active={active}
+            toggleTab={toggleTab}
+            userCourses={selectedUser?.courses}
+            reservedCourses={selectedUser?.coursesReseves}
+            userData={selectedUser}
+          />
         </Col>
       </Row>
     </div>

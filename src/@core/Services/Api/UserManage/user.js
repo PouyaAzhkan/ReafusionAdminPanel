@@ -32,6 +32,89 @@ export const useCreateUser = () => {
   });
 };
 
+// Add User Role
+export const addUserRole = () => {
+  return useMutation({
+    mutationFn: async ({ userId, roleId }) => {
+      try {
+        const response = await api.post(
+          "/User/AddUserAccess",
+          {
+            roleId: roleId,
+            userId: userId,
+            Enable: true,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        return response.data;
+      } catch (error) {
+        console.error(
+          `خطا در دادن نقش برای userId: ${userId} و roleId: ${roleId}`,
+          error
+        );
+        throw error;
+      }
+    },
+  });
+};
+
+// change user activity
+export const changeUserActivity = () => {
+  return useMutation({
+    mutationFn: async ({ userId }) => {
+      try {
+        console.log("Sending userId:", userId); // لاگ userId برای دیباگ
+        const response = await api.put(
+          "/User/ReverseToActiveUser",
+          { userId },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        return response.data;
+      } catch (error) {
+        console.error("Error changing user activity:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data, // جزئیات خطای سرور (مثل ErrorType و ErrorMessage)
+          config: error.config, // تنظیمات درخواست برای دیباگ
+        });
+        throw error;
+      }
+    },
+  });
+};
+
+// edit user info
+
+export const editUserInfo = () => {
+  return useMutation({
+    mutationFn: async (userData) => {
+      try {
+        // فیلتر کردن فیلدها، اما نگه‌داشتن id حتی اگر null یا undefined باشه
+        const filteredData = Object.fromEntries(
+          Object.entries(userData).filter(
+            ([key, value]) =>
+              key === "id" || (value !== undefined && value !== null)
+          )
+        );
+
+        const response = await api.put("/User/UpdateUser", filteredData);
+        return response.data;
+      } catch (error) {
+        console.error("خطا در ویرایش اطلاعات کاربر:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+        throw error;
+      }
+    },
+  });
+};
+
 // delete user
 export const useDeleteUser = () => {
   return useMutation({

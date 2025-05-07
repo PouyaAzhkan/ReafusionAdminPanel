@@ -38,6 +38,7 @@ const Sample = lazy(() => import("../../pages/Sample"));
 // users
 const Users = lazy(() => import("../../pages/Users"));
 const UserDetail = lazy(() => import("../../pages/UserDetail"));
+const UsersJobHistory = lazy(() => import("../../pages/UsersJobHistory"));
 
 const ManegeWeblogNews = lazy(() =>
   import("../../components/ManegeWeblog&News/ManegeWeblog&News")
@@ -104,6 +105,10 @@ const Routes = [
   {
     path: "/users/view/:id",
     element: <UserDetail />,
+  },
+  {
+    path: "/UsersJobHistory",
+    element: <UsersJobHistory />,
   },
   {
     path: "/WeblogAndNewsList",

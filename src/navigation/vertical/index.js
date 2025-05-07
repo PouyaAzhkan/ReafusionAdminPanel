@@ -1,4 +1,4 @@
-import { Mail, Home, Airplay, Circle, Book } from "react-feather";
+import { Home, Users, Circle, Book } from "react-feather";
 
 export default [
   {
@@ -10,7 +10,7 @@ export default [
   {
     id: "userManage",
     title: "مدیریت کاربر",
-    icon: <Airplay size={20} />,
+    icon: <Users size={20} />,
     // navLink: "/sample",
     children: [
       {
@@ -18,6 +18,12 @@ export default [
         title: "لیست کاربران",
         icon: <Circle size={12} />,
         navLink: "/users",
+      },
+      {
+        id: "usersJobHistory",
+        title: "سوابق شغلی کاربران",
+        icon: <Circle size={12} />,
+        navLink: "/usersJobHistory",
       },
     ],
   },

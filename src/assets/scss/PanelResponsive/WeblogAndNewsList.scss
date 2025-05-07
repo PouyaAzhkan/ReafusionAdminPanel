@@ -5,6 +5,23 @@
 .weblogList {
   width: 857px;
 }
+.DetailImage {
+  width: 300px;
+} 
+.DetailInfo {
+  width: 492px;
+}
+@media (max-width: 1050px) {
+  .categorycontaner {
+     flex-wrap: wrap !important;
+  }
+  .WeblogAndNewsInfo {
+     width: 100%;
+  }
+  .CategoryList {
+    width: 100% !important;
+  }
+}
 @media (max-width: 950px) {
    .weblog {
       display: block;
@@ -19,8 +36,13 @@
     display: block;
     }
     .detailCard,
-    .weblogStatus {
+    .weblogStatus,
+    .DetailImage,
+    .DetailInfo  {
       width: 100%;
+    }
+    .categoryDetail {
+      flex-wrap: wrap !important;
     }
 }
 @media (max-width: 600px) {

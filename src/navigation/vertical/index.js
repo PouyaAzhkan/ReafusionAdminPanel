@@ -32,6 +32,19 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/WeblogAndNewsList",
       },
+      {
+        id: "AddWeblog",
+        title: "افزودن اخبار مقالات",
+        icon: <Circle size={12} />,
+        navLink: "AddWeblogAndNews",
+      },
+      {
+        id: "ManageWeblogCategory",
+        title: "مدیریت دسته بندی اخبار",
+        icon: <Circle size={12} />,
+        navLink: "/ManageWeblogCategory",
+      },
+      
     ],
   },
 ];

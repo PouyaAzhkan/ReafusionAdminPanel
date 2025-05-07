@@ -146,7 +146,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="title"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" invalid={!!errors.title} placeholder="عنوان" {...field} />
+                  <Input className='text-primary' type="text" invalid={!!errors.title} placeholder="عنوان" {...field} />
                 )}
               />
               {errors.title && <FormFeedback>{errors.title.message}</FormFeedback>}
@@ -158,7 +158,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="googleTitle"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" invalid={!!errors.googleTitle} placeholder="عنوان گوگل" {...field} />
+                  <Input className='text-primary' type="text" invalid={!!errors.googleTitle} placeholder="عنوان گوگل" {...field} />
                 )}
               />
               {errors.googleTitle && <FormFeedback>{errors.googleTitle.message}</FormFeedback>}
@@ -170,7 +170,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="keyWord"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" invalid={!!errors.keyWord} placeholder="کلمات کلیدی" {...field} />
+                  <Input className='text-primary' type="text" invalid={!!errors.keyWord} placeholder="کلمات کلیدی" {...field} />
                 )}
               />
               {errors.keyWord && <FormFeedback>{errors.keyWord.message}</FormFeedback>}
@@ -182,7 +182,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="newsCatregoryName"
                 control={control}
                 render={({ field }) => (
-                  <Input type="select" invalid={!!errors.newsCatregoryName} {...field}>
+                  <Input className='text-primary' type="select" invalid={!!errors.newsCatregoryName} {...field}>
                     <option value="">انتخاب کنید</option>
                     {getCategory?.map((cat) => (
                       <option key={cat.id} value={cat.categoryName}>
@@ -201,7 +201,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="litleDiscribe"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" invalid={!!errors.litleDiscribe} placeholder="توضیحات کوتاه" {...field} />
+                  <Input className='text-primary' type="text" invalid={!!errors.litleDiscribe} placeholder="توضیحات کوتاه" {...field} />
                 )}
               />
               {errors.litleDiscribe && <FormFeedback>{errors.litleDiscribe.message}</FormFeedback>}
@@ -213,7 +213,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="Discribe"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" invalid={!!errors.Discribe} placeholder="توضیحات کلی" {...field} />
+                  <Input className='text-primary' type="text" invalid={!!errors.Discribe} placeholder="توضیحات کلی" {...field} />
                 )}
               />
               {errors.Discribe && <FormFeedback>{errors.Discribe.message}</FormFeedback>}
@@ -225,7 +225,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 name="googleDescribe"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" invalid={!!errors.googleDescribe} placeholder="توضیحات گوگل" {...field} />
+                  <Input className='text-primary' type="text" invalid={!!errors.googleDescribe} placeholder="توضیحات گوگل" {...field} />
                 )}
               />
               {errors.googleDescribe && <FormFeedback>{errors.googleDescribe.message}</FormFeedback>}
@@ -239,6 +239,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
                 render={({ field: { onChange, value, ...rest } }) => (
                   <Input
                     type="file"
+                    className='text-primary'
                     invalid={!!errors.CurrentImageAddress}
                     onChange={(e) => handleInputChange(e, onChange)}
                     {...rest}

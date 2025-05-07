@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useMemo } from "react";
 import { Card, CardBody, CardTitle, Input, Label, Button } from "reactstrap";
 import { Check, X, Link } from "react-feather";
 import telegramIcon from "../../../assets/images/logo/telegram.png";
@@ -25,8 +25,8 @@ const UserOtherInfo = ({ userData }) => {
     isLoading: isAllRoleLoading,
   } = GetUserList();
 
-  // ساخت userRoles به‌صورت پویا از داده‌های API
-  const userRoles = createUserRoles(allRoleData?.roles);
+  // ساخت userRoles به‌صورت پایدار با useMemo
+  const userRoles = useMemo(() => createUserRoles(allRoleData?.roles), [allRoleData?.roles]);
 
   // تنظیم وضعیت اولیه سوئیچ‌ها
   const [accountStates, setAccountStates] = useState([]);
@@ -35,10 +35,15 @@ const UserOtherInfo = ({ userData }) => {
   useEffect(() => {
     if (userRoles.length > 0) {
       const newStates = userRoles.map((role) =>
-        userData?.roles?.some((userRole) => userRole.roleName === role.title) ||
-        false
+        userData?.roles?.some((userRole) => userRole.roleName === role.title) || false
       );
-      setAccountStates(newStates);
+      setAccountStates((prevStates) => {
+        // فقط اگر newStates با prevStates متفاوت باشد، به‌روزرسانی کن
+        if (JSON.stringify(prevStates) !== JSON.stringify(newStates)) {
+          return newStates;
+        }
+        return prevStates;
+      });
     }
   }, [userRoles, userData?.roles]);
 
@@ -160,7 +165,7 @@ const UserOtherInfo = ({ userData }) => {
       </Card>
       <Card>
         <CardBody>
-          <CardTitle className="mb-75 fw-bolder">شبکه های اجتماعی</CardTitle>
+          <CardTitle className="mb-75 fw-bolder">شبکه‌های اجتماعی</CardTitle>
           {socialAccounts.map((item, index) => (
             <div key={index} className="d-flex mt-2">
               <div className="flex-shrink-0">

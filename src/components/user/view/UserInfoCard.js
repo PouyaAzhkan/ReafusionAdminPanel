@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react"; // اضافه کردن useEffect
 import { Row, Col, Card, CardBody, Button, Badge } from "reactstrap";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -15,7 +15,7 @@ const UserInfoCard = ({ selectedUser }) => {
   const { mutate: mutateActivity } = changeUserActivity();
 
   // به‌روزرسانی userData وقتی selectedUser تغییر کند
-  useState(() => {
+  useEffect(() => {
     setUserData(selectedUser);
   }, [selectedUser]);
 
@@ -153,7 +153,9 @@ const UserInfoCard = ({ selectedUser }) => {
                 <Loader className="font-medium-2" />
               </Badge>
               <div className="ms-75">
-                <h4 className="mb-0">{userData?.coursesReseves?.length || 0}</h4>
+                <h4 className="mb-0">
+                  {userData?.coursesReseves?.length || 0}
+                </h4>
                 <small>دوره‌های رزرو شده</small>
               </div>
             </div>

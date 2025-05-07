@@ -7,60 +7,36 @@ import {
   UncontrolledDropdown,
 } from "reactstrap";
 import { Archive, MoreVertical, Trash2 } from "react-feather";
-import { useQuery } from "@tanstack/react-query";
-import api from "../../../@core/Services/interceptor/index";
+import { useUserDetail } from "../../../@core/Services/Api/UserManage/user";
 
-export const columns = (setDeleteModal, setUserToDelete) => [
+export const columns = (setDeleteModal, setUserToDelete, setShowEditModal, setSelectedJobHistory) => [
   {
     name: "کاربر",
     sortable: true,
     width: "170px",
     sortField: "userName",
     selector: (row) => {
-      // Fetch user data directly in the column
-      const { data: user, isLoading, isError } = useQuery({
-        queryKey: ["UserDetail", row.userId],
-        queryFn: async () => {
-          try {
-            const response = await api.get(`/User/UserDetails/${row.userId}`);
-            return response || {};
-          } catch (error) {
-            console.error(`Error fetching user ${row.userId} in columns:`, error);
-            return {};
-          }
-        },
-        enabled: !!row.userId,
-        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-      });
-
+      const { data: user, isLoading, isError } = useUserDetail(row.userId);
 
       if (isLoading) return "در حال بارگذاری...";
       if (isError || !user || !user.id) return "بدون نام";
 
-      return `${user.fName || ""} ${user.lName || ""}`.trim() || user.userName || "بدون نام";
+      return (
+        `${user.fName || ""} ${user.lName || ""}`.trim() ||
+        user.userName ||
+        "بدون نام"
+      );
     },
     cell: (row) => {
-      // Same logic for rendering the cell
-      const { data: user, isLoading, isError } = useQuery({
-        queryKey: ["UserDetail", row.userId],
-        queryFn: async () => {
-          try {
-            const response = await api.get(`/User/UserDetails/${row.userId}`);
-            return response || {};
-          } catch (error) {
-            console.error(`Error fetching user ${row.userId} in columns:`, error);
-            return {};
-          }
-        },
-        enabled: !!row.userId,
-        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-      });
+      const { data: user, isLoading, isError } = useUserDetail(row.userId);
 
       const displayName = isLoading
         ? "در حال بارگذاری..."
         : isError || !user || !user.id
         ? "بدون نام"
-        : `${user.fName || ""} ${user.lName || ""}`.trim() || user.userName || "بدون نام";
+        : `${user.fName || ""} ${user.lName || ""}`.trim() ||
+          user.userName ||
+          "بدون نام";
 
       return (
         <Link
@@ -152,7 +128,11 @@ export const columns = (setDeleteModal, setUserToDelete) => [
               tag="a"
               href="/"
               className="w-100"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedJobHistory(row); // ذخیره ردیف انتخاب‌شده
+                setShowEditModal(true); // باز کردن مودال ویرایش
+              }}
             >
               <Archive size={14} className="me-50" />
               <span className="align-middle">ویرایش</span>

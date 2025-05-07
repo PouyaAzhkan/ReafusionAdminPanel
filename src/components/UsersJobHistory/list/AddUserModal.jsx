@@ -1,10 +1,5 @@
-// ** React Imports
 import { useState } from 'react'
-
-// ** Third Party Components
 import { User, Phone, Mail, Lock, X } from 'react-feather'
-
-// ** Reactstrap Imports
 import {
   Modal,
   Input,
@@ -16,28 +11,27 @@ import {
   InputGroupText,
   Alert
 } from 'reactstrap'
-
-// ** Styles
+import toast from 'react-hot-toast'
+import { useCreateJobHistory } from '../../../@core/Services/Api/JobHistory/JobHistory'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
-import { useCreateUser } from '../../../@core/Services/Api/UserManage/user'
 
 const AddNewModal = ({ open, handleModal }) => {
-  // ** States
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    gmail: '',
-    password: '',
-    phoneNumber: '',
-    isStudent: false,
-    isTeacher: false
+    jobTitle: '',
+    aboutJob: '',
+    companyName: '',
+    companyWebSite: '',
+    companyLinkdin: '',
+    workStartDate: '',
+    workEndDate: '',
+    inWork: false
   })
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
-  const { mutate, isLoading } = useCreateUser()
+  const { mutate, isLoading } = useCreateJobHistory();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -45,41 +39,33 @@ const AddNewModal = ({ open, handleModal }) => {
   }
 
   const handleSubmit = () => {
-    if (!form.gmail.includes('@') || !form.gmail.includes('.')) {
-      alert('لطفاً یک ایمیل معتبر وارد کنید (مثال: test@example.com)')
-      return
-    }
-    if (!/^\d{11}$/.test(form.phoneNumber)) {
-      alert('شماره تلفن باید 11 رقم باشد (مثال: 09123456789)')
-      return
-    }
     setSuccess(false)
     setError(false)
     setSuccessMessage('')
     setErrorMessage('')
     mutate({ ...form, command: 'create' }, {
       onSuccess: (response) => {
-        // نمایش کل پاسخ API در کنسول
         console.log('پاسخ API:', response)
-        // بررسی موفقیت و نمایش آلرت
         if (response.success) {
-          alert('ایجاد شد')
+          toast.success('سابقه شغلی با موفقیت ایجاد شد!')
         }
         setSuccess(true)
-        setSuccessMessage('کاربر با موفقیت ایجاد شد!')
+        setSuccessMessage('سابقه شغلی با موفقیت ایجاد شد!')
         handleModal()
         setForm({
-          firstName: '',
-          lastName: '',
-          gmail: '',
-          password: '',
-          phoneNumber: '',
-          isStudent: false,
-          isTeacher: false
+          jobTitle: '',
+          aboutJob: '',
+          companyName: '',
+          companyWebSite: '',
+          companyLinkdin: '',
+          workStartDate: '',
+          workEndDate: '',
+          inWork: false
         })
       },
       onError: (error) => {
         const messages = error.response?.data?.ErrorMessage || ['خطایی رخ داد']
+        toast.error(messages.join(', '))
         setError(true)
         setErrorMessage(messages.join(', '))
         console.log('خطای API:', error)
@@ -98,7 +84,7 @@ const AddNewModal = ({ open, handleModal }) => {
       contentClassName='pt-0'
     >
       <ModalHeader className='mb-1' toggle={handleModal} close={CloseBtn} tag='div'>
-        <h5 className='modal-title'>ساخت کاربر</h5>
+        <h5 className='modal-title'>ساخت سابقه شغلی</h5>
       </ModalHeader>
       <ModalBody className='flex-grow-1'>
         {success && (
@@ -106,7 +92,7 @@ const AddNewModal = ({ open, handleModal }) => {
             color="success"
             isOpen={success}
             toggle={() => setSuccess(false)}
-            fade={false} // غیرفعال کردن انیمیشن برای رفع خطا
+            fade={false}
           >
             {successMessage}
           </Alert>
@@ -116,72 +102,67 @@ const AddNewModal = ({ open, handleModal }) => {
             color="danger"
             isOpen={error}
             toggle={() => setError(false)}
-            fade={false} // غیرفعال کردن انیمیشن برای رفع خطا
+            fade={false}
           >
             {errorMessage}
           </Alert>
         )}
-        {/*fisrt name */}
         <div className='mb-1'>
-          <Label className='form-label' for='firstName'>نام</Label>
+          <Label className='form-label' for='jobTitle'>عنوان شغل</Label>
           <InputGroup>
             <InputGroupText><User size={15} /></InputGroupText>
-            <Input id='firstName' name='firstName' value={form.firstName} onChange={handleChange} />
+            <Input id='jobTitle' name='jobTitle' value={form.jobTitle} onChange={handleChange} />
           </InputGroup>
         </div>
-
-        {/* last name */}
         <div className='mb-1'>
-          <Label className='form-label' for='lastName'>نام خانوادگی</Label>
+          <Label className='form-label' for='aboutJob'>توضیخات شغل</Label>
           <InputGroup>
             <InputGroupText><User size={15} /></InputGroupText>
-            <Input id='lastName' name='lastName' value={form.lastName} onChange={handleChange} />
+            <Input id='aboutJob' name='aboutJob' value={form.aboutJob} onChange={handleChange} />
           </InputGroup>
         </div>
-
-        {/* gmail */}
         <div className='mb-1'>
-          <Label className='form-label' for='gmail'>ایمیل</Label>
+          <Label className='form-label' for='companyName'>نام شرکت</Label>
           <InputGroup>
             <InputGroupText><Mail size={15} /></InputGroupText>
-            <Input type='email' id='gmail' name='gmail' value={form.gmail} onChange={handleChange} />
+            <Input id='companyName' name='companyName' value={form.companyName} onChange={handleChange} />
           </InputGroup>
         </div>
-
-        {/* password */}
         <div className='mb-1'>
-          <Label className='form-label' for='password'>رمزعبور</Label>
+          <Label className='form-label' for='companyWebSite'>وب سایت شرکت</Label>
           <InputGroup>
-            <InputGroupText><Lock size={15} /></InputGroupText>
-            <Input type='password' id='password' name='password' value={form.password} onChange={handleChange} />
+            <InputGroupText><Mail size={15} /></InputGroupText>
+            <Input id='companyWebSite' name='companyWebSite' value={form.companyWebSite} onChange={handleChange} />
           </InputGroup>
         </div>
-
-        {/* phone */}
         <div className='mb-1'>
-          <Label className='form-label' for='phoneNumber'>شماره تماس</Label>
+          <Label className='form-label' for='companyLinkdin'>لینکدین شرکت</Label>
           <InputGroup>
-            <InputGroupText><Phone size={15} /></InputGroupText>
-            <Input type='text' id='phoneNumber' name='phoneNumber' value={form.phoneNumber} onChange={handleChange} />
+            <InputGroupText><Mail size={15} /></InputGroupText>
+            <Input id='companyLinkdin' name='companyLinkdin' value={form.companyLinkdin} onChange={handleChange} />
           </InputGroup>
         </div>
-
-        {/* is student */}
-        <div className='form-check mb-1'>
-          <Input type='checkbox' id='isStudent' name='isStudent' checked={form.isStudent} onChange={handleChange} />
-          <Label className='form-check-label' for='isStudent'>دانشجو هست</Label>
+        <div className='mb-1'>
+          <Label className='form-label' for='workStartDate'>تاریخ شروع کار</Label>
+          <InputGroup>
+            <InputGroupText><Mail size={15} /></InputGroupText>
+            <Input type='date' id='workStartDate' name='workStartDate' value={form.workStartDate} onChange={handleChange} />
+          </InputGroup>
         </div>
-
-        {/* is teacher */}
-        <div className='form-check mb-1'>
-          <Input type='checkbox' id='isTeacher' name='isTeacher' checked={form.isTeacher} onChange={handleChange} />
-          <Label className='form-check-label' for='isTeacher'>مربی هست</Label>
+        <div className='mb-1'>
+          <Label className='form-label' for='workEndDate'>تاریخ پایان کار</Label>
+          <InputGroup>
+            <InputGroupText><Mail size={15} /></InputGroupText>
+            <Input type='date' id='workEndDate' name='workEndDate' value={form.workEndDate} onChange={handleChange} />
+          </InputGroup>
         </div>
-
+        <div className='form-check mb-1'>
+          <Input type='checkbox' id='inWork' name='inWork' checked={form.inWork} onChange={handleChange} />
+          <Label className='form-check-label' for='inWork'>مشغول بودن</Label>
+        </div>
         <Button className='me-1' color='primary' onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'در حال ارسال...' : 'ایجاد کاربر'}
+          {isLoading ? 'در حال ارسال...' : 'ایجاد سابقه شغلی'}
         </Button>
-
         <Button color='secondary' onClick={handleModal} outline>
           انصراف
         </Button>

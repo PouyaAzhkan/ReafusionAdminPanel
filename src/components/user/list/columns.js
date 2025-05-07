@@ -118,13 +118,14 @@ export const columns = (setDeleteModal, setUserToDelete) => [
           </DropdownToggle>
           <DropdownMenu>
             <DropdownItem
-              tag="a"
-              href="/"
+              tag="span"
               className="w-100"
               onClick={(e) => e.preventDefault()}
             >
-              <Archive size={14} className="me-50" />
-              <span className="align-middle">ویرایش</span>
+              <Link to={`/users/view/${row.id}`}>
+                <Archive size={14} className="me-50" />
+                <span className="align-middle">ویرایش</span>
+              </Link>
             </DropdownItem>
             <DropdownItem
               tag="a"

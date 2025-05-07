@@ -17,18 +17,6 @@ export const GetUserList = (params) => {
   });
 };
 
-// get user detail
-export const useUserDetail = (userId) => {
-  return useQuery({
-    queryKey: ["UserDetail", userId],
-    queryFn: async () => {
-      const response = await api.get(`/User/UserDetails/${userId}`);
-      return response; // فقط داده اصلی رو برگردون، نه کل response
-    },
-    enabled: !!userId,
-  });
-};
-
 // create user
 export const useCreateUser = () => {
   return useMutation({
@@ -141,5 +129,17 @@ export const useDeleteUser = () => {
         throw error;
       }
     },
+  });
+};
+
+// get user detail
+export const useUserDetail = (userId) => {
+  return useQuery({
+    queryKey: ["UserDetail", userId],
+    queryFn: async () => {
+      const response = await api.get(`/User/UserDetails/${userId}`);
+      return response; // فقط داده اصلی رو برگردون، نه کل response
+    },
+    enabled: !!userId,
   });
 };

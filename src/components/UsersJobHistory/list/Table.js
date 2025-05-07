@@ -1,6 +1,7 @@
 import { Fragment, useState, useEffect } from "react";
 import AddUserModal from "./AddUserModal";
-import DeleteUserModal from "./DeleteUserModal";
+import DeleteJobHistoryModal from "./DeleteJobHistoryModal";
+import EditJobHistoryModal from "./EditJobHistoryModal";
 import { columns } from "./columns";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
@@ -8,8 +9,11 @@ import { ChevronDown } from "react-feather";
 import { Row, Col, Card, Input, Button } from "reactstrap";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
-import { useDeleteUser } from "../../../@core/Services/Api/UserManage/user";
-import { useAllUsersJobHistory } from "../../../@core/Services/Api/UserJobHistory/GetAllUsersJobHistory";
+import {
+  getAllUsersJobHistory,
+  useDeleteJobHistory,
+} from "../../../@core/Services/Api/JobHistory/JobHistory";
+import toast from "react-hot-toast";
 
 const CustomHeader = ({
   data,
@@ -59,7 +63,7 @@ const CustomHeader = ({
               color="primary"
               onClick={handleModal}
             >
-              افزودن کاربر
+              افزودن سابقه شغلی
             </Button>
           </div>
         </Col>
@@ -75,18 +79,31 @@ const UsersList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
+  const [jobHistoryToDelete, setJobHistoryToDelete] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedJobHistory, setSelectedJobHistory] = useState(null);
 
-  const { data: jobHistoryData, isError, isLoading, refetch } = useAllUsersJobHistory();
-  const { mutate: deleteUser, isLoading: isDeleting } = useDeleteUser();
+  const {
+    data: jobHistoryData,
+    isError,
+    isLoading,
+    refetch,
+  } = getAllUsersJobHistory();
+  const { mutate: deleteJobHistory, isLoading: isDeleting } =
+    useDeleteJobHistory();
 
   // ** Filter data based on search query and pagination
-  const filteredData = jobHistoryData?.filter((item) =>
-    debouncedSearch
-      ? item.jobTitle?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        item.companyName?.toLowerCase().includes(debouncedSearch.toLowerCase())
-      : true
-  ) || [];
+  const filteredData =
+    jobHistoryData?.filter((item) =>
+      debouncedSearch
+        ? item.jobTitle
+            ?.toLowerCase()
+            .includes(debouncedSearch.toLowerCase()) ||
+          item.companyName
+            ?.toLowerCase()
+            .includes(debouncedSearch.toLowerCase())
+        : true
+    ) || [];
 
   // ** Paginate filtered data
   const paginatedData = filteredData.slice(
@@ -106,26 +123,36 @@ const UsersList = () => {
 
   // ** Handle Delete User
   const handleConfirmDelete = () => {
-    if (userToDelete) {
-      deleteUser(userToDelete, {
-        onSuccess: () => {
-          alert("کاربر با موفقیت حذف شد!");
+    if (jobHistoryToDelete) {
+      deleteJobHistory(jobHistoryToDelete, {
+        onSuccess: (result) => {
+          toast.success(result.message || "سابقه شغلی با موفقیت حذف شد!", {
+            position: "top-right",
+            duration: 3000,
+          });
           setDeleteModal(false);
-          setUserToDelete(null);
+          setJobHistoryToDelete(null);
           refetch();
         },
         onError: (error) => {
-          const errorMessage =
-            error.response?.data?.ErrorMessage?.[0] ||
-            "خطای ناشناخته در حذف کاربر";
-          alert(`خطا در حذف کاربر: ${errorMessage}`);
+          const errorMessage = error.message || "خطا در حذف سابقه شغلی";
+          toast.error(`خطا: ${errorMessage}`, {
+            position: "top-right",
+            duration: 3000,
+          });
           setDeleteModal(false);
-          setUserToDelete(null);
+          setJobHistoryToDelete(null);
         },
       });
     } else {
       setDeleteModal(false);
     }
+  };
+
+  // ** Handle Job History Update
+  const handleJobHistoryUpdate = (updatedJobHistory) => {
+    refetch(); // بارگذاری مجدد داده‌ها از API
+    setShowEditModal(false); // بستن مودال پس از به‌روزرسانی
   };
 
   // ** Handlers
@@ -189,7 +216,12 @@ const UsersList = () => {
             pagination
             responsive
             paginationServer
-            columns={columns(setDeleteModal, setUserToDelete)}
+            columns={columns(
+              setDeleteModal,
+              setJobHistoryToDelete,
+              setShowEditModal,
+              setSelectedJobHistory
+            )}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
             className="react-dataTable"
@@ -209,15 +241,25 @@ const UsersList = () => {
         </div>
       </Card>
 
+      {/* add job history modal */}
       <AddUserModal open={sidebarOpen} handleModal={handleModal} />
 
-      <DeleteUserModal
+      {/* delete job history modal */}
+      <DeleteJobHistoryModal
         deleteModal={deleteModal}
         setDeleteModal={setDeleteModal}
-        userToDelete={userToDelete}
-        setUserToDelete={setUserToDelete}
+        jobHistoryToDelete={jobHistoryToDelete}
+        setJobHistoryToDelete={setJobHistoryToDelete}
         handleConfirmDelete={handleConfirmDelete}
         isDeleting={isDeleting}
+      />
+
+      {/* edit job history modal */}
+      <EditJobHistoryModal
+        show={showEditModal}
+        setShow={setShowEditModal}
+        selectedJobHistory={selectedJobHistory}
+        onUserUpdated={handleJobHistoryUpdate}
       />
     </Fragment>
   );

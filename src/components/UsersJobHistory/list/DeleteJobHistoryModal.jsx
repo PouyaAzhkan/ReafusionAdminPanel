@@ -4,21 +4,21 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 const DeleteUserModal = ({
     deleteModal,
     setDeleteModal,
-    userToDelete,
-    setUserToDelete,
+    jobHistoryToDelete,
+    setJobHistoryToDelete,
     handleConfirmDelete,
     isDeleting,
 }) => {
     const handleCancelDelete = () => {
         console.log('Delete cancelled');
         setDeleteModal(false);
-        setUserToDelete(null);
+        setJobHistoryToDelete(null);
     };
 
     return (
         <Modal isOpen={deleteModal} toggle={handleCancelDelete} centered>
-            <ModalHeader toggle={handleCancelDelete}>تأیید حذف کاربر</ModalHeader>
-            <ModalBody>آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟</ModalBody>
+            <ModalHeader toggle={handleCancelDelete}>تأیید حذف سابقه شغلی</ModalHeader>
+            <ModalBody>آیا مطمئن هستید که می‌خواهید سابقه شغلی را حذف کنید؟</ModalBody>
             <ModalFooter>
                 <Button
                     color="danger"

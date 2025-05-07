@@ -12,6 +12,11 @@ import PublicRoute from "@components/routes/PublicRoute";
 
 // ** Utils
 import { isObjEmpty } from "@utils";
+import { UserList } from "../../pages/UserList";
+import ManegeWeblogNews from "../../components/ManegeWeblog&News/ManegeWeblog&News";
+import WeblogAndNewsDetail from "../../components/ManegeWeblog&News/Weblog&NewsDetail";
+import AddWeblog from "../../components/ManegeWeblog&News/AddWeblog";
+import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblogCategory/ManageWeblogCategory";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -108,6 +113,18 @@ const Routes = [
   {
     path: "/WeblogAndNewsList",
     element: <ManegeWeblogNews />,
+  },
+  {
+    path: "/WeblogAndNewsList/:id",
+    element: <WeblogAndNewsDetail />,
+  },
+  {
+    path: "/AddWeblogAndNews",
+    element: <AddWeblog />,
+  },
+  {
+    path: "/ManageWeblogCategory",
+    element: <ManageWeblogCategory />,
   },
 ];
 

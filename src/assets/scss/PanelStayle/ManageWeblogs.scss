@@ -1,0 +1,72 @@
+.WeblogAndNewsInfo {
+  width: 350px;
+}
+.select1{
+  width: 80px;
+}
+.WeblogCard {
+  width: 270px;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); // سایه اولیه
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(147, 31, 255, 0.549); // سایه بنفش
+  }
+}
+.card-Img {
+  height: 151px;
+}
+.truncate-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%; // یا مثلاً 200px بسته به نیاز
+  position: relative;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.6;
+  max-height: calc(1.6em * 3); // 3 خط با line-height 1.6
+}
+.detailCard {
+  width: 350px;
+}
+.container {
+  width: 100%;
+}
+.detailCardImg {
+  height: 200px;
+  margin: auto;
+}
+.FlexInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  h5 {
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  p {
+    flex: 1;
+    margin: 0;
+    word-break: break-word;
+  }
+}
+.weblogStatus {
+  max-width: 830px ;
+}
+.activeWeblog {
+  width: 50px;
+}
+.CategoryList {
+  width: 840px;
+}

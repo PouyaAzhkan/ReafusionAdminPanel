@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from "react";
-import AddUserModal from "./AddUserModal";
+import AddJobHistoryModal from "./AddJobHistoryModal";
 import DeleteJobHistoryModal from "./DeleteJobHistoryModal";
 import EditJobHistoryModal from "./EditJobHistoryModal";
 import { columns } from "./columns";
@@ -242,7 +242,7 @@ const UsersList = () => {
       </Card>
 
       {/* add job history modal */}
-      <AddUserModal open={sidebarOpen} handleModal={handleModal} />
+      <AddJobHistoryModal open={sidebarOpen} handleModal={handleModal} />
 
       {/* delete job history modal */}
       <DeleteJobHistoryModal

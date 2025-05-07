@@ -375,34 +375,6 @@ const EditJobHistoryModal = ({ show, setShow, selectedJobHistory, onUserUpdated 
                                 <FormFeedback>{errors.inWork.message}</FormFeedback>
                             )}
                         </Col>
-                        <Col md={6} xs={12}>
-                            <Label className="form-label" for="userId">
-                                شناسه کاربر <span className="text-danger">*</span>
-                            </Label>
-                            <Controller
-                                control={control}
-                                id="userId"
-                                name="userId"
-                                rules={{
-                                    required: "شناسه کاربر الزامی است",
-                                    pattern: {
-                                        value: /^\d+$/,
-                                        message: "شناسه کاربر باید عدد باشد",
-                                    },
-                                }}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id="userId"
-                                        placeholder="مثال: 12345"
-                                        invalid={!!errors.userId}
-                                    />
-                                )}
-                            />
-                            {errors.userId && (
-                                <FormFeedback>{errors.userId.message}</FormFeedback>
-                            )}
-                        </Col>
                         <Col xs={12} className="text-center mt-2 pt-50">
                             <Button
                                 type="submit"

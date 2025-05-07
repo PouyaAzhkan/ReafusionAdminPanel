@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { User, Phone, Mail, Lock, X } from 'react-feather'
+import { Briefcase, Mail, Calendar, Home, PenTool, Linkedin, Link, X } from 'react-feather'
 import {
   Modal,
   Input,
@@ -110,49 +110,49 @@ const AddNewModal = ({ open, handleModal }) => {
         <div className='mb-1'>
           <Label className='form-label' for='jobTitle'>عنوان شغل</Label>
           <InputGroup>
-            <InputGroupText><User size={15} /></InputGroupText>
+            <InputGroupText><Briefcase size={15} /></InputGroupText>
             <Input id='jobTitle' name='jobTitle' value={form.jobTitle} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
           <Label className='form-label' for='aboutJob'>توضیخات شغل</Label>
           <InputGroup>
-            <InputGroupText><User size={15} /></InputGroupText>
+            <InputGroupText><PenTool size={15} /></InputGroupText>
             <Input id='aboutJob' name='aboutJob' value={form.aboutJob} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
           <Label className='form-label' for='companyName'>نام شرکت</Label>
           <InputGroup>
-            <InputGroupText><Mail size={15} /></InputGroupText>
+            <InputGroupText><Home size={15} /></InputGroupText>
             <Input id='companyName' name='companyName' value={form.companyName} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
           <Label className='form-label' for='companyWebSite'>وب سایت شرکت</Label>
           <InputGroup>
-            <InputGroupText><Mail size={15} /></InputGroupText>
+            <InputGroupText><Link size={15} /></InputGroupText>
             <Input id='companyWebSite' name='companyWebSite' value={form.companyWebSite} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
           <Label className='form-label' for='companyLinkdin'>لینکدین شرکت</Label>
           <InputGroup>
-            <InputGroupText><Mail size={15} /></InputGroupText>
+            <InputGroupText><Linkedin size={15} /></InputGroupText>
             <Input id='companyLinkdin' name='companyLinkdin' value={form.companyLinkdin} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
           <Label className='form-label' for='workStartDate'>تاریخ شروع کار</Label>
           <InputGroup>
-            <InputGroupText><Mail size={15} /></InputGroupText>
+            <InputGroupText><Calendar size={15} /></InputGroupText>
             <Input type='date' id='workStartDate' name='workStartDate' value={form.workStartDate} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
           <Label className='form-label' for='workEndDate'>تاریخ پایان کار</Label>
           <InputGroup>
-            <InputGroupText><Mail size={15} /></InputGroupText>
+            <InputGroupText><Calendar size={15} /></InputGroupText>
             <Input type='date' id='workEndDate' name='workEndDate' value={form.workEndDate} onChange={handleChange} />
           </InputGroup>
         </div>

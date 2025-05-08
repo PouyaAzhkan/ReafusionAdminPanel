@@ -22,13 +22,46 @@ export const useDeleteComment = () => {
   return useMutation({
     mutationFn: async (CourseCommandId) => {
       try {
-        console.log("Request headers:", api.defaults.headers);
         const response = await api.delete(
           `/Course/DeleteCourseComment?CourseCommandId=${CourseCommandId}`
         );
-        return response;
+        return response.data;
       } catch (error) {
         console.error("Error deleting comment:", error);
+        throw error;
+      }
+    },
+  });
+};
+
+// accept comment
+export const useAcceptComment = () => {
+  return useMutation({
+    mutationFn: async (CommentCourseId) => {
+      try {
+        const response = await api.post(
+          `/Course/AcceptCourseComment?CommentCourseId=${CommentCourseId}`
+        );
+        return response.data;
+      } catch (error) {
+        console.error("Error accept comment:", error);
+        throw error;
+      }
+    },
+  });
+};
+
+// reject comment
+export const useRejectComment = () => {
+  return useMutation({
+    mutationFn: async (CommentCourseId) => {
+      try {
+        const response = await api.post(
+          `/Course/RejectCourseComment?CommentCourseId=${CommentCourseId}`
+        );
+        return response;
+      } catch (error) {
+        console.error("Error reject comment:", error);
         throw error;
       }
     },

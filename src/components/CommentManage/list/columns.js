@@ -6,11 +6,19 @@ import {
   DropdownMenu,
   DropdownToggle,
   UncontrolledDropdown,
+  Spinner,
 } from "reactstrap";
-
+import { toast } from "react-hot-toast";
 import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
 
-export const columns = (setDeleteModal, setCommentToDelete) => [
+export const columns = (
+  setDeleteModal,
+  setCommentToDelete,
+  handleAcceptComment,
+  handleRejectComment,
+  isAccepting,
+  isRejecting
+) => [
   {
     name: "نام کاربر",
     width: "200px",
@@ -96,12 +104,28 @@ export const columns = (setDeleteModal, setCommentToDelete) => [
             <DropdownItem
               tag="span"
               className="w-100"
-              onClick={(e) => e.preventDefault()}
+              disabled={isAccepting || isRejecting}
+              onClick={(e) => {
+                e.preventDefault();
+                if (row.accept) {
+                  handleRejectComment(row.commentId);
+                } else {
+                  handleAcceptComment(row.commentId);
+                }
+              }}
             >
-              <Link to={`/users/view/${row.id}`}>
-                <Archive size={14} className="me-50" />
-                <span className="align-middle">ویرایش</span>
-              </Link>
+              <span className="align-middle">
+                {isAccepting || isRejecting ? (
+                  <>
+                    <Spinner size="sm" className="me-1" />
+                    در حال پردازش...
+                  </>
+                ) : row.accept ? (
+                  "رد کردن"
+                ) : (
+                  "تایید کردن"
+                )}
+              </span>
             </DropdownItem>
             <DropdownItem
               tag="a"
@@ -120,7 +144,7 @@ export const columns = (setDeleteModal, setCommentToDelete) => [
                   setCommentToDelete(row.commentId);
                 } else {
                   console.error("Comment ID is missing or invalid");
-                  alert("شناسه کامنت نامعتبر است");
+                  toast.error("شناسه کامنت نامعتبر است");
                 }
               }}
             >

@@ -1,19 +1,12 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from "react";
-
-// ** Components
 import AddUserModal from "./AddUserModal";
-import DeleteCommentModal from "./DeleteCommentModal"; // اضافه کردن مودال حذف
+import DeleteCommentModal from "./DeleteCommentModal";
 import { columns } from "./columns";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
 import { ChevronDown } from "react-feather";
-
-// ** Utils
 import { selectThemeColors } from "@utils";
-
-// ** Reactstrap Imports
 import {
   Row,
   Col,
@@ -24,15 +17,18 @@ import {
   CardBody,
   CardTitle,
   CardHeader,
+  Spinner,
 } from "reactstrap";
-
-// ** Styles
+import { toast } from "react-hot-toast";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import {
   GetCommentList,
+  useAcceptComment,
   useDeleteComment,
+  useRejectComment,
 } from "../../../@core/Services/Api/CommentManage/CommentManage";
+import { useQueryClient } from "@tanstack/react-query";
 
 // ** Table Header
 const CustomHeader = ({
@@ -65,9 +61,7 @@ const CustomHeader = ({
         </Col>
         <Col
           xl="8"
-          className="d-flex align-items-sm-center justify-content-xl-end
-           justify-content-start flex-xl-nowrap flex-wrap flex-sm-row
-            flex-column p-0 mt-xl-0 mt-1"
+          className="d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column p-0 mt-xl-0 mt-1"
         >
           <div className="d-flex align-items-center mb-sm-0 mb-1 me-1 w-50">
             <Input
@@ -91,49 +85,87 @@ const CommentList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [currentStatus, setCurrentStatus] = useState({
     value: null,
     label: "انتخاب",
     number: 0,
   });
-
   const [deleteModal, setDeleteModal] = useState(false);
-  const [commentToDelete, setCommentToDelete] = useState();
+  const [commentToDelete, setCommentToDelete] = useState(null);
 
-  // Delete User
+  // فراخوانی هوک‌ها
+  const queryClient = useQueryClient();
+  const { mutate: acceptComment, isLoading: isAccepting } = useAcceptComment();
+  const { mutate: rejectComment, isLoading: isRejecting } = useRejectComment();
   const { mutate: deleteComment, isLoading: isDeleting } = useDeleteComment();
 
+  // کلید کش پویا
+  const queryKey = [
+    "comments",
+    currentPage,
+    rowsPerPage,
+    currentStatus.value,
+    debouncedSearch,
+  ];
+
+  // تابع برای تأیید کامنت
+  const handleAcceptComment = (commentId) => {
+    if (!commentId) {
+      toast.error("شناسه کامنت نامعتبر است");
+      return;
+    }
+    acceptComment(commentId, {
+      onSuccess: () => {
+        toast.success("کامنت با موفقیت تأیید شد!");
+        queryClient.invalidateQueries(queryKey); // به‌روزرسانی داده‌ها
+      },
+      onError: (error) => {
+        const errorMessage =
+          error.response?.data?.ErrorMessage?.[0] || "خطا در تأیید کامنت";
+        toast.error(`خطا: ${errorMessage}`);
+      },
+    });
+  };
+
+  // تابع برای رد کامنت
+  const handleRejectComment = (commentId) => {
+    if (!commentId) {
+      toast.error("شناسه کامنت نامعتبر است");
+      return;
+    }
+    rejectComment(commentId, {
+      onSuccess: () => {
+        toast.success("کامنت با موفقیت رد شد!");
+        queryClient.invalidateQueries(queryKey); // به‌روزرسانی داده‌ها
+      },
+      onError: (error) => {
+        const errorMessage =
+          error.response?.data?.ErrorMessage?.[0] || "خطا در رد کامنت";
+        toast.error(`خطا: ${errorMessage}`);
+      },
+    });
+  };
+
+  // حذف کامنت
   const handleConfirmDelete = () => {
     if (commentToDelete && typeof commentToDelete === "string") {
-      console.log("Attempting to delete comment with id:", commentToDelete);
       deleteComment(commentToDelete, {
-        onSuccess: (response) => {
-          console.log("API Response (Success):", response);
-          alert("کامنت با موفقیت حذف شد!");
+        onSuccess: () => {
+          toast.success("کامنت با موفقیت حذف شد!");
           setDeleteModal(false);
           setCommentToDelete(null);
-          refetch();
+          queryClient.invalidateQueries(queryKey); // به‌روزرسانی داده‌ها
         },
         onError: (error) => {
-          console.error("API Error Response:", {
-            ErrorType: error.response?.data?.ErrorType,
-            ErrorMessage: error.response?.data?.ErrorMessage,
-            StatusCode: error.response?.status,
-            FullResponseData: error.response?.data,
-            FullError: error,
-          });
           const errorMessage =
-            error.response?.data?.ErrorMessage?.[0] ||
-            "خطای ناشناخته در حذف کامنت";
-          alert(`خطا در حذف کامنت: ${errorMessage}`);
+            error.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در حذف کامنت";
+          toast.error(`خطا در حذف کامنت: ${errorMessage}`);
           setDeleteModal(false);
           setCommentToDelete(null);
         },
       });
     } else {
-      console.warn("Invalid or missing comment ID:", commentToDelete);
-      alert("شناسه کامنت نامعتبر است");
+      toast.error("شناسه کامنت نامعتبر است");
       setDeleteModal(false);
       setCommentToDelete(null);
     }
@@ -246,7 +278,14 @@ const CommentList = () => {
             pagination
             responsive
             paginationServer
-            columns={columns(setDeleteModal, setCommentToDelete)} // پاس دادن توابع
+            columns={columns(
+              setDeleteModal,
+              setCommentToDelete,
+              handleAcceptComment,
+              handleRejectComment,
+              isAccepting,
+              isRejecting
+            )}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
             className="react-dataTable"

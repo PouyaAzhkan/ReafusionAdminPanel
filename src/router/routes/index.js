@@ -15,7 +15,6 @@ import { isObjEmpty } from "@utils";
 import WeblogAndNewsDetail from "../../components/ManegeWeblog&News/Weblog&NewsDetail";
 import AddWeblog from "../../components/ManegeWeblog&News/AddWeblog";
 import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblogCategory/ManageWeblogCategory";
-
 const getLayout = {
   blank: <BlankLayout />,
   vertical: <VerticalLayout />,
@@ -46,6 +45,9 @@ const UsersJobHistory = lazy(() => import("../../pages/UsersJobHistory"));
 const ManegeWeblogNews = lazy(() =>
   import("../../components/ManegeWeblog&News/ManegeWeblog&News")
 );
+
+// comments
+const Comments = lazy(() => import("../../pages/Comments"));
 
 // ** Merge Routes
 const Routes = [
@@ -128,6 +130,10 @@ const Routes = [
   {
     path: "/ManageWeblogCategory",
     element: <ManageWeblogCategory />,
+  },
+  {
+    path: "/comments",
+    element: <Comments />,
   },
 ];
 

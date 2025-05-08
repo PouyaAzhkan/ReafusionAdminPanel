@@ -1,4 +1,4 @@
-import { Home, Users, Circle, Book } from "react-feather";
+import { Home, Users, Circle, Book, MessageSquare } from "react-feather";
 
 export default [
   {
@@ -50,7 +50,12 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/ManageWeblogCategory",
       },
-      
     ],
+  },
+  {
+    id: "comments",
+    title: "مدیریت کامنت ها",
+    icon: <MessageSquare size={20} />,
+    navLink: "/comments",
   },
 ];

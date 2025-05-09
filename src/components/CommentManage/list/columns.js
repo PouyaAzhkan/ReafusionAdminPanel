@@ -1,4 +1,12 @@
-import { Archive, Eye, MoreVertical, Trash2 } from "react-feather";
+import {
+  Archive,
+  Check,
+  ExternalLink,
+  Eye,
+  MoreVertical,
+  Trash2,
+  XSquare,
+} from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,
@@ -17,7 +25,9 @@ export const columns = (
   handleAcceptComment,
   handleRejectComment,
   isAccepting,
-  isRejecting
+  isRejecting,
+  setSidebarOpen, // اضافه شده
+  setCommentToReply // اضافه شده
 ) => [
   {
     name: "نام کاربر",
@@ -114,16 +124,22 @@ export const columns = (
                 }
               }}
             >
-              <span className="align-middle">
+              <span className="align-items-center">
                 {isAccepting || isRejecting ? (
                   <>
                     <Spinner size="sm" className="me-1" />
                     در حال پردازش...
                   </>
                 ) : row.accept ? (
-                  "رد کردن"
+                  <span>
+                    <XSquare size={14} className="me-50" />
+                    رد کردن
+                  </span>
                 ) : (
-                  "تایید کردن"
+                  <span>
+                    <Check size={14} className="me-50" />
+                    تایید کردن
+                  </span>
                 )}
               </span>
             </DropdownItem>
@@ -150,6 +166,31 @@ export const columns = (
             >
               <Trash2 size={14} className="me-50" />
               <span className="align-middle">حذف</span>
+            </DropdownItem>
+            <DropdownItem
+              tag="span"
+              className="w-100"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("Opening reply modal for:", {
+                  commentId: row.commentId,
+                  courseId: row.courseId,
+                });
+                if (row.commentId) {
+                  setSidebarOpen(true);
+                  setCommentToReply({
+                    commentId: row.commentId,
+                    courseId: row.courseId,
+                  });
+                } else {
+                  toast.error("شناسه کامنت نامعتبر است");
+                }
+              }}
+            >
+              <span className="align-items-center">
+                <ExternalLink size={14} className="me-50" />
+                پاسخ
+              </span>
             </DropdownItem>
           </DropdownMenu>
         </UncontrolledDropdown>

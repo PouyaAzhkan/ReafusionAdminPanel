@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from "react";
-import AddUserModal from "./AddUserModal";
+import ReplyCommentModal from "./ReplyCommentModal";
 import DeleteCommentModal from "./DeleteCommentModal";
 import { columns } from "./columns";
 import Select from "react-select";
@@ -13,7 +13,6 @@ import {
   Card,
   Input,
   Label,
-  Button,
   CardBody,
   CardTitle,
   CardHeader,
@@ -33,7 +32,6 @@ import { useQueryClient } from "@tanstack/react-query";
 // ** Table Header
 const CustomHeader = ({
   data,
-  handleModal,
   handlePerPage,
   rowsPerPage,
   handleSearch,
@@ -92,14 +90,13 @@ const CommentList = () => {
   });
   const [deleteModal, setDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
+  const [commentToReply, setCommentToReply] = useState(null); // شیء شامل commentId و courseId
 
-  // فراخوانی هوک‌ها
   const queryClient = useQueryClient();
   const { mutate: acceptComment, isLoading: isAccepting } = useAcceptComment();
   const { mutate: rejectComment, isLoading: isRejecting } = useRejectComment();
   const { mutate: deleteComment, isLoading: isDeleting } = useDeleteComment();
 
-  // کلید کش پویا
   const queryKey = [
     "comments",
     currentPage,
@@ -108,7 +105,6 @@ const CommentList = () => {
     debouncedSearch,
   ];
 
-  // تابع برای تأیید کامنت
   const handleAcceptComment = (commentId) => {
     if (!commentId) {
       toast.error("شناسه کامنت نامعتبر است");
@@ -117,7 +113,7 @@ const CommentList = () => {
     acceptComment(commentId, {
       onSuccess: () => {
         toast.success("کامنت با موفقیت تأیید شد!");
-        queryClient.invalidateQueries(queryKey); // به‌روزرسانی داده‌ها
+        queryClient.invalidateQueries(queryKey);
       },
       onError: (error) => {
         const errorMessage =
@@ -127,7 +123,6 @@ const CommentList = () => {
     });
   };
 
-  // تابع برای رد کامنت
   const handleRejectComment = (commentId) => {
     if (!commentId) {
       toast.error("شناسه کامنت نامعتبر است");
@@ -136,7 +131,7 @@ const CommentList = () => {
     rejectComment(commentId, {
       onSuccess: () => {
         toast.success("کامنت با موفقیت رد شد!");
-        queryClient.invalidateQueries(queryKey); // به‌روزرسانی داده‌ها
+        queryClient.invalidateQueries(queryKey);
       },
       onError: (error) => {
         const errorMessage =
@@ -146,7 +141,6 @@ const CommentList = () => {
     });
   };
 
-  // حذف کامنت
   const handleConfirmDelete = () => {
     if (commentToDelete && typeof commentToDelete === "string") {
       deleteComment(commentToDelete, {
@@ -154,11 +148,12 @@ const CommentList = () => {
           toast.success("کامنت با موفقیت حذف شد!");
           setDeleteModal(false);
           setCommentToDelete(null);
-          queryClient.invalidateQueries(queryKey); // به‌روزرسانی داده‌ها
+          queryClient.invalidateQueries(queryKey);
         },
         onError: (error) => {
           const errorMessage =
-            error.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در حذف کامنت";
+            error.response?.data?.ErrorMessage?.[0] ||
+            "خطای ناشناخته در حذف کامنت";
           toast.error(`خطا در حذف کامنت: ${errorMessage}`);
           setDeleteModal(false);
           setCommentToDelete(null);
@@ -171,17 +166,14 @@ const CommentList = () => {
     }
   };
 
-  // Debounce search with useEffect
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // بازگشت به صفحه اول
+      setCurrentPage(1);
     }, 1000);
-
-    return () => clearTimeout(timer); // پاکسازی تایمر
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch data
   const { data, isError, isLoading, refetch } = GetCommentList({
     PageNumber: currentPage,
     RowsOfPage: rowsPerPage,
@@ -198,18 +190,16 @@ const CommentList = () => {
   const handlePerPage = (e) => {
     const newRowsPerPage = parseInt(e.target.value);
     setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1); // بازگشت به صفحه اول
+    setCurrentPage(1);
   };
 
   const handleSearch = (val) => {
     setSearchQuery(val);
   };
 
-  // Pagination component
   const CustomPagination = () => {
-    const totalRows = data?.totalCount || 0; // تعداد کل ردیف‌ها
-    const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage)); // حداقل 1 صفحه
-
+    const totalRows = data?.totalCount || 0;
+    const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
     return (
       <ReactPaginate
         previousLabel={"قبلی"}
@@ -232,7 +222,6 @@ const CommentList = () => {
     );
   };
 
-  // Status options
   const statusOptions = [
     { value: "", label: "انتخاب" },
     { value: true, label: "تایید شده" },
@@ -240,7 +229,7 @@ const CommentList = () => {
   ];
 
   if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (isError) return <div>خطا در بارگذاری کامنت ها.</div>;
+  if (isError) return <div>خطا در بارگذاری کامنت‌ها.</div>;
 
   return (
     <Fragment>
@@ -261,7 +250,7 @@ const CommentList = () => {
                 value={currentStatus}
                 onChange={(data) => {
                   setCurrentStatus(data);
-                  setCurrentPage(1); // بازگشت به صفحه اول
+                  setCurrentPage(1);
                 }}
               />
             </Col>
@@ -284,7 +273,9 @@ const CommentList = () => {
               handleAcceptComment,
               handleRejectComment,
               isAccepting,
-              isRejecting
+              isRejecting,
+              setSidebarOpen,
+              setCommentToReply
             )}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
@@ -298,14 +289,18 @@ const CommentList = () => {
                 rowsPerPage={rowsPerPage}
                 handleSearch={handleSearch}
                 handlePerPage={handlePerPage}
-                handleModal={handleModal}
               />
             }
           />
         </div>
       </Card>
 
-      <AddUserModal open={sidebarOpen} handleModal={handleModal} />
+      <ReplyCommentModal
+        open={sidebarOpen}
+        handleModal={handleModal}
+        CommentId={commentToReply?.commentId || null}
+        CourseId={commentToReply?.courseId || null}
+      />
 
       <DeleteCommentModal
         deleteModal={deleteModal}

@@ -67,3 +67,60 @@ export const useRejectComment = () => {
     },
   });
 };
+
+// add reply comment
+export const useAddReplyComment = () => {
+  return useMutation({
+    mutationFn: async ({ commentId, courseId, title, describe }) => {
+      console.log("داده‌های دریافتی در mutationFn:", {
+        commentId,
+        courseId,
+        title,
+        describe,
+      });
+      if (!commentId || !courseId || !title || !describe) {
+        throw new Error(
+          "داده‌های ارسالی ناقص هستند: " +
+            JSON.stringify({ commentId, courseId, title, describe })
+        );
+      }
+
+      const formData = new FormData();
+      formData.append("CommentId", commentId);
+      formData.append("CourseId", courseId);
+      formData.append("Title", title);
+      formData.append("Describe", describe);
+
+      const response = await api.post(
+        "/Course/AddReplyCourseComment",
+        formData,
+        {
+          headers: {
+            // هدر Content-Type به صورت خودکار توسط FormData تنظیم می‌شود، نیازی به تنظیم دستی نیست
+          },
+        }
+      );
+      return response;
+    },
+    onSuccess: (data) => {
+      console.log("پاسخ با موفقیت ثبت شد:", data);
+    },
+    onError: (error) => {
+      const errorData = error.response?.data;
+      let errorMessage = "خطایی در ثبت پاسخ رخ داد";
+      if (errorData) {
+        if (Array.isArray(errorData.ErrorMessage)) {
+          errorMessage = errorData.ErrorMessage.join(", ");
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors) {
+          errorMessage = Object.values(errorData.errors).flat().join(", ");
+        } else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+      }
+      console.error("جزئیات کامل خطا در ثبت پاسخ:", errorData);
+      console.error("خطا در ثبت پاسخ:", errorMessage);
+    },
+  });
+};

@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from "react";
-import ReplyCommentModal from "./ReplyCommentModal";
+import AddReplyCommentModal from "./AddReplyCommentModal";
 import DeleteCommentModal from "./DeleteCommentModal";
 import { columns } from "./columns";
 import Select from "react-select";
@@ -28,6 +28,7 @@ import {
   useRejectComment,
 } from "../../../@core/Services/Api/CommentManage/CommentManage";
 import { useQueryClient } from "@tanstack/react-query";
+import ReplyListModal from "./ReplyListModal";
 
 // ** Table Header
 const CustomHeader = ({
@@ -83,6 +84,11 @@ const CommentList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showReplyList, setShowReplyList] = useState(false);
+
+  // تابع برای باز و بسته کردن ReplyListModal
+  const handleReplyListModal = () => setShowReplyList(!showReplyList);
+
   const [currentStatus, setCurrentStatus] = useState({
     value: null,
     label: "انتخاب",
@@ -181,7 +187,7 @@ const CommentList = () => {
     Query: debouncedSearch,
   });
 
-  const handleModal = () => setSidebarOpen(!sidebarOpen);
+  const handleReplyModal = () => setSidebarOpen(!sidebarOpen);
 
   const handlePagination = (page) => {
     setCurrentPage(page.selected + 1);
@@ -258,7 +264,7 @@ const CommentList = () => {
         </CardBody>
       </Card>
 
-      <Card className="overflow-hidden">
+      <Card>
         <div className="react-dataTable">
           <DataTable
             noHeader
@@ -275,7 +281,8 @@ const CommentList = () => {
               isAccepting,
               isRejecting,
               setSidebarOpen,
-              setCommentToReply
+              setCommentToReply,
+              setShowReplyList
             )}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
@@ -295,12 +302,34 @@ const CommentList = () => {
         </div>
       </Card>
 
-      <ReplyCommentModal
-        open={sidebarOpen}
-        handleModal={handleModal}
+      <AddReplyCommentModal
+        openReply={sidebarOpen}
+        handleReplyModal={handleReplyModal}
         CommentId={commentToReply?.commentId || null}
         CourseId={commentToReply?.courseId || null}
       />
+
+      {showReplyList && (
+        <ReplyListModal
+          open={showReplyList}
+          handleModal={() => setShowReplyList(!showReplyList)}
+          courseId={commentToReply?.courseId || null}
+          commentId={commentToReply?.commentId || null}
+          commentTitle={commentToReply?.commentTitle || ""}
+          setDeleteModal={setDeleteModal}
+          setCommentToDelete={setCommentToDelete}
+          handleAcceptComment={handleAcceptComment}
+          handleRejectComment={handleRejectComment}
+          isAccepting={isAccepting}
+          isRejecting={isRejecting}
+          setSidebarOpen={setSidebarOpen}
+          setCommentToReply={setCommentToReply}
+          handleConfirmDelete={handleConfirmDelete}
+          deleteModal={deleteModal}
+          commentToDelete={commentToDelete}
+          isDeleting={isDeleting}
+        />
+      )}
 
       <DeleteCommentModal
         deleteModal={deleteModal}

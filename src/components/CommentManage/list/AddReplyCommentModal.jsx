@@ -15,7 +15,7 @@ import '@styles/react/libs/flatpickr/flatpickr.scss';
 import { useAddReplyComment } from '../../../@core/Services/Api/CommentManage/CommentManage';
 import toast from 'react-hot-toast'; // وارد کردن react-hot-toast
 
-const ReplyCommentModal = ({ open, handleModal, CommentId, CourseId }) => {
+const ReplyCommentModal = ({ openReply, handleReplyModal, CommentId, CourseId }) => {
   const [form, setForm] = useState({
     Title: '',
     Describe: '',
@@ -87,7 +87,7 @@ const ReplyCommentModal = ({ open, handleModal, CommentId, CourseId }) => {
             toast.success('پاسخ ثبت شد'); // استفاده از toast.success به جای alert
             setSuccess(true);
             setSuccessMessage('پاسخ با موفقیت ثبت شد!');
-            handleModal();
+            handleReplyModal();
             setForm({ Title: '', Describe: '' });
           } else {
             setError(true);
@@ -121,17 +121,17 @@ const ReplyCommentModal = ({ open, handleModal, CommentId, CourseId }) => {
     );
   };
 
-  const CloseBtn = <X className='cursor-pointer' size={15} onClick={handleModal} />;
+  const CloseBtn = <X className='cursor-pointer' size={15} onClick={handleReplyModal} />;
 
   return (
     <Modal
-      isOpen={open}
-      toggle={handleModal}
-      className='sidebar-sm'
+      isOpen={openReply}
+      toggle={handleReplyModal}
+      className='sidebar-sm z-3'
       modalClassName='modal-slide-in'
       contentClassName='pt-0'
     >
-      <ModalHeader className='mb-1' toggle={handleModal} close={CloseBtn} tag='div'>
+      <ModalHeader className='mb-1' toggle={handleReplyModal} close={CloseBtn} tag='div'>
         <h5 className='modal-title'>پاسخ به کامنت</h5>
       </ModalHeader>
       <ModalBody className='flex-grow-1'>
@@ -182,7 +182,7 @@ const ReplyCommentModal = ({ open, handleModal, CommentId, CourseId }) => {
         <Button className='me-1' color='primary' onClick={handleSubmit} disabled={isLoading}>
           {isLoading ? 'در حال ارسال...' : 'ثبت پاسخ'}
         </Button>
-        <Button color='secondary' onClick={handleModal} outline>
+        <Button color='secondary' onClick={handleReplyModal} outline>
           انصراف
         </Button>
       </ModalBody>

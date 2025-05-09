@@ -1,12 +1,3 @@
-import {
-  Archive,
-  Check,
-  ExternalLink,
-  Eye,
-  MoreVertical,
-  Trash2,
-  XSquare,
-} from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,
@@ -16,6 +7,13 @@ import {
   UncontrolledDropdown,
   Spinner,
 } from "reactstrap";
+import {
+  Check,
+  ExternalLink,
+  MoreVertical,
+  Trash2,
+  XSquare,
+} from "react-feather";
 import { toast } from "react-hot-toast";
 import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
 
@@ -27,18 +25,17 @@ export const columns = (
   isAccepting,
   isRejecting,
   setSidebarOpen,
-  setCommentToReply,
-  setShowReplyList
+  setCommentToReply
 ) => [
   {
     name: "نام کاربر",
     width: "200px",
-    sortField: "userFullName",
-    selector: (row) => row.userFullName,
+    sortField: "author",
+    selector: (row) => row.author,
     cell: (row) => (
       <div className="d-flex align-items-center">
         <img
-          src={emptyUserImg}
+          src={row.pictureAddress || emptyUserImg}
           className="rounded-circle me-2"
           width="30"
           height="30"
@@ -49,7 +46,7 @@ export const columns = (
           className="user_name text-truncate text-body"
         >
           <span className="fw-bolder">
-            {row.userFullName?.replace("-", " ") || "بدون نام"}
+            {row.author?.replace("-", " ") || "بدون نام"}
           </span>
         </Link>
       </div>
@@ -57,32 +54,21 @@ export const columns = (
   },
   {
     name: "عنوان کامنت",
-    width: "200px",
-    sortField: "commentTitle",
-    selector: (row) => row.commentTitle,
-    cell: (row) => (
-      <span className="text-truncate">{row.commentTitle || "—"}</span>
-    ),
+    width: "150px",
+    sortField: "title",
+    selector: (row) => row.title,
+    cell: (row) => <span className="text-truncate">{row.title || "—"}</span>,
   },
   {
     name: "توضیحات کامنت",
-    width: "300px",
+    width: "200px",
     sortField: "describe",
     selector: (row) => row.describe,
     cell: (row) => <span className="text-truncate">{row.describe || "—"}</span>,
   },
   {
-    name: "نام دوره",
-    width: "200px",
-    sortField: "courseTitle",
-    selector: (row) => row.courseTitle,
-    cell: (row) => (
-      <span className="text-truncate">{row.courseTitle || "—"}</span>
-    ),
-  },
-  {
     name: "وضعیت",
-    width: "100px",
+    width: "80px",
     sortField: "accept",
     selector: (row) => row.accept,
     cell: (row) => (
@@ -92,32 +78,8 @@ export const columns = (
     ),
   },
   {
-    name: "پاسخ‌ها",
-    minWidth: "100px",
-    cell: (row) => (
-      <div>
-        {row.replyCount > 0 ? (
-          <span
-            onClick={() => {
-              setCommentToReply({
-                courseId: row.courseId,
-                commentId: row.commentId,
-                commentTitle: row.commentTitle,
-              });
-              setShowReplyList(true);
-            }}
-          >
-            <Eye size={16} />
-          </span>
-        ) : (
-          <span className="light-secondary">-</span>
-        )}
-      </div>
-    ),
-  },
-  {
     name: "عملیات",
-    width: "100px",
+    width: "80px",
     cell: (row) => (
       <div className="column-action">
         <UncontrolledDropdown className="dropend">
@@ -132,9 +94,9 @@ export const columns = (
               onClick={(e) => {
                 e.preventDefault();
                 if (row.accept) {
-                  handleRejectComment(row.commentId);
+                  handleRejectComment(row.id);
                 } else {
-                  handleAcceptComment(row.commentId);
+                  handleAcceptComment(row.id);
                 }
               }}
             >
@@ -163,17 +125,10 @@ export const columns = (
               className="w-100"
               onClick={(e) => {
                 e.preventDefault();
-                console.log(
-                  "Selected commentId:",
-                  row.commentId,
-                  "Row data:",
-                  row
-                );
-                if (row.commentId) {
+                if (row.id) {
                   setDeleteModal(true);
-                  setCommentToDelete(row.commentId);
+                  setCommentToDelete(row.id);
                 } else {
-                  console.error("Comment ID is missing or invalid");
                   toast.error("شناسه کامنت نامعتبر است");
                 }
               }}
@@ -186,14 +141,10 @@ export const columns = (
               className="w-100"
               onClick={(e) => {
                 e.preventDefault();
-                console.log("Opening reply modal for:", {
-                  commentId: row.commentId,
-                  courseId: row.courseId,
-                });
-                if (row.commentId) {
+                if (row.id) {
                   setSidebarOpen(true);
                   setCommentToReply({
-                    commentId: row.commentId,
+                    commentId: row.id,
                     courseId: row.courseId,
                   });
                 } else {

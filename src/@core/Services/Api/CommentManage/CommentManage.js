@@ -124,3 +124,21 @@ export const useAddReplyComment = () => {
     },
   });
 };
+
+// get course comments
+export const getCommentReply = (CourseId, CommentId) => {
+  return useQuery({
+    queryKey: ["CourseCommentReply", CourseId, CommentId],
+    queryFn: async () => {
+      try {
+        const response = await api.get(
+          `/Course/GetCourseReplyCommnets/${CourseId}/${CommentId}`
+        );
+        return response;
+      } catch (error) {
+        console.error("Error fetching comment replies:", error.response?.data);
+        throw error;
+      }
+    },
+  });
+};

@@ -1,4 +1,11 @@
-import { Home, Users, Circle, Book, MessageSquare } from "react-feather";
+import {
+  Home,
+  Users,
+  Circle,
+  Book,
+  MessageSquare,
+  Trello,
+} from "react-feather";
 
 export default [
   {
@@ -57,5 +64,11 @@ export default [
     title: "مدیریت کامنت ها",
     icon: <MessageSquare size={20} />,
     navLink: "/comments",
+  },
+  {
+    id: "buildings",
+    title: "مدیریت ساختمان ها",
+    icon: <Trello size={20} />,
+    navLink: "/buildings",
   },
 ];

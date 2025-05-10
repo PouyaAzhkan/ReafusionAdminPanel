@@ -45,9 +45,10 @@ const UsersJobHistory = lazy(() => import("../../pages/UsersJobHistory"));
 const ManegeWeblogNews = lazy(() =>
   import("../../components/ManegeWeblog&News/ManegeWeblog&News")
 );
-
 // comments
 const Comments = lazy(() => import("../../pages/Comments"));
+// buildings
+const Buildings = lazy(() => import("../../pages/Buildings"));
 
 // ** Merge Routes
 const Routes = [
@@ -134,6 +135,10 @@ const Routes = [
   {
     path: "/comments",
     element: <Comments />,
+  },
+  {
+    path: "/buildings",
+    element: <Buildings />,
   },
 ];
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { GetUserList } from './../../../@core/Services/Api/UserManage/user';
 import { Row, Col } from 'reactstrap';
 import StatsHorizontal from '@components/widgets/stats/StatsHorizontal';
 import { X, Check, Trello } from 'react-feather';

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../interceptor/index";
 import axios from "axios";
 
@@ -93,7 +93,10 @@ const processQueue = async () => {
     if (error.name === "AbortError") {
       reject(error);
     } else {
-      console.error("خطا در دریافت آدرس:", error.response?.data || error.message);
+      console.error(
+        "خطا در دریافت آدرس:",
+        error.response?.data || error.message
+      );
       reject("خطا در دریافت آدرس");
     }
     isProcessingQueue = false;
@@ -106,5 +109,20 @@ export const usefetchBuildingsAddress = (latitude, longitude, signal) => {
   return new Promise((resolve, reject) => {
     requestQueue.push({ latitude, longitude, signal, resolve, reject });
     processQueue();
+  });
+};
+
+// add building
+export const useCreateBuilding = () => {
+  return useMutation({
+    mutationFn: async (data) => {
+      try {
+        const response = await api.post("/Building", data);
+        return response;
+      } catch (error) {
+        console.log("error : ", error);
+        throw error;
+      }
+    },
   });
 };

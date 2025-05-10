@@ -2,7 +2,6 @@
 import { Fragment, useState, useEffect } from "react";
 
 // ** Components
-import AddUserModal from "./AddUserModal";
 import { columns } from "./columns";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
@@ -29,6 +28,7 @@ import {
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import { getAllBuildings } from "../../../@core/Services/Api/Buildings/Buildings";
+import AddBuildingModal from "./AddBuildingModal";
 
 const statusOptions = [
   { value: "", label: "انتخاب" },
@@ -87,7 +87,7 @@ const CustomHeader = ({
               color="primary"
               onClick={handleModal}
             >
-              افزودن کاربر
+              افزودن ساختمان
             </Button>
           </div>
         </Col>
@@ -249,7 +249,7 @@ const UsersList = () => {
         </div>
       </Card>
 
-      <AddUserModal open={sidebarOpen} handleModal={handleModal} />
+      <AddBuildingModal open={sidebarOpen} handleModal={handleModal} />
     </Fragment>
   );
 };

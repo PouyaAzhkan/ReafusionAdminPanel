@@ -1,4 +1,3 @@
-import fs from 'fs'
 import * as path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -54,7 +53,10 @@ export default () => {
         { find: 'assert', replacement: 'rollup-plugin-node-polyfills/polyfills/assert' },
         { find: 'buffer', replacement: 'rollup-plugin-node-polyfills/polyfills/buffer-es6' },
         { find: 'process', replacement: 'rollup-plugin-node-polyfills/polyfills/process-es6' },
-        { find: '@components', replacement: path.resolve(__dirname, 'src/@core/components') }
+        { find: '@components', replacement: path.resolve(__dirname, 'src/@core/components') },
+        // اضافه کردن alias برای react-leaflet و leaflet
+        { find: 'react-leaflet', replacement: path.resolve(__dirname, 'node_modules/react-leaflet') },
+        { find: 'leaflet', replacement: path.resolve(__dirname, 'node_modules/leaflet') }
       ]
     },
     esbuild: {
@@ -76,9 +78,9 @@ export default () => {
           {
             name: 'load-js-files-as-jsx',
             setup(build) {
-              build.onLoad({ filter: /src\\.*\.js$/ }, async args => ({
+              build.onLoad({ filter: /src\\.*\.js$/ }, async (args) => ({
                 loader: 'jsx',
-                contents: await fs.readFileSync(args.path, 'utf8')
+                contents: await (await import('fs')).readFileSync(args.path, 'utf8')
               }))
             }
           }

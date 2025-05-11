@@ -1,4 +1,4 @@
-import { Home, Users, Circle, Book } from "react-feather";
+import { Home, Users, Circle, Book, BookOpen } from "react-feather";
 
 export default [
   {
@@ -51,6 +51,19 @@ export default [
         navLink: "/ManageWeblogCategory",
       },
       
+    ],
+  },
+  {
+    id: "Course",
+    title: "مدیریت دوره ها",
+    icon: <BookOpen size={20} />,
+    children: [
+      {
+        id: "CourseList",
+        title: "لیست دوره ها",
+        icon: <Circle size={12} />,
+        navLink: "/courses",
+      },
     ],
   },
 ];

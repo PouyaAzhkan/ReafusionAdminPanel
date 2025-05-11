@@ -1,17 +1,10 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from "react";
-
-// ** Components
 import { columns } from "./columns";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
 import { ChevronDown } from "react-feather";
-
-// ** Utils
 import { selectThemeColors } from "@utils";
-
-// ** Reactstrap Imports
 import {
   Row,
   Col,
@@ -23,12 +16,15 @@ import {
   CardTitle,
   CardHeader,
 } from "reactstrap";
-
-// ** Styles
+import { Toaster } from "react-hot-toast";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
-import { getAllBuildings } from "../../../@core/Services/Api/Buildings/Buildings";
+import {
+  getAllBuildings,
+  useChangeBuildingStatus,
+} from "../../../@core/Services/Api/Buildings/Buildings";
 import AddBuildingModal from "./AddBuildingModal";
+import EditBuildingInfo from "./EditBuildingInfo"; // ایمپورت کامپوننت جدید
 
 const statusOptions = [
   { value: "", label: "انتخاب" },
@@ -36,7 +32,6 @@ const statusOptions = [
   { value: false, label: "غیرفعال" },
 ];
 
-// ** Table Header
 const CustomHeader = ({
   data,
   handleModal,
@@ -44,8 +39,6 @@ const CustomHeader = ({
   rowsPerPage,
   handleSearch,
   searchQuery,
-  handleStatusChange,
-  currentStatus,
 }) => {
   return (
     <div className="invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75">
@@ -102,25 +95,25 @@ const UsersList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState(null); // اضافه کردن state برای ساختمان انتخاب‌شده
   const [currentStatus, setCurrentStatus] = useState({
     value: "",
     label: "انتخاب",
   });
 
-  // Debounce search with useEffect
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // بازگشت به صفحه اول
+      setCurrentPage(1);
     }, 1000);
 
-    return () => clearTimeout(timer); // پاکسازی تایمر
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch data
   const { data, isError, isLoading, refetch } = getAllBuildings();
+  const { mutate: changeBuildingStatus } = useChangeBuildingStatus({});
 
-  // Filter data based on search and status
   const filteredData =
     data?.filter((item) => {
       const matchesSearch = debouncedSearch
@@ -130,13 +123,10 @@ const UsersList = () => {
             .includes(debouncedSearch.toLowerCase())
         : true;
       const matchesStatus =
-        currentStatus.value !== ""
-          ? item.active === currentStatus.value // اصلاح شده
-          : true;
+        currentStatus.value !== "" ? item.active === currentStatus.value : true;
       return matchesSearch && matchesStatus;
     }) || [];
 
-  // Paginate filtered data
   const totalRows = filteredData.length;
   const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -152,7 +142,7 @@ const UsersList = () => {
   const handlePerPage = (e) => {
     const newRowsPerPage = parseInt(e.target.value);
     setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1); // بازگشت به صفحه اول
+    setCurrentPage(1);
   };
 
   const handleSearch = (val) => {
@@ -161,10 +151,13 @@ const UsersList = () => {
 
   const handleStatusChange = (option) => {
     setCurrentStatus(option);
-    setCurrentPage(1); // بازگشت به صفحه اول
+    setCurrentPage(1);
   };
 
-  // Pagination component
+  const handleBuildingUpdated = (updatedBuilding) => {
+    refetch(); // به‌روزرسانی داده‌ها پس از ویرایش
+  };
+
   const CustomPagination = () => {
     return (
       <ReactPaginate
@@ -189,10 +182,11 @@ const UsersList = () => {
   };
 
   if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (isError) return <div>خطا در بارگذاری کاربران.</div>;
+  if (isError) return <div>خطا در بارگذاری ساختمان‌ها.</div>;
 
   return (
     <Fragment>
+      <Toaster position="top-right" reverseOrder={false} />
       <Card>
         <CardHeader>
           <CardTitle tag="h4">فیلترها</CardTitle>
@@ -208,10 +202,7 @@ const UsersList = () => {
                 classNamePrefix="select"
                 options={statusOptions}
                 value={currentStatus}
-                onChange={(data) => {
-                  setCurrentStatus(data);
-                  setCurrentPage(1); // بازگشت به صفحه اول
-                }}
+                onChange={handleStatusChange}
               />
             </Col>
           </Row>
@@ -227,12 +218,12 @@ const UsersList = () => {
             pagination
             responsive
             paginationServer
-            columns={columns()}
+            columns={columns({ changeBuildingStatus, refetch, setShowEditModal, setSelectedBuilding })}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
             className="react-dataTable"
             paginationComponent={CustomPagination}
-            data={paginatedData} // استفاده از داده‌های صفحه‌بندی‌شده
+            data={paginatedData}
             subHeaderComponent={
               <CustomHeader
                 data={data}
@@ -241,8 +232,6 @@ const UsersList = () => {
                 handleSearch={handleSearch}
                 handlePerPage={handlePerPage}
                 handleModal={handleModal}
-                handleStatusChange={handleStatusChange}
-                currentStatus={currentStatus}
               />
             }
           />
@@ -250,6 +239,13 @@ const UsersList = () => {
       </Card>
 
       <AddBuildingModal open={sidebarOpen} handleModal={handleModal} />
+
+      <EditBuildingInfo
+        showEditModal={showEditModal}
+        setShowEditModal={setShowEditModal}
+        selectedBuilding={selectedBuilding}
+        onBuildingUpdated={handleBuildingUpdated}
+      />
     </Fragment>
   );
 };

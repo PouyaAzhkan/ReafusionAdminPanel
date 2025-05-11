@@ -18,7 +18,7 @@ export const getAllBuildings = () => {
   });
 };
 
-// fetch address
+// ********************** address ************************
 
 // کش برای ذخیره آدرس‌ها
 const addressCache = {};
@@ -68,7 +68,11 @@ const processQueue = async () => {
       latitude === "0" ||
       longitude === "0" ||
       isNaN(latitude) ||
-      isNaN(longitude)
+      isNaN(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
     ) {
       resolve("مختصات نامعتبر");
       isProcessingQueue = false;
@@ -76,8 +80,9 @@ const processQueue = async () => {
       return;
     }
 
+    const apiKey = "bdc_056320c0b384432c820a84a768784b09"; // کلید API خود را اینجا قرار دهید
     const response = await axios.get(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fa`,
+      `https://api.bigdatacloud.net/data/reverse-geocode?latitude=${latitude}&longitude=${longitude}&localityLanguage=fa&key=${apiKey}`,
       { signal }
     );
 
@@ -97,7 +102,13 @@ const processQueue = async () => {
         "خطا در دریافت آدرس:",
         error.response?.data || error.message
       );
-      reject("خطا در دریافت آدرس");
+      let errorMessage = "خطا در دریافت آدرس";
+      if (error.response?.status === 401) {
+        errorMessage = "کلید API نامعتبر است";
+      } else if (error.response?.status === 429) {
+        errorMessage = "محدودیت تعداد درخواست‌ها";
+      }
+      reject(errorMessage);
     }
     isProcessingQueue = false;
     processQueue();
@@ -112,6 +123,8 @@ export const usefetchBuildingsAddress = (latitude, longitude, signal) => {
   });
 };
 
+// ********************** address end *********************
+
 // add building
 export const useCreateBuilding = () => {
   return useMutation({
@@ -121,6 +134,55 @@ export const useCreateBuilding = () => {
         return response;
       } catch (error) {
         console.log("error : ", error);
+        throw error;
+      }
+    },
+  });
+};
+
+// active or deactive building
+export const useChangeBuildingStatus = () => {
+  return useMutation({
+    mutationFn: async ({ id, active }) => {
+      try {
+        const response = await api.put("/Building/Active", {
+          id,
+          active,
+        });
+        return response.data;
+      } catch (error) {
+        console.error("خطا در تغییر وضعیت:", error);
+        throw error;
+      }
+    },
+  });
+};
+
+// edit building
+export const useEditBuilding = () => {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      buildingName,
+      workDate,
+      floor,
+      latitude,
+      longitude,
+      active,
+    }) => {
+      try {
+        const response = await api.put("/Building", {
+          id,
+          buildingName,
+          workDate,
+          floor,
+          latitude,
+          longitude,
+          active,
+        });
+        return response.data;
+      } catch (error) {
+        console.error("خطا در تغییر وضعیت:", error);
         throw error;
       }
     },

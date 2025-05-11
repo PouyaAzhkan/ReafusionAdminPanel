@@ -1,4 +1,4 @@
-import { Archive, FileText, MoreVertical, Trash2 } from "react-feather";
+import { Archive, CheckSquare, MoreVertical, XSquare } from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,
@@ -7,27 +7,11 @@ import {
   DropdownToggle,
   UncontrolledDropdown,
 } from "reactstrap";
-import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
 import { usefetchBuildingsAddress } from "../../../@core/Services/Api/Buildings/Buildings";
 import { useEffect, useState, useRef } from "react";
+import toast from "react-hot-toast";
 
-// استایل برای نمایش آدرس
-const addressStyle = {
-  whiteSpace: "normal",
-  wordBreak: "break-word",
-  lineHeight: "1.5", // فاصله خطوط برای خوانایی بهتر
-  fontSize: "14px", // اندازه فونت مشابه تصویر
-};
-
-const renderRole = (row) => {
-  return (
-    <div className="text-capitalize text-truncate">
-      {row.userRoles || "بدون نقش"}
-    </div>
-  );
-};
-
-export const columns = () => [
+export const columns = ({ changeBuildingStatus, refetch, setShowEditModal, setSelectedBuilding }) => [
   {
     name: "آیدی",
     sortable: true,
@@ -40,11 +24,11 @@ export const columns = () => [
     name: "نام ساختمان",
     sortable: true,
     width: "220px",
-    sortField: "fname",
+    sortField: "buildingName",
     selector: (row) => row.buildingName,
     cell: (row) => (
       <Link
-        to={`/users/view/${row.id}`}
+        to={`/buildings/view/${row.id}`}
         className="user_name text-truncate text-body"
       >
         <span className="fw-bolder">{row.buildingName || "بدون نام"}</span>
@@ -86,7 +70,7 @@ export const columns = () => [
   {
     name: "آدرس",
     sortable: false,
-    width: "350px", // افزایش عرض ستون برای نمایش بهتر آدرس
+    width: "350px",
     cell: (row) => {
       const [address, setAddress] = useState("در حال بارگذاری...");
       const [isLoading, setIsLoading] = useState(true);
@@ -127,7 +111,7 @@ export const columns = () => [
       }, [row.latitude, row.longitude]);
 
       return (
-        <span className="text-truncate" style={addressStyle}>
+        <span className="text-truncate">
           {isLoading ? "در حال بارگذاری..." : address}
         </span>
       );
@@ -146,12 +130,46 @@ export const columns = () => [
             <DropdownItem
               tag="span"
               className="w-100"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedBuilding(row); // تنظیم ساختمان انتخاب‌شده
+                setShowEditModal(true); // باز کردن مودال
+              }}
             >
-              <Link to={`/users/view/${row.id}`}>
-                <Archive size={14} className="me-50" />
-                <span className="align-middle">ویرایش</span>
-              </Link>
+              <Archive size={14} className="me-50" />
+              <span className="align-middle">ویرایش</span>
+            </DropdownItem>
+            <DropdownItem
+              tag="span"
+              className="w-100"
+              onClick={(e) => {
+                e.preventDefault();
+                changeBuildingStatus(
+                  { id: row.id, active: !row.active },
+                  {
+                    onSuccess: () => {
+                      toast.success("وضعیت با موفقیت تغییر کرد");
+                      refetch();
+                    },
+                    onError: (error) => {
+                      toast.error("خطا در تغییر وضعیت");
+                      console.error("خطا در تغییر وضعیت:", error);
+                    },
+                  }
+                );
+              }}
+            >
+              {row.active ? (
+                <>
+                  <XSquare size={14} className="me-50" />
+                  <span className="align-middle">غیرفعال</span>
+                </>
+              ) : (
+                <>
+                  <CheckSquare size={14} className="me-50" />
+                  <span className="align-middle">فعال</span>
+                </>
+              )}
             </DropdownItem>
           </DropdownMenu>
         </UncontrolledDropdown>

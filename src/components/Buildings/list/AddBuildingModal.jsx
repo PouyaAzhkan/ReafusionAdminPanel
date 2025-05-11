@@ -246,21 +246,6 @@ const AddBuildingModal = ({ open, handleModal }) => {
         </div>
 
         <div className='mb-1'>
-          <Label className='form-label'>
-            انتخاب لوکیشن <span className='text-danger'>*</span>
-          </Label>
-          <div ref={containerRef} style={{ height: '300px', width: '100%' }}>
-            {isClient && open && position && (
-              <MapComponent
-                position={position}
-                setPosition={setPosition}
-                setForm={setForm}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className='mb-1'>
           <Label className='form-label' for='latitude'>
             عرض جغرافیایی <span className='text-danger'>*</span>
           </Label>
@@ -294,6 +279,21 @@ const AddBuildingModal = ({ open, handleModal }) => {
               readOnly
             />
           </InputGroup>
+        </div>
+
+        <div className='mb-1'>
+          <Label className='form-label'>
+            انتخاب لوکیشن <span className='text-danger'>*</span>
+          </Label>
+          <div ref={containerRef} style={{ height: '300px', width: '100%' }}>
+            {isClient && open && position && (
+              <MapComponent
+                position={position}
+                setPosition={setPosition}
+                setForm={setForm}
+              />
+            )}
+          </div>
         </div>
 
         <Button className='me-1' color='primary' onClick={handleSubmit} disabled={isLoading}>

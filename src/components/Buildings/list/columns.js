@@ -11,7 +11,12 @@ import { usefetchBuildingsAddress } from "../../../@core/Services/Api/Buildings/
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 
-export const columns = ({ changeBuildingStatus, refetch, setShowEditModal, setSelectedBuilding }) => [
+export const columns = ({
+  changeBuildingStatus,
+  refetch,
+  setShowEditModal,
+  setSelectedBuilding,
+}) => [
   {
     name: "آیدی",
     sortable: true,
@@ -27,12 +32,7 @@ export const columns = ({ changeBuildingStatus, refetch, setShowEditModal, setSe
     sortField: "buildingName",
     selector: (row) => row.buildingName,
     cell: (row) => (
-      <Link
-        to={`/buildings/view/${row.id}`}
-        className="user_name text-truncate text-body"
-      >
-        <span className="fw-bolder">{row.buildingName || "بدون نام"}</span>
-      </Link>
+      <span className="fw-bolder">{row.buildingName || "بدون نام"}</span>
     ),
   },
   {

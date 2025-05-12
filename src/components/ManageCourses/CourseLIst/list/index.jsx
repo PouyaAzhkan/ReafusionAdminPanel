@@ -1,4 +1,5 @@
 import React, { useRef, useState, useMemo } from "react";
+import '../../../../assets/scss/PanelResponsive/CoursesPages.scss'
 import Tabs from "./Tabs";
 import Select from "react-select";
 import { Row, Col, Input, TabContent, TabPane } from "reactstrap";
@@ -8,42 +9,40 @@ import StatsHorizontal from "../../../../@core/components/widgets/stats/StatsHor
 import { Activity, Book, Clock, X } from "react-feather";
 import CourseReserve from "./tabs/CourseReserve";
 import PaymentOfCourses from "./tabs/PaymentOfCourses";
-import GetTeacherCourses from "../../../../@core/Services/Api/Courses/GetTeacherCourses";
-import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/ActiveDectiveCourses";
-import GetCourses from "../../../../@core/Services/Api/Courses/GetCourses";
+import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
+import GetCourses from "../../../../@core/Services/Api/Courses/CourseList/GetCourses";
+import GetTeacherCourses from "../../../../@core/Services/Api/Courses/CourseList/GetTeacherCourses";
 
 const Courses = () => {
   const [activeView, setActiveView] = useState("flex");
   const [activeTab, setActiveTab] = useState("1");
-  const [sortType, setSortType] = useState(""); // مرتب‌سازی بر اساس رزرو/جدیدترین
-  const [priceSort, setPriceSort] = useState(""); // مرتب‌سازی بر اساس قیمت
+  const [sortType, setSortType] = useState("");
+  const [priceSort, setPriceSort] = useState("");
   const ref = useRef();
   const [params, setParams] = useState({
     PageNumber: 1,
-    RowsOfPage: 12,
+    RowsOfPage: 12, // Explicitly set to 12
     SortingCol: "DESC",
     SortType: "Expire",
     Query: "",
   });
 
-  // دریافت داده‌ها با استفاده از GetCourses
+  // Fetch courses and teacher courses
   const { data: GetCourse, isLoading: GetCourseLoading, error: GetCourseError, refetch } = GetCourses(params);
   const { data: GetTeacherCourse, isLoading: GetTeacherCourseLoading, error: GetTeacherCourseError } = GetTeacherCourses();
+
+  // Debugging logs
+  console.log("API Params:", params);
+  console.log("API Response Length:", GetCourse?.courseDtos?.length);
+  console.log("Total Count:", GetCourse?.totalCount);
 
   const toggleTab = (tab) => {
     setActiveTab(tab);
   };
 
-  // مدیریت جستجو
+  // Handle search query with debounce
   const handleSearchQuery = (query) => {
     setParams((prev) => ({ ...prev, Query: query, PageNumber: 1 }));
-    refetch();
-  };
-
-  // مدیریت تعداد ردیف‌ها در صفحه
-  const handleRowsChange = (rows) => {
-    console.log("Rows Per Page:", rows);
-    setParams((prev) => ({ ...prev, RowsOfPage: rows, PageNumber: 1 }));
     refetch();
   };
 
@@ -55,7 +54,18 @@ const Courses = () => {
     ref.current = timeOut;
   };
 
-  // مدیریت تغییر صفحه
+  // Handle rows per page change
+  const handleRowsChange = (rows) => {
+    console.log("Rows Per Page:", rows);
+    setParams((prev) => {
+      const newParams = { ...prev, RowsOfPage: Number(rows), PageNumber: 1 };
+      console.log("Updated Params:", newParams);
+      return newParams;
+    });
+    refetch();
+  };
+
+  // Handle pagination
   const handlePagination = (page) => {
     const newPageNumber = page.selected + 1;
     console.log("New Page Number:", newPageNumber);
@@ -63,6 +73,7 @@ const Courses = () => {
     refetch();
   };
 
+  // Handle course activation/deactivation
   const activeOrDeActive = async (boolean, id) => {
     try {
       const data = { active: boolean, id };
@@ -72,9 +83,10 @@ const Courses = () => {
     }
   };
 
-  // مرتب‌سازی داده‌ها با useMemo برای بهینه‌سازی
+  // Sort course data with useMemo for performance
   const sortedCourseData = useMemo(() => {
     let data = [...(GetCourse?.courseDtos || [])];
+    console.log("Sorted Course Data Length:", data.length);
     if (sortType === "reserveCount") {
       data.sort((a, b) => b.reserveCount - a.reserveCount);
     } else if (sortType === "nearest") {
@@ -88,7 +100,7 @@ const Courses = () => {
     return data;
   }, [GetCourse?.courseDtos, sortType, priceSort]);
 
-  // مدیریت لودینگ و خطاها
+  // Handle loading and error states
   if (GetCourseLoading || GetTeacherCourseLoading) {
     return <div className="text-center">در حال بارگذاری...</div>;
   }
@@ -97,6 +109,7 @@ const Courses = () => {
     return <div className="text-center text-danger">خطا در بارگذاری داده‌ها</div>;
   }
 
+  // Calculate stats
   const CourseCount = GetCourse?.courseDtos || [];
   const expiredCount = CourseCount.filter((course) => course.isdelete === true).length;
   const ActiveData = CourseCount.filter((course) => course.isActive === true).length;
@@ -104,13 +117,13 @@ const Courses = () => {
 
   return (
     <div className="courses-container d-flex gap-2">
-      <div className="w-25">
+      <div className="courseStatus w-25">
         <StatsHorizontal icon={<Book size={21} />} color="primary" stats={GetCourse?.totalCount || 0} statTitle="مجموع تمام دوره‌ها" />
         <StatsHorizontal icon={<Activity size={21} />} color="success" stats={ActiveData} statTitle="دوره‌های فعال" />
         <StatsHorizontal icon={<Clock size={20} />} color="warning" stats={ExpireData} statTitle="دوره‌های غیرفعال" />
         <StatsHorizontal icon={<X size={20} />} color="danger" stats={expiredCount} statTitle="دوره‌های حذف‌شده" />
       </div>
-      <div className="w-75">
+      <div className="courseList w-75">
         <Tabs className="mb-2" activeTab={activeTab} toggleTab={toggleTab} />
         <TabContent activeTab={activeTab}>
           <TabPane tabId="1">
@@ -235,7 +248,7 @@ const Courses = () => {
             <div className="d-flex gap-1 align-items-center mt-2">
               <Input type="text" onChange={handleSetSearch} placeholder="جستجو در دوره‌ها" />
             </div>
-            <CourseCard activeView={activeView} item={GetTeacherCourse?.teacherCourseDtos || []} />
+            <CourseCard className='courseCard' activeView={activeView} item={GetTeacherCourse?.teacherCourseDtos || []} />
             <CustomPagination
               total={GetTeacherCourse?.totalCount || 0}
               rowsPerPage={params.RowsOfPage}

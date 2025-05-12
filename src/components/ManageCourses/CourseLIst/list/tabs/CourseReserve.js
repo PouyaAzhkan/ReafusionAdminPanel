@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { CourseTableTitles } from "../../../../../@core/constants/courses";
 import HeaderTable from "../../../../../@core/components/header-table/HeaderTable";
 import CustomPagination from "../../../../../@core/components/pagination";
-import GetReservedCourses from "../../../../../@core/Services/Api/Courses/GetReserveCourses";
+import GetReservedCourses from "../../../../../@core/Services/Api/Courses/CourseList/GetReserveCourses";
 
 // **start
 const CourseReserve = () => {
@@ -35,10 +35,10 @@ const CourseReserve = () => {
   };
 
   return (
-    <>
+    <div style={{ overflowX: "auto" }}>
       <Table hover>
         <HeaderTable titles={CourseTableTitles} />
-        <tbody style={{ overflowX: "auto" }}>
+        <tbody>
           {coursesState &&
             coursesState.slice(itemOffset, endOffset)?.map((item, index) => {
               return (
@@ -56,7 +56,7 @@ const CourseReserve = () => {
                     )}
                   </td>
                   <td>
-                    <Link to={"/courses/view/" + item.courseId} state={{ tab: "3" }} > 
+                    <Link to={"/courses/" + item.courseId} state={{ tab: "3" }} > 
                        <Button color="primary">جزئیات</Button>
                     </Link>
                   </td>
@@ -71,7 +71,7 @@ const CourseReserve = () => {
         rowsPerPage={RowsOfPage}
         handleClickFunc={handleWithOutDispatch}
       />
-    </>
+    </div>
   );
 };
 

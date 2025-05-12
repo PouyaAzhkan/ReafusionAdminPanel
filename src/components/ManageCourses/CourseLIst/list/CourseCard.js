@@ -11,7 +11,7 @@ const CourseCard = ({ activeView, item, handleActiveOrDetective }) => {
   const renderProducts = () => (
     <Row className="mt-2">
       {item.map((item, index) => (
-        <Col key={index} md="4" sm="6" xs="12" className="d-flex">
+        <Col key={index} md="4" sm="6" xs="12" className="d-flex justify-content-center align-items-center">
           <Card className="ecommerce-card d-flex flex-column w-100">
             <ChangeStatusButton
               handleActiveOrDetective={handleActiveOrDetective}

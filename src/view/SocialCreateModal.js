@@ -93,12 +93,6 @@ const SocialModal = ({ setShowModal, showModal, refetchGroup, groupId, variant, 
     });
   };
 
-  // بررسی مقدار نامعتبر variant
-  if (!["edit", "add"].includes(variant)) {
-    console.error("Invalid variant value:", variant);
-    return <div>خطا: مقدار variant نامعتبر است</div>;
-  }
-
   return (
     <div className="vertically-centered-modal">
       <Modal

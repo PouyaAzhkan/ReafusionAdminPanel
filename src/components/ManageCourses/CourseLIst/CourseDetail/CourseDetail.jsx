@@ -9,9 +9,9 @@ import ModalBasic from "./ModalBasic";
 import useGetCourseDetailInfo from "../../../../@core/Services/Api/Courses/CourseDetail/GetDetailInfo";
 import EditCourse from "./EditCourse";
 import GetCreateCourse from "../../../../@core/Services/Api/Courses/CourseDetail/GetCreateCourse";
-import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/ActiveDectiveCourses";
 import GetCourseGroup from "../../../../@core/Services/Api/Courses/CourseDetail/GetCourseGroup";
 import ChangeUserReserve from "../../../../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageUser/ChangeUserReserve";
+import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
 
 const CourseDetail = () => {
   const { id } = useParams();

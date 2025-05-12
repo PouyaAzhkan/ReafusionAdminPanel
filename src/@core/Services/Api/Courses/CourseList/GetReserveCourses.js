@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import Api from '../../../../@core/Services/interceptor'
+import Api from '../../../../../@core/Services/interceptor'
 
 const GetReservedCourses = () => {
    return useQuery({

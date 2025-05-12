@@ -1,6 +1,6 @@
 import { Modal, ModalHeader, ModalBody, Button } from "reactstrap";
-import useAcceptCoursePayment from "../../../../../@core/Services/Api/Courses/AcceptCoursePayment";
-import useDeleteCoursePayment from "../../../../../@core/Services/Api/Courses/DeleteCoursePayment";
+import useAcceptCoursePayment from "../../../../../@core/Services/Api/Courses/CourseList/AcceptCoursePayment";
+import useDeleteCoursePayment from "../../../../../@core/Services/Api/Courses/CourseList/DeleteCoursePayment";
 
 const AcceptPaymentModal = ({
   showModal,

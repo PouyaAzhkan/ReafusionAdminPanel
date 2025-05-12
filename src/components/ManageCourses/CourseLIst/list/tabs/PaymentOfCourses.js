@@ -7,7 +7,7 @@ import HeaderTable from "../../../../../@core/components/header-table/HeaderTabl
 import { PaymentCoursesTableTitles } from "../../../../../@core/constants/courses";
 import AcceptPaymentModal from "./AcceptPaymentModal";
 import CustomPagination from "../../../../../@core/components/pagination";
-import GetAllCoursePayment from "../../../../../@core/Services/Api/Courses/GetAllCoursePayment";
+import GetAllCoursePayment from "../../../../../@core/Services/Api/Courses/CourseList/GetAllCoursePayment";
 
 const PaymentOfCourses = ({ courseId }) => {
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ const PaymentOfCourses = ({ courseId }) => {
                   <span className="align-middle fw-bold">{item.studentName}</span>
                 </td>
                 <td
-                  onClick={() => navigate(`/courses/view/${item.courseId}`)}
+                  onClick={() => navigate(`/courses/${item.courseId}`)}
                   style={{ cursor: "pointer" }}
                 >
                   {item.title}

@@ -19,7 +19,7 @@ const TableItems = ({ toggle, setAccId, item }) => {
           setAccId(item.id);
           toggle();
         }}
-        className="px-0"
+        className="px-0 text-primary"
         style={{ width: "100px" }}
       >
         <Edit size={17} className="mx-75" />

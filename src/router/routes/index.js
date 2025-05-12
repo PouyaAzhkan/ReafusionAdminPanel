@@ -17,6 +17,7 @@ import AddWeblog from "../../components/ManegeWeblog&News/AddWeblog";
 import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblogCategory/ManageWeblogCategory";
 import Courses from "../../components/ManageCourses/CourseLIst/list";
 import CourseDetail from "../../components/ManageCourses/CourseLIst/CourseDetail/CourseDetail";
+import AddCourse from "../../components/ManageCourses/AddCourse/AddCourse";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -138,6 +139,10 @@ const Routes = [
   {
     path: "/courses/:id",
     element: <CourseDetail />,
+  },
+    {
+    path: "/AddCourse",
+    element: <AddCourse />,
   },
 ];
 

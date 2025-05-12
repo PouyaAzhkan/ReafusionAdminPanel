@@ -16,7 +16,6 @@ import {
   CardTitle,
   CardHeader,
 } from "reactstrap";
-import { Toaster } from "react-hot-toast";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import {
@@ -186,7 +185,6 @@ const UsersList = () => {
 
   return (
     <Fragment>
-      <Toaster position="top-right" reverseOrder={false} />
       <Card>
         <CardHeader>
           <CardTitle tag="h4">فیلترها</CardTitle>
@@ -218,7 +216,12 @@ const UsersList = () => {
             pagination
             responsive
             paginationServer
-            columns={columns({ changeBuildingStatus, refetch, setShowEditModal, setSelectedBuilding })}
+            columns={columns({
+              changeBuildingStatus,
+              refetch,
+              setShowEditModal,
+              setSelectedBuilding,
+            })}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
             className="react-dataTable"

@@ -1,4 +1,4 @@
-import { Archive, CheckSquare, MoreVertical, XSquare } from "react-feather";
+import { Archive, CheckSquare, Edit, MoreVertical, XSquare } from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,
@@ -126,7 +126,7 @@ export const columns = ({
           <DropdownToggle tag="div" className="btn btn-sm">
             <MoreVertical size={14} className="cursor-pointer" />
           </DropdownToggle>
-          <DropdownMenu>
+          <DropdownMenu container="body">
             <DropdownItem
               tag="span"
               className="w-100"
@@ -136,7 +136,7 @@ export const columns = ({
                 setShowEditModal(true); // باز کردن مودال
               }}
             >
-              <Archive size={14} className="me-50" />
+              <Edit size={14} className="me-50" />
               <span className="align-middle">ویرایش</span>
             </DropdownItem>
             <DropdownItem

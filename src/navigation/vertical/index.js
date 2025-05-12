@@ -5,6 +5,7 @@ import {
   Book,
   MessageSquare,
   Trello,
+  Calendar,
 } from "react-feather";
 
 export default [
@@ -66,9 +67,35 @@ export default [
     navLink: "/comments",
   },
   {
-    id: "buildings",
+    id: "buildingsManage",
     title: "مدیریت ساختمان ها",
     icon: <Trello size={20} />,
     navLink: "/buildings",
+  },
+  {
+    id: "schedualManage",
+    title: "مدیریت بازه های زمانی",
+    icon: <Calendar size={20} />,
+    // navLink: "/sample",
+    children: [
+      {
+        id: "adminSchedual",
+        title: "ادمین",
+        icon: <Circle size={12} />,
+        navLink: "/adminSchedual",
+      },
+      {
+        id: "teacherSchedual",
+        title: "استاد",
+        icon: <Circle size={12} />,
+        navLink: "/teacherSchedual",
+      },
+      {
+        id: "studentSchedual",
+        title: "دانشجو",
+        icon: <Circle size={12} />,
+        navLink: "/studentSchedual",
+      },
+    ],
   },
 ];

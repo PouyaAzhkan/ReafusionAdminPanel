@@ -1,4 +1,4 @@
-import { Archive, FileText, MoreVertical, Trash2 } from "react-feather";
+import { Archive, Edit, FileText, MoreVertical, Trash2 } from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,
@@ -116,14 +116,14 @@ export const columns = (setDeleteModal, setUserToDelete) => [
           <DropdownToggle tag="div" className="btn btn-sm">
             <MoreVertical size={14} className="cursor-pointer" />
           </DropdownToggle>
-          <DropdownMenu>
+          <DropdownMenu container="body">
             <DropdownItem
               tag="span"
               className="w-100"
               onClick={(e) => e.preventDefault()}
             >
               <Link to={`/users/view/${row.id}`}>
-                <Archive size={14} className="me-50" />
+                <Edit size={14} className="me-50" />
                 <span className="align-middle">ویرایش</span>
               </Link>
             </DropdownItem>

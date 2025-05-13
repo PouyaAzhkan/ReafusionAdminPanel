@@ -18,6 +18,8 @@ import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblo
 import Courses from "../../components/ManageCourses/CourseLIst/list";
 import CourseDetail from "../../components/ManageCourses/CourseLIst/CourseDetail/CourseDetail";
 import AddCourse from "../../components/ManageCourses/AddCourse/AddCourse";
+import AllBuildingList from "../../components/Buildings/list/AllBuildingList";
+import AllCommentList from "../../components/CommentManage/list/AllCommentList";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -144,9 +146,17 @@ const Routes = [
     path: "/courses/:id",
     element: <CourseDetail />,
   },
-    {
+  {
     path: "/AddCourse",
     element: <AddCourse />,
+  },
+  {
+    path: "/buildings",
+    element: <AllBuildingList />,
+  },
+  {
+    path: "/comments",
+    element: <AllCommentList />,
   },
 ];
 

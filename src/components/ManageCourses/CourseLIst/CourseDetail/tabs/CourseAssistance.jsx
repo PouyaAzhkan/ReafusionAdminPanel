@@ -10,9 +10,19 @@ const CourseAssistance = ({ id }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [accId, setAccId] = useState("");
 
-  const { data: details, isLoading: detailsLoading, error: detailsError, isSuccess, isRefetching, refetch } = GetAssistanceDetail(accId)
-  const { data: assistance, isLoading: assistanceLoading, error: assistancError } = GetCourseAssistance()
-
+  const {
+    data: details,
+    isLoading: detailsLoading,
+    error: detailsError,
+    isSuccess: detailsSuccess,
+    isRefetching,
+    refetch,
+  } = GetAssistanceDetail(accId);
+  const {
+    data: assistance,
+    isLoading: assistanceLoading,
+    error: assistanceError, // Fixed typo
+  } = GetCourseAssistance();
 
   // Edit Modal
   const [editModal, setEditModal] = useState(false);
@@ -23,18 +33,31 @@ const CourseAssistance = ({ id }) => {
   const toggleCreateModal = () => setCreateModal(!createModal);
 
   useEffect(() => {
-    if (isSuccess) {
+    // Only filter if assistance is defined and is an array
+    if (assistance && Array.isArray(assistance)) {
       setFilteredData(assistance.filter((ev) => ev.courseId === id));
+    } else {
+      setFilteredData([]); // Ensure filteredData is always an array
     }
-  }, [isSuccess, id, isRefetching]);
+  }, [assistance, id]); // Removed isSuccess and isRefetching from dependencies
 
-    if (detailsError || assistanceLoading) return <p>در حال بارگزاری اطلاعات</p>
-  if (detailsLoading || assistancError) return <p>خطا در بارگزاری اطلاعات</p>
+  // Comprehensive loading and error handling
+  if (assistanceLoading || detailsLoading) {
+    return <p>در حال بارگذاری اطلاعات...</p>;
+  }
+
+  if (assistanceError || detailsError) {
+    return <p>خطا در بارگذاری اطلاعات: {assistanceError?.message || detailsError?.message}</p>;
+  }
+
+  if (!assistance) {
+    return <p>داده‌ای برای نمایش وجود ندارد</p>;
+  }
 
   return (
     <Fragment>
       <div className="divider divider-start d-flex justify-content-between">
-        <div className="divider-text fs-2">منتور ها</div>
+        <div className="divider-text fs-2">منتورها</div>
         <Button color="primary" onClick={toggleCreateModal} style={{ zIndex: "10" }}>
           افزودن منتور
         </Button>
@@ -50,7 +73,7 @@ const CourseAssistance = ({ id }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.length > 0 &&
+              {filteredData.length > 0 ? (
                 filteredData.map((item, index) => (
                   <TableItems
                     key={index}
@@ -58,14 +81,16 @@ const CourseAssistance = ({ id }) => {
                     toggle={toggleEditModal}
                     item={item}
                   />
-                ))}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={CourseAssistanceTable.length} className="text-center py-5">
+                    منتوری برای این دوره وجود ندارد
+                  </td>
+                </tr>
+              )}
             </tbody>
           </Table>
-          {filteredData.length == 0 && (
-            <span className="w-100 text-center d-block my-5">
-              منتوری برای این دوره وجود ندارد
-            </span>
-          )}
         </div>
       </Card>
       <ModalAssistance
@@ -74,7 +99,7 @@ const CourseAssistance = ({ id }) => {
         data={details?.courseAssistanceDto}
         refetch={refetch}
         courseId={id}
-        section={"update"}
+        section="update"
       />
       <ModalAssistance
         isOpen={createModal}
@@ -82,7 +107,7 @@ const CourseAssistance = ({ id }) => {
         data={{ userId: "", courseId: "" }}
         refetch={refetch}
         courseId={id}
-        section={"create"}
+        section="create"
       />
     </Fragment>
   );

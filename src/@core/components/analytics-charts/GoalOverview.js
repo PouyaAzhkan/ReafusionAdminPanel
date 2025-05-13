@@ -77,7 +77,7 @@ const GoalOverview = ({topic, data1, data2, title2, title1, dataPersent}) => {
         <CardTitle tag="h4">{topic}</CardTitle>
       </CardHeader>
       <CardBody style={{ height: '245px' }}>
-        <Chart options={options} series={series} type="radialBar" height={245} />
+        <Chart options={options} series={series} type="radialBar" height={300} />
       </CardBody>
       <Row className="border-top text-center mx-0">
         <Col xs="6" className="border-end py-1">

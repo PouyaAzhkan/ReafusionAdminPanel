@@ -111,7 +111,7 @@ const Report = () => {
                 />
             </Col>
             {/* refree */}
-            <Col lg="3" sm="6">
+            <Col lg="4" sm="6">
                 <StatsHorizontal
                     color="danger"
                     statTitle="داور ها"
@@ -122,7 +122,7 @@ const Report = () => {
                 />
             </Col>
             {/* tournament Mentor */}
-            <Col lg="3" sm="6">
+            <Col lg="4" sm="6">
                 <StatsHorizontal
                     color="success"
                     statTitle="منتور مسابقات"
@@ -133,7 +133,7 @@ const Report = () => {
                 />
             </Col>
             {/* support */}
-            <Col lg="3" sm="6">
+            <Col lg="4" sm="6">
                 <StatsHorizontal
                     color="success"
                     statTitle="پشتیبان ها"

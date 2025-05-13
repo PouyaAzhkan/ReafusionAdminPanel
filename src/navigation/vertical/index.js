@@ -1,4 +1,3 @@
-import { Home, Users, Circle, Book, BookOpen,  MessageSquare, Trello, } from "react-feather";
 import {
   Home,
   Users,
@@ -7,6 +6,7 @@ import {
   MessageSquare,
   Trello,
   Calendar,
+  BookOpen,
 } from "react-feather";
 
 export default [

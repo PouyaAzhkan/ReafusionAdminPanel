@@ -3,13 +3,13 @@ import Api from "../../../../../@core/Services/interceptor";
 
 const GetCourseGroup = (id, teacherId) => {
   return useQuery({
-     queryKey: ['GetCourseGroup', id, teacherId],
-     queryFn: async () => {
-       const response = await Api.get(`/CourseGroup/GetCourseGroup?TeacherId=${teacherId}&CourseId=${id}`);
-       
-       return response 
-     }
-  })
-}
+    queryKey: ["GetCourseGroup", id, teacherId],
+    queryFn: async () => {
+      const response = await Api.get(`/CourseGroup/GetCourseGroup?TeacherId=${teacherId}&CourseId=${id}`);
+      return response;
+    },
+    enabled: !!id && !!teacherId, // فقط زمانی اجرا شود که هر دو مقدار معتبر باشند
+  });
+};
 
-export default GetCourseGroup
+export default GetCourseGroup;

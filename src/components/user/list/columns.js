@@ -99,11 +99,8 @@ export const columns = (setDeleteModal, setUserToDelete) => [
     sortField: "active",
     selector: (row) => row.active,
     cell: (row) => (
-      <Badge
-        color={row.active === "True" ? "light-success" : "light-danger"}
-        pill
-      >
-        {row.active === "True" ? "فعال" : "غیرفعال"}
+      <Badge color={row.active ? "light-success" : "light-danger"} pill>
+        {row.active ? "فعال" : "غیرفعال"}
       </Badge>
     ),
   },

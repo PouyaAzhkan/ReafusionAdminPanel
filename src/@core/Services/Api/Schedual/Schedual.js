@@ -60,14 +60,31 @@ export const useAddNewSchedule = (currentCurseId, scheduleData) => {
   return useMutation({
     mutationFn: async () => {
       try {
+        if (!currentCurseId) {
+          throw new Error("currentCurseId is required");
+        }
         const response = await api.post(
-          `/Schedual/AddSchedualAutomatic?currentCurseId=${currentCurseId}`,
-          scheduleData // آرایه‌ای از اشیاء که در بدنه درخواست ارسال می‌شود
+          `/Schedual/AddSchedualSingle?currentCurseId=${encodeURIComponent(
+            currentCurseId
+          )}`,
+          scheduleData,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
         );
-        return response.data; // فرض می‌کنم پاسخ API در response.data است
+        return response.data;
       } catch (error) {
-        console.log("error is: ", error);
-        throw error;
+        console.log("Error in useAddNewSchedule:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
+        });
+        throw (
+          error.response?.data?.errors ||
+          error.response?.data?.message ||
+          error.message
+        );
       }
     },
   });

@@ -18,7 +18,7 @@ import {
 import { MoreVertical, ChevronDown, Edit } from "react-feather";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
-import { getAdminSchedual } from "../../../@core/Services/Api/Schedual/Schedual";
+import { getStudentSchedual } from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import DateObject from "react-date-object";
@@ -26,7 +26,6 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { gregorian } from "react-date-object/calendars/gregorian";
 import SchedualCalendar from "../Calendar";
-import AddSchedualModal from "./AddSchedualModal";
 
 // تعریف ستون‌ها
 export const columns = () => [
@@ -126,7 +125,7 @@ export const columns = () => [
 ];
 
 // کامپوننت هدر سفارشی
-const CustomHeader = ({ handlePerPage, rowsPerPage, handleAddNewModal }) => {
+const CustomHeader = ({ handlePerPage, rowsPerPage }) => {
     return (
         <div className="invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75">
             <Row>
@@ -152,8 +151,8 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleAddNewModal }) => {
                     className="d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1"
                 >
                     <div className="d-flex align-items-center table-header-actions">
-                        <Button onClick={handleAddNewModal} className="add-new-item" color="primary">
-                            افزودن
+                        <Button className="add-new-item" color="primary">
+                            انتخاب دانشجو
                         </Button>
                     </div>
                 </Col>
@@ -163,17 +162,13 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleAddNewModal }) => {
 };
 
 // کامپوننت اصلی
-const AdminSchedualList = () => {
+const StudentSchedualList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
-    const [openAddNewModal, setOpenAddNewModal] = useState(false);
-
-    const handleAddNewModal = () => setOpenAddNewModal(!openAddNewModal);
-
 
     // فراخوانی API با تاریخ‌های انتخاب‌شده
-    const { data, isError, isLoading } = getAdminSchedual({
+    const { data, isError, isLoading } = getStudentSchedual({
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
     });
@@ -277,7 +272,6 @@ const AdminSchedualList = () => {
                                     <CustomHeader
                                         rowsPerPage={rowsPerPage}
                                         handlePerPage={handlePerPage}
-                                        handleAddNewModal={handleAddNewModal}
                                     />
                                 }
                             />
@@ -289,13 +283,8 @@ const AdminSchedualList = () => {
                     <SchedualCalendar onDateRangeChange={handleDateRangeChange} />
                 </Col>
             </Row>
-
-            <AddSchedualModal
-                handleModal={handleAddNewModal}
-                open={openAddNewModal}
-            />
         </Fragment>
     );
 };
 
-export default AdminSchedualList;
+export default StudentSchedualList;

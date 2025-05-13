@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Briefcase, Mail, Calendar, Home, PenTool, Linkedin, Link, X } from 'react-feather'
+import { Briefcase, Calendar, Home, PenTool, Linkedin, Link, X, Clock } from 'react-feather'
 import {
   Modal,
   Input,
@@ -15,16 +15,15 @@ import toast from 'react-hot-toast'
 import { useCreateJobHistory } from '../../../@core/Services/Api/JobHistory/JobHistory'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 
-const AddNewModal = ({ open, handleModal }) => {
+const AddSchedualModal = ({ open, handleModal }) => {
   const [form, setForm] = useState({
-    jobTitle: '',
-    aboutJob: '',
-    companyName: '',
-    companyWebSite: '',
-    companyLinkdin: '',
-    workStartDate: '',
-    workEndDate: '',
-    inWork: false
+    course: '',
+    courseGroup: '',
+    startDate: '',
+    startTime: '',
+    endTime: '',
+    weekNumber: '',
+    rowEffect: '',
   })
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState(false)
@@ -53,14 +52,13 @@ const AddNewModal = ({ open, handleModal }) => {
         setSuccessMessage('سابقه شغلی با موفقیت ایجاد شد!')
         handleModal()
         setForm({
-          jobTitle: '',
-          aboutJob: '',
-          companyName: '',
-          companyWebSite: '',
-          companyLinkdin: '',
-          workStartDate: '',
-          workEndDate: '',
-          inWork: false
+          course: '',
+          courseGroup: '',
+          startDate: '',
+          startTime: '',
+          endTime: '',
+          weekNumber: '',
+          rowEffect: '',
         })
       },
       onError: (error) => {
@@ -84,7 +82,7 @@ const AddNewModal = ({ open, handleModal }) => {
       contentClassName='pt-0'
     >
       <ModalHeader className='mb-1' toggle={handleModal} close={CloseBtn} tag='div'>
-        <h5 className='modal-title'>ساخت سابقه شغلی</h5>
+        <h5 className='modal-title'>ساخت بازه زمانی</h5>
       </ModalHeader>
       <ModalBody className='flex-grow-1'>
         {success && (
@@ -108,60 +106,56 @@ const AddNewModal = ({ open, handleModal }) => {
           </Alert>
         )}
         <div className='mb-1'>
-          <Label className='form-label' for='jobTitle'>عنوان شغل</Label>
+          <Label className='form-label' for='course'>دوره</Label>
           <InputGroup>
             <InputGroupText><Briefcase size={15} /></InputGroupText>
-            <Input id='jobTitle' name='jobTitle' value={form.jobTitle} onChange={handleChange} />
+            <Input id='course' name='course' value={form.course} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
-          <Label className='form-label' for='aboutJob'>توضیخات شغل</Label>
+          <Label className='form-label' for='courseGroup'>گروه دوره</Label>
           <InputGroup>
             <InputGroupText><PenTool size={15} /></InputGroupText>
-            <Input id='aboutJob' name='aboutJob' value={form.aboutJob} onChange={handleChange} />
+            <Input id='courseGroup' name='courseGroup' value={form.courseGroup} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
-          <Label className='form-label' for='companyName'>نام شرکت</Label>
+          <Label className='form-label' for='startDate'>تاریخ شروع</Label>
+          <InputGroup>
+            <InputGroupText><Calendar size={15} /></InputGroupText>
+            <Input type='date' id='startDate' name='startDate' value={form.startDate} onChange={handleChange} />
+          </InputGroup>
+        </div>
+        <div className='mb-1'>
+          <Label className='form-label' for='startTime'>ساعت شروع</Label>
+          <InputGroup>
+            <InputGroupText><Clock size={15} /></InputGroupText>
+            <Input type='time' id='startTime' name='startTime' value={form.startTime} onChange={handleChange} />
+          </InputGroup>
+        </div>
+        <div className='mb-1'>
+          <Label className='form-label' for='endTime'>ساعت پایان</Label>
+          <InputGroup>
+            <InputGroupText><Clock size={15} /></InputGroupText>
+            <Input type='time' id='endTime' name='endTime' value={form.endTime} onChange={handleChange} />
+          </InputGroup>
+        </div>
+        <div className='mb-1'>
+          <Label className='form-label' for='weekNumber'>تعداد کلاس در هفته</Label>
           <InputGroup>
             <InputGroupText><Home size={15} /></InputGroupText>
-            <Input id='companyName' name='companyName' value={form.companyName} onChange={handleChange} />
+            <Input type='number' id='weekNumber' name='weekNumber' value={form.weekNumber} onChange={handleChange} />
           </InputGroup>
         </div>
         <div className='mb-1'>
-          <Label className='form-label' for='companyWebSite'>وب سایت شرکت</Label>
+          <Label className='form-label' for='rowEffect'>تعداد کل کلاس ها</Label>
           <InputGroup>
-            <InputGroupText><Link size={15} /></InputGroupText>
-            <Input id='companyWebSite' name='companyWebSite' value={form.companyWebSite} onChange={handleChange} />
+            <InputGroupText><Home size={15} /></InputGroupText>
+            <Input type='number' id='rowEffect' name='rowEffect' value={form.rowEffect} onChange={handleChange} />
           </InputGroup>
-        </div>
-        <div className='mb-1'>
-          <Label className='form-label' for='companyLinkdin'>لینکدین شرکت</Label>
-          <InputGroup>
-            <InputGroupText><Linkedin size={15} /></InputGroupText>
-            <Input id='companyLinkdin' name='companyLinkdin' value={form.companyLinkdin} onChange={handleChange} />
-          </InputGroup>
-        </div>
-        <div className='mb-1'>
-          <Label className='form-label' for='workStartDate'>تاریخ شروع کار</Label>
-          <InputGroup>
-            <InputGroupText><Calendar size={15} /></InputGroupText>
-            <Input type='date' id='workStartDate' name='workStartDate' value={form.workStartDate} onChange={handleChange} />
-          </InputGroup>
-        </div>
-        <div className='mb-1'>
-          <Label className='form-label' for='workEndDate'>تاریخ پایان کار</Label>
-          <InputGroup>
-            <InputGroupText><Calendar size={15} /></InputGroupText>
-            <Input type='date' id='workEndDate' name='workEndDate' value={form.workEndDate} onChange={handleChange} />
-          </InputGroup>
-        </div>
-        <div className='form-check mb-1'>
-          <Input type='checkbox' id='inWork' name='inWork' checked={form.inWork} onChange={handleChange} />
-          <Label className='form-check-label' for='inWork'>مشغول بودن</Label>
         </div>
         <Button className='me-1' color='primary' onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'در حال ارسال...' : 'ایجاد سابقه شغلی'}
+          {isLoading ? 'در حال ارسال...' : 'ایجاد بازه زمانی'}
         </Button>
         <Button color='secondary' onClick={handleModal} outline>
           انصراف
@@ -171,4 +165,4 @@ const AddNewModal = ({ open, handleModal }) => {
   )
 }
 
-export default AddNewModal
+export default AddSchedualModal

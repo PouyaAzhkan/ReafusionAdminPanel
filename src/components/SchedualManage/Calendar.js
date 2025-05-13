@@ -23,17 +23,15 @@ const SchedualCalendar = ({ onDateRangeChange }) => {
         .convert(gregorian, gregorian_en)
         .format("YYYY-MM-DD");
 
-      // ارسال تاریخ‌ها به کامپوننت والد
+      // ارسال تاریخ‌ها فقط در صورت وجود مقادیر معتبر
       onDateRangeChange({ startDate: start, endDate: end, dates: allDates });
-    } else {
-      // در صورت عدم انتخاب بازه، مقادیر خالی ارسال شود
-      onDateRangeChange({ startDate: "", endDate: "", dates: [] });
     }
+    // در غیر این صورت، چیزی ارسال نکنید تا state والد ریست نشود
   };
 
   useEffect(() => {
     handleRangeDate();
-  }, [dates]);
+  }, [allDates]); // وابستگی به allDates به جای dates
 
   return (
     <div>

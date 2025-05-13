@@ -1,8 +1,8 @@
-import React from 'react'
+import TeacherSchedualList from '../../components/SchedualManage/TeacherSchedualList/TeacherSchedualList'
 
 const TeacherSchedual = () => {
   return (
-    <div>TeacherSchedual</div>
+    <TeacherSchedualList />
   )
 }
 

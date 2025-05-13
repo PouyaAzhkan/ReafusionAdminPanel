@@ -15,6 +15,12 @@ import { isObjEmpty } from "@utils";
 import WeblogAndNewsDetail from "../../components/ManegeWeblog&News/Weblog&NewsDetail";
 import AddWeblog from "../../components/ManegeWeblog&News/AddWeblog";
 import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblogCategory/ManageWeblogCategory";
+import Courses from "../../components/ManageCourses/CourseLIst/list";
+import CourseDetail from "../../components/ManageCourses/CourseLIst/CourseDetail/CourseDetail";
+import AddCourse from "../../components/ManageCourses/AddCourse/AddCourse";
+import AllBuildingList from "../../components/Buildings/list/AllBuildingList";
+import AllCommentList from "../../components/CommentManage/list/AllCommentList";
+
 const getLayout = {
   blank: <BlankLayout />,
   vertical: <VerticalLayout />,
@@ -142,12 +148,24 @@ const Routes = [
     element: <ManageWeblogCategory />,
   },
   {
-    path: "/comments",
-    element: <Comments />,
+    path: "/courses",
+    element: <Courses />,
+  },
+  {
+    path: "/courses/:id",
+    element: <CourseDetail />,
+  },
+  {
+    path: "/AddCourse",
+    element: <AddCourse />,
   },
   {
     path: "/buildings",
-    element: <Buildings />,
+    element: <AllBuildingList />,
+  },
+  {
+    path: "/comments",
+    element: <AllCommentList />,
   },
   {
     path: "/adminSchedual",

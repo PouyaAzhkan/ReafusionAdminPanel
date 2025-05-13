@@ -1,3 +1,4 @@
+import { Home, Users, Circle, Book, BookOpen,  MessageSquare, Trello, } from "react-feather";
 import {
   Home,
   Users,
@@ -71,6 +72,25 @@ export default [
     title: "مدیریت ساختمان ها",
     icon: <Trello size={20} />,
     navLink: "/buildings",
+  },
+  {
+    id: "Course",
+    title: "مدیریت دوره ها",
+    icon: <BookOpen size={20} />,
+    children: [
+      {
+        id: "CourseList",
+        title: "لیست دوره ها",
+        icon: <Circle size={12} />,
+        navLink: "/courses",
+      },
+      {
+        id: "AddCourse",
+        title: "افزودن دوره",
+        icon: <Circle size={12} />,
+        navLink: "/AddCourse",
+      },
+    ],
   },
   {
     id: "schedualManage",

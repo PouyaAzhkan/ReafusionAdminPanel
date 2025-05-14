@@ -20,7 +20,7 @@ import "@styles/react/libs/react-select/_react-select.scss";
 import CourseListModal from "./CourseListModal";
 import useGetCourseDetailInfo from "../../../@core/Services/Api/Courses/CourseDetail/GetDetailInfo";
 import GetCourseGroup from "../../../@core/Services/Api/Courses/CourseDetail/GetCourseGroup";
-import { useAddNewSchedule } from "../../../@core/Services/Api/Schedual/Schedual";
+import { useAddNewSchedule, useEditFroming, useEditLockToRiase } from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 
 const defaultValues = {
@@ -63,6 +63,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [courseGroups, setCourseGroups] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scheduleId, setScheduleId] = useState(null); // برای ذخیره ID برنامه بعد از افزودن
 
   const {
     reset,
@@ -76,6 +77,10 @@ const AddSchedualModal = ({ open, handleModal }) => {
     defaultValues,
     resolver: yupResolver(schema),
   });
+
+  // هوک‌های ویرایش
+  const { mutate: editFroming, isLoading: isEditingFroming } = useEditFroming();
+  const { mutate: editLockToRiase, isLoading: isEditingLockToRiase } = useEditLockToRiase();
 
   // دریافت اطلاعات دوره
   const { data: courseDetail, isLoading: courseDetailLoading, error: courseDetailError } =
@@ -104,7 +109,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
   // تابع تبدیل زمان به عدد اعشاری
   const convertTimeToDouble = (timeString) => {
     const [hours, minutes] = timeString.split(":").map(Number);
-    return hours + minutes / 60; // مثلاً "10:00" به 10.0 و "10:30" به 10.5
+    return hours + minutes / 60;
   };
 
   // به‌روزرسانی گروه‌ها
@@ -112,9 +117,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
     if (courseGroupLoading) return;
     if (!courseGroupError && courseGroup) {
       setCourseGroups(courseGroup);
-      console.log("گروه‌های دریافت‌شده:", courseGroup);
     } else if (courseGroupError) {
-      console.error("خطا در دریافت گروه‌ها:", courseGroupError);
       setCourseGroups([]);
       toast.error("خطا در دریافت گروه‌ها: " + courseGroupError.message);
     }
@@ -126,7 +129,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
     if (courseDetailLoading || courseGroupLoading) {
       timeout = setTimeout(() => {
         toast.error("بارگذاری اطلاعات بیش از حد طول کشید. لطفا دوباره تلاش کنید.");
-      }, 10000); // 10 ثانیه
+      }, 10000);
     }
     return () => clearTimeout(timeout);
   }, [courseDetailLoading, courseGroupLoading]);
@@ -152,9 +155,9 @@ const AddSchedualModal = ({ open, handleModal }) => {
 
     const payload = {
       courseGroupId: Number(data.groupId),
-      startDate: new Date(data.startDate).toISOString().split("T")[0], // فقط تاریخ: "2025-05-14"
-      startTime: convertTimeToDouble(data.startTime), // اعشاری: 10.0
-      endTime: convertTimeToDouble(data.endTime),     // اعشاری: 11.0
+      startDate: new Date(data.startDate).toISOString().split("T")[0],
+      startTime: convertTimeToDouble(data.startTime),
+      endTime: convertTimeToDouble(data.endTime),
       weekNumber: Number(data.weekNumber),
       rowEffect: Number(data.rowEffect),
       isActive: data.isActive,
@@ -201,19 +204,17 @@ const AddSchedualModal = ({ open, handleModal }) => {
       return;
     }
 
-    console.log("Payload ارسالی:", payload);
-
     addNewSchedualData(payload, {
-      onSuccess: () => {
+      onSuccess: (response) => {
         toast.success("بازه زمانی با موفقیت اضافه شد!");
         setIsSubmitting(false);
+        setScheduleId(response?.id); // فرض می‌کنیم پاسخ شامل id برنامه است
         reset(defaultValues);
         setCourseGroups([]);
         setSelectedCourseId(null);
       },
       onError: (error) => {
         setIsSubmitting(false);
-        console.error("جزئیات خطا:", error);
         if (error?.ErrorMessage) {
           error.ErrorMessage.forEach((msg) => toast.error(msg));
           setError("submit", {
@@ -232,7 +233,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
   };
 
   const onDiscard = () => {
-    console.log("onDiscard فراخوانی شد.");
     clearErrors();
     reset(defaultValues);
     setCourseGroups([]);
@@ -242,7 +242,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
 
   const handleCourseSelect = (courseId, courseName) => {
     if (!courseId) {
-      console.error("courseId نامعتبر است:", courseId);
       setError("courseId", { type: "manual", message: "دوره معتبر انتخاب نشده است" });
       return;
     }
@@ -250,6 +249,50 @@ const AddSchedualModal = ({ open, handleModal }) => {
     setValue("courseId", courseId, { shouldValidate: true });
     setValue("courseName", courseName, { shouldValidate: true });
     setValue("groupId", "", { shouldValidate: true });
+  };
+
+  // مدیریت تغییر سوئیچ وضعیت برگزاری
+  const handleIsActiveChange = (isChecked) => {
+    if (!scheduleId) {
+      setValue("isActive", isChecked, { shouldValidate: true });
+      return;
+    }
+
+    editFroming(
+      { id: scheduleId, active: isChecked },
+      {
+        onSuccess: () => {
+          toast.success("وضعیت برگزاری با موفقیت به‌روزرسانی شد!");
+          setValue("isActive", isChecked, { shouldValidate: true });
+        },
+        onError: (error) => {
+          toast.error("خطا در به‌روزرسانی وضعیت برگزاری: " + error.message);
+          setValue("isActive", !isChecked, { shouldValidate: true }); // بازگرداندن به حالت قبلی
+        },
+      }
+    );
+  };
+
+  // مدیریت تغییر سوئیچ حضور و غیاب
+  const handleAttendanceEnabledChange = (isChecked) => {
+    if (!scheduleId) {
+      setValue("attendanceEnabled", isChecked, { shouldValidate: true });
+      return;
+    }
+
+    editLockToRiase(
+      { id: scheduleId, active: isChecked },
+      {
+        onSuccess: () => {
+          toast.success("وضعیت حضور و غیاب با موفقیت به‌روزرسانی شد!");
+          setValue("attendanceEnabled", isChecked, { shouldValidate: true });
+        },
+        onError: (error) => {
+          toast.error("خطا در به‌روزرسانی وضعیت حضور و غیاب: " + error.message);
+          setValue("attendanceEnabled", !isChecked, { shouldValidate: true }); // بازگرداندن به حالت قبلی
+        },
+      }
+    );
   };
 
   const groupOptions = courseGroups.map((group) => ({
@@ -462,7 +505,8 @@ const AddSchedualModal = ({ open, handleModal }) => {
                           id="billing-switch"
                           name="billing-switch"
                           checked={field.value}
-                          onChange={(e) => field.onChange(e.target.checked)}
+                          onChange={(e) => handleIsActiveChange(e.target.checked)}
+                          disabled={isEditingFroming}
                         />
                         <Label className="form-check-label" htmlFor="billing-switch">
                           <span className="switch-icon-left">
@@ -492,7 +536,8 @@ const AddSchedualModal = ({ open, handleModal }) => {
                           id="attendance-switch"
                           name="attendance-switch"
                           checked={field.value}
-                          onChange={(e) => field.onChange(e.target.checked)}
+                          onChange={(e) => handleAttendanceEnabledChange(e.target.checked)}
+                          disabled={isEditingLockToRiase}
                         />
                         <Label className="form-check-label" htmlFor="attendance-switch">
                           <span className="switch-icon-left">

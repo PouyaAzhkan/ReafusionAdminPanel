@@ -139,3 +139,36 @@ export const useUpdateSchedule = (currentCurseId) => {
     },
   });
 };
+
+// edit forming
+export const useEditFroming = () => {
+  return useMutation({
+    mutationFn: async ({ id, active }) => {
+      try {
+        const response = await api.put("/Schedual/SchedualFroming", {
+          id,
+          active,
+        });
+        return response.data;
+      } catch (error) {
+        console.error("خطا در تغییر حالت دوره:", error);
+        throw error;
+      }
+    },
+  });
+};
+
+// edit lock to rasie
+export const useEditLockToRiase = () => {
+  return useMutation({
+    mutationFn: async ({ id, active }) => {
+      try {
+        const response = await api.put("/Schedual/LockToRiase", { id, active });
+        return response.data;
+      } catch (error) {
+        console.error("خطا در تغییر حضور:", error);
+        throw error;
+      }
+    },
+  });
+};

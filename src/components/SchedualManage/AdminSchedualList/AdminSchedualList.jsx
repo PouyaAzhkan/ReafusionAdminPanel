@@ -18,7 +18,7 @@ import {
 import { MoreVertical, ChevronDown, Edit } from "react-feather";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
-import { getAdminSchedual } from "../../../@core/Services/Api/Schedual/Schedual";
+import { getAdminSchedual, getCourseGroupDetail } from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import DateObject from "react-date-object";
@@ -27,15 +27,24 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import { gregorian } from "react-date-object/calendars/gregorian";
 import SchedualCalendar from "../Calendar";
 import AddSchedualModal from "./AddSchedualModal";
+import EditSchedualModal from "./EditSchedualModal";
 
 // تعریف ستون‌ها
-export const columns = () => [
+export const columns = (handleEditModal) => [
     {
         name: "نام گروه",
         width: "150px",
         sortField: "title",
-        selector: (row) => row.id,
-        cell: (row) => <span className="text-truncate">{row.id || "—"}</span>,
+        selector: (row) => row.courseGroupId,
+        cell: (row) => {
+            const { data, isLoading, isError } = getCourseGroupDetail(row.courseGroupId);
+            useEffect(() => {
+            }, [data, row.courseGroupId]);
+            if (isLoading) return <span className="text-truncate">در حال بارگذاری...</span>;
+            if (isError) return <span className="text-truncate">خطا در دریافت</span>;
+            const groupName = data?.courseGroupDto?.groupName || "—";
+            return <span className="text-truncate">{groupName}</span>;
+        },
     },
     {
         name: "ساعت",
@@ -43,9 +52,7 @@ export const columns = () => [
         sortField: "title",
         selector: (row) => row.startTime,
         cell: (row) => (
-            <span className="text-truncate">
-                {row.startTime + " " + "تا" + " " + row.endTime || "—"}
-            </span>
+            <span className="text-truncate">{row.startTime + " تا " + row.endTime || "—"}</span>
         ),
     },
     {
@@ -63,7 +70,6 @@ export const columns = () => [
         cell: (row) => {
             const startDate = row.startDate?.split("T")[0];
             const endDate = row.endDate?.split("T")[0];
-
             const startPersian = startDate
                 ? new DateObject({ date: startDate, calendar: gregorian })
                     .convert(persian, persian_fa)
@@ -74,7 +80,6 @@ export const columns = () => [
                     .convert(persian, persian_fa)
                     .format("YYYY/MM/DD")
                 : "";
-
             return startPersian && endPersian ? `${startPersian} تا ${endPersian}` : "—";
         },
     },
@@ -113,7 +118,10 @@ export const columns = () => [
                         <DropdownItem
                             tag="span"
                             className="w-100"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleEditModal(row); // پاس دادن row
+                            }}
                         >
                             <Edit size={14} className="me-50" />
                             <span className="align-middle">ویرایش</span>
@@ -164,47 +172,49 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleAddNewModal }) => {
 
 // کامپوننت اصلی
 const AdminSchedualList = () => {
+    const [openAddNewModal, setOpenAddNewModal] = useState(false);
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null); // استیت برای ردیف انتخاب‌شده
+
+    const today = new Date();
+    const formattedToday = today.toISOString().split("T")[0];
+
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
-    const [openAddNewModal, setOpenAddNewModal] = useState(false);
+    const [dateRange, setDateRange] = useState({
+        startDate: formattedToday,
+        endDate: formattedToday,
+    });
 
     const handleAddNewModal = () => setOpenAddNewModal(!openAddNewModal);
+    const handleEditModal = (row) => {
+        setSelectedRow(row); // ذخیره ردیف انتخاب‌شده
+        setOpenEditModal(!openEditModal);
+    };
 
-
-    // فراخوانی API با تاریخ‌های انتخاب‌شده
+    // fetch data
     const { data, isError, isLoading } = getAdminSchedual({
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
     });
 
-    // نمایش وضعیت API با toast و console.log
     useEffect(() => {
         if (isLoading) {
             toast.loading("در حال بارگذاری داده‌ها...");
-            console.log("درخواست API ارسال شد:", {
-                startDate: dateRange.startDate,
-                endDate: dateRange.endDate,
-            });
         } else {
-            toast.dismiss(); // بستن toast بارگذاری
+            toast.dismiss();
         }
         if (isError) {
             toast.error("خطا در دریافت داده‌ها!");
-            console.log("خطای API:", isError);
         }
-    }, [isLoading, isError, dateRange.startDate, dateRange.endDate]); // وابستگی‌های دقیق‌تر
+    }, [isLoading, isError]);
 
-    // داده‌های دریافتی از API
     const filteredData = data || [];
-
-    // صفحه‌بندی داده‌ها
     const paginatedData = filteredData.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
 
-    // هندلرها
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
     };
@@ -215,19 +225,15 @@ const AdminSchedualList = () => {
         setCurrentPage(1);
     };
 
-    // هندلر برای دریافت تاریخ‌ها
     const handleDateRangeChange = ({ startDate, endDate }) => {
-        // اعتبارسنجی: اطمینان از اینکه تاریخ پایان بعد از تاریخ شروع است
         if (endDate && startDate && new Date(endDate) < new Date(startDate)) {
             toast.error("تاریخ پایان باید بعد از تاریخ شروع باشد!");
             return;
         }
-        console.log("تاریخ انتخاب‌شده:", { startDate, endDate });
         setDateRange({ startDate, endDate });
         setCurrentPage(1);
     };
 
-    // کامپوننت صفحه‌بندی سفارشی
     const CustomPagination = () => {
         const totalRows = filteredData.length;
         const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
@@ -246,9 +252,7 @@ const AdminSchedualList = () => {
                 previousClassName={"page-item prev"}
                 previousLinkClassName={"page-link"}
                 pageLinkClassName={"page-link"}
-                containerClassName={
-                    "pagination react-paginate justify-content-end my-2 pe-1"
-                }
+                containerClassName={"pagination react-paginate justify-content-end my-2 pe-1"}
                 disabledClassName={"disabled"}
             />
         );
@@ -267,7 +271,7 @@ const AdminSchedualList = () => {
                                 pagination
                                 responsive
                                 paginationServer
-                                columns={columns()}
+                                columns={columns(handleEditModal)}
                                 onSort={() => { }}
                                 sortIcon={<ChevronDown />}
                                 className="react-dataTable"
@@ -284,15 +288,16 @@ const AdminSchedualList = () => {
                         </div>
                     </Card>
                 </Col>
-                {/* calendar */}
                 <Col md={4} className="pb-1">
                     <SchedualCalendar onDateRangeChange={handleDateRangeChange} />
                 </Col>
             </Row>
 
-            <AddSchedualModal
-                handleModal={handleAddNewModal}
-                open={openAddNewModal}
+            <AddSchedualModal handleModal={handleAddNewModal} open={openAddNewModal} />
+            <EditSchedualModal
+                handleModal={handleEditModal}
+                open={openEditModal}
+                scheduleData={selectedRow} // پاس دادن داده‌های ردیف
             />
         </Fragment>
     );

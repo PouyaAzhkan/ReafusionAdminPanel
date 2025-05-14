@@ -9,10 +9,9 @@ const GetCourses = (initialParams, coursePageParams, params) => {
         params: {
           ...initialParams, // پارامترهای اولیه
           ...coursePageParams, // پارامترهای صفحه‌بندی اضافی
-           params
+          params,
         },
       });
-      console.log("API Response:", response); // برای دیباگ
       return response; // فقط داده‌ها را برگردان
     },
   });

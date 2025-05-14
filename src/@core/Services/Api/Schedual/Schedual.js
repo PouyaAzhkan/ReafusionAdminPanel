@@ -56,20 +56,20 @@ export const getStudentSchedual = (params) => {
 };
 
 // add new schedual
-export const useAddNewSchedule = (currentCurseId, scheduleData) => {
+export const useAddNewSchedule = (currentCurseId) => {
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (scheduleData) => {
       try {
         if (!currentCurseId) {
           throw new Error("currentCurseId is required");
         }
         const response = await api.post(
-          `/Schedual/AddSchedualSingle?currentCurseId=${encodeURIComponent(
-            currentCurseId
-          )}`,
+          `/Schedual/AddSchedualSingle?currentCurseId=${currentCurseId}`,
           scheduleData,
           {
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
         );
         return response.data;
@@ -85,6 +85,56 @@ export const useAddNewSchedule = (currentCurseId, scheduleData) => {
           error.response?.data?.message ||
           error.message
         );
+      }
+    },
+  });
+};
+
+// get course group detail
+export const getCourseGroupDetail = (Id, options = {}) => {
+  const isValidId = Id && Number.isInteger(Number(Id)) && Number(Id) > 0;
+
+  return useQuery({
+    queryKey: ["GroupDetail", Id],
+    queryFn: async () => {
+      if (!isValidId) {
+        throw new Error("Invalid courseGroupId");
+      }
+      try {
+        const response = await api.get("/CourseGroup/Details", {
+          params: { Id },
+        });
+        return response; // فقط داده‌ها رو برگردون
+      } catch (error) {
+        console.error("Error in getCourseGroupDetail:", error);
+        throw error;
+      }
+    },
+    enabled: options.enabled !== false && isValidId, // فقط وقتی Id معتبره و enabled صراحتاً false نیست
+    ...options,
+  });
+};
+
+// update schedual
+export const useUpdateSchedule = (currentCurseId) => {
+  return useMutation({
+    mutationFn: async (scheduleData) => {
+      try {
+        if (!currentCurseId) {
+          throw new Error("currentCurseId is required");
+        }
+        const response = await api.post(
+          `/Schedual/UpdateSchedualSingle?currentCurseId=${currentCurseId}`,
+          scheduleData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        return response;
+      } catch (error) {
+        console.log("error", error);
       }
     },
   });

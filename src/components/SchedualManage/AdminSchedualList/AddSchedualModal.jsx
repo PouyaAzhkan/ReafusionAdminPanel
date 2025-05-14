@@ -40,8 +40,14 @@ const schema = yup.object().shape({
   courseId: yup.string().required("لطفا دوره معتبر انتخاب کنید"),
   groupId: yup.string().required("لطفا گروه دوره را انتخاب کنید"),
   startDate: yup.string().required("لطفا تاریخ شروع را وارد کنید"),
-  startTime: yup.string().required("لطفا ساعت شروع را وارد کنید"),
-  endTime: yup.string().required("لطفا ساعت پایان را وارد کنید"),
+  startTime: yup
+    .string()
+    .required("لطفا ساعت شروع را وارد کنید")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "فرمت ساعت شروع نامعتبر است"),
+  endTime: yup
+    .string()
+    .required("لطفا ساعت پایان را وارد کنید")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "فرمت ساعت پایان نامعتبر است"),
   weekNumber: yup
     .number()
     .required("لطفا تعداد در هفته را وارد کنید")
@@ -95,13 +101,11 @@ const AddSchedualModal = ({ open, handleModal }) => {
   // هوک برای افزودن برنامه
   const { mutate: addNewSchedualData } = useAddNewSchedule(courseId);
 
-  // لاگ برای دیباگ
-  useEffect(() => {
-    console.log("وضعیت مودال:", { open, selectedCourseId, courseId, teacherId });
-    if (selectedCourseId && courseId && teacherId) {
-      console.log("courseId و teacherId ارسال‌شده به GetCourseGroup:", { courseId, teacherId });
-    }
-  }, [open, selectedCourseId, courseId, teacherId]);
+  // تابع تبدیل زمان به عدد اعشاری
+  const convertTimeToDouble = (timeString) => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours + minutes / 60; // مثلاً "10:00" به 10.0 و "10:30" به 10.5
+  };
 
   // به‌روزرسانی گروه‌ها
   useEffect(() => {
@@ -146,14 +150,29 @@ const AddSchedualModal = ({ open, handleModal }) => {
 
     setIsSubmitting(true);
 
-    // استفاده از زمان به‌صورت رشته خام (بدون تبدیل به اعشاری)
-    const startTime = data.startTime; // مثلاً "18:00"
-    const endTime = data.endTime;     // مثلاً "19:00"
+    const payload = {
+      courseGroupId: Number(data.groupId),
+      startDate: new Date(data.startDate).toISOString().split("T")[0], // فقط تاریخ: "2025-05-14"
+      startTime: convertTimeToDouble(data.startTime), // اعشاری: 10.0
+      endTime: convertTimeToDouble(data.endTime),     // اعشاری: 11.0
+      weekNumber: Number(data.weekNumber),
+      rowEffect: Number(data.rowEffect),
+      isActive: data.isActive,
+      attendanceEnabled: data.attendanceEnabled,
+      teacherId: Number(teacherId),
+    };
 
-    // اعتبارسنجی دستی برای محدوده زمانی
-    const [startHours] = startTime.split(":").map(Number);
-    const [endHours] = endTime.split(":").map(Number);
-    if (startHours < 8 || startHours > 20) {
+    // اعتبارسنجی زمان
+    if (isNaN(payload.startTime) || isNaN(payload.endTime)) {
+      setError("startTime", {
+        type: "manual",
+        message: "ساعت شروع یا پایان نامعتبر است",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (payload.startTime < 8 || payload.startTime > 20) {
       setError("startTime", {
         type: "manual",
         message: "ساعت شروع باید بین 8 صبح و 8 شب باشد",
@@ -161,15 +180,8 @@ const AddSchedualModal = ({ open, handleModal }) => {
       setIsSubmitting(false);
       return;
     }
-    if (endHours < 8 || endHours > 20) {
-      setError("endTime", {
-        type: "manual",
-        message: "ساعت پایان باید بین 8 صبح و 8 شب باشد",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-    if (endHours <= startHours) {
+
+    if (payload.endTime <= payload.startTime) {
       setError("endTime", {
         type: "manual",
         message: "ساعت پایان باید بعد از ساعت شروع باشد",
@@ -178,19 +190,15 @@ const AddSchedualModal = ({ open, handleModal }) => {
       return;
     }
 
-    const payload = {
-      courseGroupId: Number(data.groupId),
-      startDate: new Date(data.startDate).toISOString(),
-      startTime: startTime, // حالا به‌صورت "18:00"
-      endTime: endTime,     // حالا به‌صورت "19:00"
-      weekNumber: Number(data.weekNumber),
-      rowEffect: Number(data.rowEffect),
-      isActive: data.isActive,
-      attendanceEnabled: data.attendanceEnabled,
-    };
-
-    if (teacherId) {
-      payload.teacherId = Number(teacherId);
+    // بررسی اعتبار courseGroupId
+    const validGroup = courseGroups.find((group) => group.groupId === Number(data.groupId));
+    if (!validGroup) {
+      setError("groupId", {
+        type: "manual",
+        message: "گروه دوره نامعتبر است",
+      });
+      setIsSubmitting(false);
+      return;
     }
 
     console.log("Payload ارسالی:", payload);
@@ -202,21 +210,21 @@ const AddSchedualModal = ({ open, handleModal }) => {
         reset(defaultValues);
         setCourseGroups([]);
         setSelectedCourseId(null);
-        handleModal();
       },
       onError: (error) => {
         setIsSubmitting(false);
         console.error("جزئیات خطا:", error);
-        if (typeof error === "object" && !Array.isArray(error)) {
-          Object.entries(error).forEach(([field, messages]) => {
-            setError(field, { type: "manual", message: messages.join(", ") });
-          });
-          toast.error("لطفا خطاهای فرم را بررسی کنید.");
-        } else {
-          toast.error(`خطا در افزودن بازه زمانی: ${error.message || error}`);
+        if (error?.ErrorMessage) {
+          error.ErrorMessage.forEach((msg) => toast.error(msg));
           setError("submit", {
             type: "manual",
-            message: `خطا در افزودن بازه زمانی: ${error.message || error}`,
+            message: error.ErrorMessage.join(", "),
+          });
+        } else {
+          toast.error(`خطا در افزودن بازه زمانی: ${error.message || "خطای ناشناخته"}`);
+          setError("submit", {
+            type: "manual",
+            message: error.message || "خطای ناشناخته",
           });
         }
       },
@@ -242,7 +250,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
     setValue("courseId", courseId, { shouldValidate: true });
     setValue("courseName", courseName, { shouldValidate: true });
     setValue("groupId", "", { shouldValidate: true });
-    setCourseModalOpen(false);
   };
 
   const groupOptions = courseGroups.map((group) => ({
@@ -254,7 +261,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
     <Fragment>
       <Modal
         isOpen={open}
-        onClosed={onDiscard}
         toggle={handleModal}
         className="modal-dialog-centered modal-lg"
       >
@@ -270,7 +276,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
                       type="radio"
                       defaultChecked
                       id="homeAddress"
-                      name="addressRadio"
+                      name="addressBundles"
                       value="homeAddress"
                       className="custom-option-item-check"
                     />
@@ -287,7 +293,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
                     <Input
                       type="radio"
                       id="officeAddress"
-                      name="addressRadio"
+                      name="addressBundles"
                       value="officeAddress"
                       className="custom-option-item-check"
                     />

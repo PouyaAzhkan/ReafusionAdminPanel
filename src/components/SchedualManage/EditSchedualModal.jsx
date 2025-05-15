@@ -17,14 +17,14 @@ import { selectThemeColors } from "@utils";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import toast from "react-hot-toast";
-import useGetCourseDetailInfo from "../../../@core/Services/Api/Courses/CourseDetail/GetDetailInfo";
-import GetCourseGroup from "../../../@core/Services/Api/Courses/CourseDetail/GetCourseGroup";
 import {
     getCourseGroupDetail,
     useUpdateSchedule,
     useEditForming,
     useEditLockToRaise,
-} from "../../../@core/Services/Api/Schedual/Schedual";
+} from "../../../src/@core/Services/Api/Schedual/Schedual.js";
+import useGetCourseDetailInfo from "../../@core/Services/Api/Courses/CourseDetail/GetDetailInfo";
+import GetCourseGroup from "../../@core/Services/Api/Courses/CourseDetail/GetCourseGroup";
 
 const defaultValues = {
     startDate: "",

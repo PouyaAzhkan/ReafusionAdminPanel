@@ -32,7 +32,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import { gregorian } from "react-date-object/calendars/gregorian";
 import SchedualCalendar from "../Calendar";
 import AddSchedualModal from "./AddSchedualModal";
-import EditSchedualModal from "./EditSchedualModal";
+import EditSchedualModal from "../EditSchedualModal";
 
 // تعریف ستون‌ها
 export const columns = (handleEditModal, toggleForming, toggleLockToRaise) => [

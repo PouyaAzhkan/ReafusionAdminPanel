@@ -16,11 +16,17 @@ import { Check, X, Edit, Server } from "react-feather";
 import { selectThemeColors } from "@utils";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQueryClient } from "@tanstack/react-query";
 import "@styles/react/libs/react-select/_react-select.scss";
 import CourseListModal from "./CourseListModal";
 import useGetCourseDetailInfo from "../../../@core/Services/Api/Courses/CourseDetail/GetDetailInfo";
 import GetCourseGroup from "../../../@core/Services/Api/Courses/CourseDetail/GetCourseGroup";
-import { useAddNewSchedule, useEditFroming, useEditLockToRiase } from "../../../@core/Services/Api/Schedual/Schedual";
+import {
+  useAddNewSchedule,
+  useAddNewScheduleAuto,
+  useEditForming,
+  useEditLockToRaise,
+} from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 
 const defaultValues = {
@@ -32,8 +38,8 @@ const defaultValues = {
   endTime: "",
   weekNumber: "",
   rowEffect: "",
-  isActive: false,
-  attendanceEnabled: false,
+  forming: false,
+  lockToRaise: false,
 };
 
 const schema = yup.object().shape({
@@ -63,7 +69,10 @@ const AddSchedualModal = ({ open, handleModal }) => {
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [courseGroups, setCourseGroups] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [scheduleId, setScheduleId] = useState(null); // برای ذخیره ID برنامه بعد از افزودن
+  const [scheduleId, setScheduleId] = useState(null);
+  const [scheduleType, setScheduleType] = useState("manual");
+
+  const queryClient = useQueryClient();
 
   const {
     reset,
@@ -78,15 +87,14 @@ const AddSchedualModal = ({ open, handleModal }) => {
     resolver: yupResolver(schema),
   });
 
-  // هوک‌های ویرایش
-  const { mutate: editFroming, isLoading: isEditingFroming } = useEditFroming();
-  const { mutate: editLockToRiase, isLoading: isEditingLockToRiase } = useEditLockToRiase();
+  const { mutate: editFroming, isLoading: isEditingFroming } = useEditForming();
+  const { mutate: editLockToRiase, isLoading: isEditingLockToRiase } = useEditLockToRaise();
+  const { mutate: addNewScheduleManual } = useAddNewSchedule(selectedCourseId);
+  const { mutate: addNewScheduleAuto } = useAddNewScheduleAuto(selectedCourseId);
 
-  // دریافت اطلاعات دوره
   const { data: courseDetail, isLoading: courseDetailLoading, error: courseDetailError } =
     useGetCourseDetailInfo(selectedCourseId || null);
 
-  // استخراج courseId و teacherId
   const courseId =
     courseDetail && !courseDetailLoading && !courseDetailError
       ? courseDetail.courseId || selectedCourseId
@@ -96,23 +104,18 @@ const AddSchedualModal = ({ open, handleModal }) => {
       ? courseDetail.teacherId || null
       : null;
 
-  // دریافت گروه‌های دوره
   const {
     data: courseGroup,
     isLoading: courseGroupLoading,
     error: courseGroupError,
   } = GetCourseGroup(courseId && teacherId ? courseId : null, teacherId);
 
-  // هوک برای افزودن برنامه
-  const { mutate: addNewSchedualData } = useAddNewSchedule(courseId);
-
-  // تابع تبدیل زمان به عدد اعشاری
   const convertTimeToDouble = (timeString) => {
+    if (!timeString) return null;
     const [hours, minutes] = timeString.split(":").map(Number);
     return hours + minutes / 60;
   };
 
-  // به‌روزرسانی گروه‌ها
   useEffect(() => {
     if (courseGroupLoading) return;
     if (!courseGroupError && courseGroup) {
@@ -123,7 +126,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
     }
   }, [courseGroup, courseGroupLoading, courseGroupError]);
 
-  // مدیریت تایم‌اوت برای بارگذاری
   useEffect(() => {
     let timeout;
     if (courseDetailLoading || courseGroupLoading) {
@@ -134,7 +136,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
     return () => clearTimeout(timeout);
   }, [courseDetailLoading, courseGroupLoading]);
 
-  // نمایش خطاها
   useEffect(() => {
     if (courseDetailError) {
       toast.error("خطا در دریافت اطلاعات دوره: " + courseDetailError.message);
@@ -153,20 +154,25 @@ const AddSchedualModal = ({ open, handleModal }) => {
 
     setIsSubmitting(true);
 
-    const payload = {
+    const basePayload = {
       courseGroupId: Number(data.groupId),
       startDate: new Date(data.startDate).toISOString().split("T")[0],
       startTime: convertTimeToDouble(data.startTime),
       endTime: convertTimeToDouble(data.endTime),
       weekNumber: Number(data.weekNumber),
       rowEffect: Number(data.rowEffect),
-      isActive: data.isActive,
-      attendanceEnabled: data.attendanceEnabled,
+      forming: data.forming,
+      lockToRaise: data.lockToRaise,
       teacherId: Number(teacherId),
     };
 
-    // اعتبارسنجی زمان
-    if (isNaN(payload.startTime) || isNaN(payload.endTime)) {
+    const payload = scheduleType === "auto"
+      ? [{ ...basePayload, data: {} }]
+      : basePayload;
+
+    console.log(`Payload sent to API (${scheduleType}):`, payload);
+
+    if (isNaN(basePayload.startTime) || isNaN(basePayload.endTime)) {
       setError("startTime", {
         type: "manual",
         message: "ساعت شروع یا پایان نامعتبر است",
@@ -175,7 +181,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
       return;
     }
 
-    if (payload.startTime < 8 || payload.startTime > 20) {
+    if (basePayload.startTime < 8 || basePayload.startTime > 20) {
       setError("startTime", {
         type: "manual",
         message: "ساعت شروع باید بین 8 صبح و 8 شب باشد",
@@ -184,7 +190,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
       return;
     }
 
-    if (payload.endTime <= payload.startTime) {
+    if (basePayload.endTime <= basePayload.startTime) {
       setError("endTime", {
         type: "manual",
         message: "ساعت پایان باید بعد از ساعت شروع باشد",
@@ -193,7 +199,6 @@ const AddSchedualModal = ({ open, handleModal }) => {
       return;
     }
 
-    // بررسی اعتبار courseGroupId
     const validGroup = courseGroups.find((group) => group.groupId === Number(data.groupId));
     if (!validGroup) {
       setError("groupId", {
@@ -204,16 +209,56 @@ const AddSchedualModal = ({ open, handleModal }) => {
       return;
     }
 
-    addNewSchedualData(payload, {
+    const mutate = scheduleType === "manual" ? addNewScheduleManual : addNewScheduleAuto;
+
+    mutate(payload, {
       onSuccess: (response) => {
+        console.log(`API response (${scheduleType}):`, response);
         toast.success("بازه زمانی با موفقیت اضافه شد!");
+
+        if (scheduleType === "auto" && response?.responseShow) {
+          const expectedCount = basePayload.rowEffect;
+          const actualCount = response.responseShow.length;
+          if (actualCount !== expectedCount) {
+            toast("تعداد برنامه‌های ایجاد‌شده با تعداد درخواستی مطابقت ندارد.", {
+              type: "warning",
+            });
+          }
+
+          const formingMismatch = response.responseShow.some(
+            (schedule) => schedule.forming !== basePayload.forming
+          );
+          if (formingMismatch) {
+            toast("وضعیت برگزاری در برنامه‌های ایجاد‌شده با مقدار درخواستی مطابقت ندارد.", {
+              type: "warning",
+            });
+          }
+
+          const hasInvalidIds = response.responseShow.every(
+            (schedule) => schedule.id === "00000000-0000-0000-0000-000000000000"
+          );
+          if (hasInvalidIds) {
+            toast("شناسه‌های برنامه‌های ایجاد‌شده نامعتبر هستند. لطفاً با پشتیبانی تماس بگیرید.", {
+              type: "warning",
+            });
+          }
+        }
+
+        queryClient.invalidateQueries(["schedules", courseId]);
+
         setIsSubmitting(false);
-        setScheduleId(response?.id); // فرض می‌کنیم پاسخ شامل id برنامه است
+        setScheduleId(
+          scheduleType === "auto"
+            ? response?.responseShow?.[0]?.id || response?.id
+            : response?.id
+        );
         reset(defaultValues);
         setCourseGroups([]);
         setSelectedCourseId(null);
+        handleModal();
       },
       onError: (error) => {
+        console.log(`API error (${scheduleType}):`, error);
         setIsSubmitting(false);
         if (error?.ErrorMessage) {
           error.ErrorMessage.forEach((msg) => toast.error(msg));
@@ -251,48 +296,52 @@ const AddSchedualModal = ({ open, handleModal }) => {
     setValue("groupId", "", { shouldValidate: true });
   };
 
-  // مدیریت تغییر سوئیچ وضعیت برگزاری
-  const handleIsActiveChange = (isChecked) => {
+  const handleFormingChange = (isChecked) => {
     if (!scheduleId) {
-      setValue("isActive", isChecked, { shouldValidate: true });
+      setValue("forming", isChecked, { shouldValidate: true });
       return;
     }
 
-    editFroming(
-      { id: scheduleId, active: isChecked },
-      {
-        onSuccess: () => {
-          toast.success("وضعیت برگزاری با موفقیت به‌روزرسانی شد!");
-          setValue("isActive", isChecked, { shouldValidate: true });
-        },
-        onError: (error) => {
-          toast.error("خطا در به‌روزرسانی وضعیت برگزاری: " + error.message);
-          setValue("isActive", !isChecked, { shouldValidate: true }); // بازگرداندن به حالت قبلی
-        },
-      }
-    );
+    const payload = { id: scheduleId, active: isChecked };
+    console.log("Payload sent to editFroming API:", payload);
+
+    editFroming(payload, {
+      onSuccess: (response) => {
+        console.log("API response from editFroming:", response);
+        toast.success("وضعیت برگزاری با موفقیت به‌روزرسانی شد!");
+        setValue("forming", isChecked, { shouldValidate: true });
+        queryClient.invalidateQueries(["schedules", courseId]);
+      },
+      onError: (error) => {
+        console.log("API error from editFroming:", error);
+        toast.error("خطا در به‌روزرسانی وضعیت برگزاری: " + error.message);
+        setValue("forming", !isChecked, { shouldValidate: true });
+      },
+    });
   };
 
-  // مدیریت تغییر سوئیچ حضور و غیاب
-  const handleAttendanceEnabledChange = (isChecked) => {
+  const handleLockToRaiseChange = (isChecked) => {
     if (!scheduleId) {
-      setValue("attendanceEnabled", isChecked, { shouldValidate: true });
+      setValue("lockToRaise", isChecked, { shouldValidate: true });
       return;
     }
 
-    editLockToRiase(
-      { id: scheduleId, active: isChecked },
-      {
-        onSuccess: () => {
-          toast.success("وضعیت حضور و غیاب با موفقیت به‌روزرسانی شد!");
-          setValue("attendanceEnabled", isChecked, { shouldValidate: true });
-        },
-        onError: (error) => {
-          toast.error("خطا در به‌روزرسانی وضعیت حضور و غیاب: " + error.message);
-          setValue("attendanceEnabled", !isChecked, { shouldValidate: true }); // بازگرداندن به حالت قبلی
-        },
-      }
-    );
+    const payload = { id: scheduleId, active: isChecked };
+    console.log("Payload sent to editLockToRiase API:", payload);
+
+    editLockToRiase(payload, {
+      onSuccess: (response) => {
+        console.log("API response from editLockToRiase:", response);
+        toast.success("وضعیت حضور و غیاب با موفقیت به‌روزرسانی شد!");
+        setValue("lockToRaise", isChecked, { shouldValidate: true });
+        queryClient.invalidateQueries(["schedules", courseId]);
+      },
+      onError: (error) => {
+        console.log("API error from editLockToRiase:", error);
+        toast.error("خطا در به‌روزرسانی وضعیت حضور و غیاب: " + error.message);
+        setValue("lockToRaise", !isChecked, { shouldValidate: true });
+      },
+    });
   };
 
   const groupOptions = courseGroups.map((group) => ({
@@ -317,11 +366,12 @@ const AddSchedualModal = ({ open, handleModal }) => {
                   <Col md={6} className="mb-md-0 mb-2">
                     <Input
                       type="radio"
-                      defaultChecked
                       id="homeAddress"
                       name="addressBundles"
-                      value="homeAddress"
+                      value="manual"
                       className="custom-option-item-check"
+                      checked={scheduleType === "manual"}
+                      onChange={() => setScheduleType("manual")}
                     />
                     <label className="custom-option-item px-2 py-1" htmlFor="homeAddress">
                       <span className="d-flex align-items-center">
@@ -337,8 +387,10 @@ const AddSchedualModal = ({ open, handleModal }) => {
                       type="radio"
                       id="officeAddress"
                       name="addressBundles"
-                      value="officeAddress"
+                      value="auto"
                       className="custom-option-item-check"
+                      checked={scheduleType === "auto"}
+                      onChange={() => setScheduleType("auto")}
                     />
                     <label className="custom-option-item px-2 py-1" htmlFor="officeAddress">
                       <span className="d-flex align-items-center">
@@ -496,7 +548,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
               <Col xs={12} md={6}>
                 <div className="d-flex align-items-center">
                   <Controller
-                    name="isActive"
+                    name="forming"
                     control={control}
                     render={({ field }) => (
                       <div className="form-check form-switch form-check-primary me-25">
@@ -505,7 +557,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
                           id="billing-switch"
                           name="billing-switch"
                           checked={field.value}
-                          onChange={(e) => handleIsActiveChange(e.target.checked)}
+                          onChange={(e) => handleFormingChange(e.target.checked)}
                           disabled={isEditingFroming}
                         />
                         <Label className="form-check-label" htmlFor="billing-switch">
@@ -527,7 +579,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
               <Col xs={12} md={6}>
                 <div className="d-flex align-items-center">
                   <Controller
-                    name="attendanceEnabled"
+                    name="lockToRaise"
                     control={control}
                     render={({ field }) => (
                       <div className="form-check form-switch form-check-primary me-25">
@@ -536,7 +588,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
                           id="attendance-switch"
                           name="attendance-switch"
                           checked={field.value}
-                          onChange={(e) => handleAttendanceEnabledChange(e.target.checked)}
+                          onChange={(e) => handleLockToRaiseChange(e.target.checked)}
                           disabled={isEditingLockToRiase}
                         />
                         <Label className="form-check-label" htmlFor="attendance-switch">

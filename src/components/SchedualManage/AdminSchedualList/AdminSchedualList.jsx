@@ -15,10 +15,15 @@ import {
     Label,
     CardBody,
 } from "reactstrap";
-import { MoreVertical, ChevronDown, Edit } from "react-feather";
+import { MoreVertical, ChevronDown, Edit, Check, X } from "react-feather";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
-import { getAdminSchedual, getCourseGroupDetail } from "../../../@core/Services/Api/Schedual/Schedual";
+import {
+    getAdminSchedual,
+    getCourseGroupDetail,
+    useEditForming,
+    useEditLockToRaise,
+} from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import DateObject from "react-date-object";
@@ -30,7 +35,7 @@ import AddSchedualModal from "./AddSchedualModal";
 import EditSchedualModal from "./EditSchedualModal";
 
 // تعریف ستون‌ها
-export const columns = (handleEditModal) => [
+export const columns = (handleEditModal, toggleForming, toggleLockToRaise) => [
     {
         name: "نام گروه",
         width: "150px",
@@ -38,8 +43,6 @@ export const columns = (handleEditModal) => [
         selector: (row) => row.courseGroupId,
         cell: (row) => {
             const { data, isLoading, isError } = getCourseGroupDetail(row.courseGroupId);
-            useEffect(() => {
-            }, [data, row.courseGroupId]);
             if (isLoading) return <span className="text-truncate">در حال بارگذاری...</span>;
             if (isError) return <span className="text-truncate">خطا در دریافت</span>;
             const groupName = data?.courseGroupDto?.groupName || "—";
@@ -64,7 +67,7 @@ export const columns = (handleEditModal) => [
     },
     {
         name: "تاریخ شروع و پایان",
-        width: "160px",
+        width: "150px",
         sortField: "startDate",
         selector: (row) => row.startDate,
         cell: (row) => {
@@ -107,7 +110,7 @@ export const columns = (handleEditModal) => [
     },
     {
         name: "عملیات",
-        width: "80px",
+        width: "100px",
         cell: (row) => (
             <div className="column-action">
                 <UncontrolledDropdown className="dropend">
@@ -120,11 +123,37 @@ export const columns = (handleEditModal) => [
                             className="w-100"
                             onClick={(e) => {
                                 e.preventDefault();
-                                handleEditModal(row); // پاس دادن row
+                                handleEditModal(row);
                             }}
                         >
                             <Edit size={14} className="me-50" />
                             <span className="align-middle">ویرایش</span>
+                        </DropdownItem>
+                        <DropdownItem
+                            tag="span"
+                            className="w-100"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleForming(row);
+                            }}
+                        >
+                            {row.forming ? <X size={14} className="me-50" /> : <Check size={14} className="me-50" />}
+                            <span className="align-middle">
+                                {row.forming ? "غیرفعال کردن دوره" : "فعال کردن دوره"}
+                            </span>
+                        </DropdownItem>
+                        <DropdownItem
+                            tag="span"
+                            className="w-100"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleLockToRaise(row);
+                            }}
+                        >
+                            {row.lockToRaise ? <X size={14} className="me-50" /> : <Check size={14} className="me-50" />}
+                            <span className="align-middle">
+                                {row.lockToRaise ? "غیرفعال کردن حضور" : "فعال کردن حضور"}
+                            </span>
                         </DropdownItem>
                     </DropdownMenu>
                 </UncontrolledDropdown>
@@ -174,7 +203,8 @@ const CustomHeader = ({ handlePerPage, rowsPerPage, handleAddNewModal }) => {
 const AdminSchedualList = () => {
     const [openAddNewModal, setOpenAddNewModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
-    const [selectedRow, setSelectedRow] = useState(null); // استیت برای ردیف انتخاب‌شده
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [tableData, setTableData] = useState([]);
 
     const today = new Date();
     const formattedToday = today.toISOString().split("T")[0];
@@ -188,11 +218,69 @@ const AdminSchedualList = () => {
 
     const handleAddNewModal = () => setOpenAddNewModal(!openAddNewModal);
     const handleEditModal = (row) => {
-        setSelectedRow(row); // ذخیره ردیف انتخاب‌شده
+        setSelectedRow(row);
         setOpenEditModal(!openEditModal);
     };
 
-    // fetch data
+    const handleScheduleUpdate = (updatedData) => {
+        setTableData((prevData) =>
+            prevData.map((item) =>
+                item.id === updatedData.id ? { ...item, ...updatedData } : item
+            )
+        );
+    };
+
+    const { mutate: editForming } = useEditForming();
+    const { mutate: editLockToRaise } = useEditLockToRaise();
+
+    const toggleForming = (row) => {
+        const newStatus = !row.forming;
+        editForming(
+            { id: row.id, active: newStatus },
+            {
+                onSuccess: (response) => {
+                    if (response?.success) {
+                        toast.success(`حالت دوره ${newStatus ? "فعال" : "غیرفعال"} شد!`);
+                        setTableData((prevData) =>
+                            prevData.map((item) =>
+                                item.id === row.id ? { ...item, forming: newStatus } : item
+                            )
+                        );
+                    } else {
+                        toast.error("خطا در تغییر حالت دوره");
+                    }
+                },
+                onError: (error) => {
+                    toast.error(error.message || "خطا در تغییر حالت دوره");
+                },
+            }
+        );
+    };
+
+    const toggleLockToRaise = (row) => {
+        const newStatus = !row.lockToRaise;
+        editLockToRaise(
+            { id: row.id, active: newStatus },
+            {
+                onSuccess: (response) => {
+                    if (response?.success) {
+                        toast.success(`حالت حضور ${newStatus ? "فعال" : "غیرفعال"} شد!`);
+                        setTableData((prevData) =>
+                            prevData.map((item) =>
+                                item.id === row.id ? { ...item, lockToRaise: newStatus } : item
+                            )
+                        );
+                    } else {
+                        toast.error("خطا در تغییر حالت حضور");
+                    }
+                },
+                onError: (error) => {
+                    toast.error(error.message || "خطا در تغییر حالت حضور");
+                },
+            }
+        );
+    };
+
     const { data, isError, isLoading } = getAdminSchedual({
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
@@ -207,10 +295,12 @@ const AdminSchedualList = () => {
         if (isError) {
             toast.error("خطا در دریافت داده‌ها!");
         }
-    }, [isLoading, isError]);
+        if (data) {
+            setTableData(data);
+        }
+    }, [isLoading, isError, data]);
 
-    const filteredData = data || [];
-    const paginatedData = filteredData.slice(
+    const paginatedData = tableData.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
@@ -235,7 +325,7 @@ const AdminSchedualList = () => {
     };
 
     const CustomPagination = () => {
-        const totalRows = filteredData.length;
+        const totalRows = tableData.length;
         const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
         return (
@@ -271,8 +361,8 @@ const AdminSchedualList = () => {
                                 pagination
                                 responsive
                                 paginationServer
-                                columns={columns(handleEditModal)}
-                                onSort={() => { }}
+                                columns={columns(handleEditModal, toggleForming, toggleLockToRaise)}
+                                onSort={() => {}}
                                 sortIcon={<ChevronDown />}
                                 className="react-dataTable"
                                 paginationComponent={CustomPagination}
@@ -297,7 +387,8 @@ const AdminSchedualList = () => {
             <EditSchedualModal
                 handleModal={handleEditModal}
                 open={openEditModal}
-                scheduleData={selectedRow} // پاس دادن داده‌های ردیف
+                scheduleData={selectedRow}
+                onScheduleUpdate={handleScheduleUpdate}
             />
         </Fragment>
     );

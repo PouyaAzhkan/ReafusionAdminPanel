@@ -72,7 +72,44 @@ export const useAddNewSchedule = (currentCurseId) => {
             },
           }
         );
-        return response.data;
+        console.log(response);
+        return response;
+      } catch (error) {
+        console.log("Error in useAddNewSchedule:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
+        });
+        throw (
+          error.response?.data?.errors ||
+          error.response?.data?.message ||
+          error.message
+        );
+      }
+    },
+  });
+};
+
+// add new schedual
+export const useAddNewScheduleAuto = (currentCurseId) => {
+  return useMutation({
+    mutationFn: async (scheduleData) => {
+      try {
+        if (!currentCurseId) {
+          throw new Error("currentCurseId is required");
+        }
+        const response = await api.post(
+          `/Schedual/AddSchedualAutomatic?currentCurseId=${currentCurseId}`,
+          scheduleData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+        return response;
       } catch (error) {
         console.log("Error in useAddNewSchedule:", {
           message: error.message,
@@ -119,11 +156,15 @@ export const getCourseGroupDetail = (Id, options = {}) => {
 export const useUpdateSchedule = (currentCurseId) => {
   return useMutation({
     mutationFn: async (scheduleData) => {
+      if (!currentCurseId) {
+        throw new Error("currentCurseId is required");
+      }
+      if (!scheduleData.id || !scheduleData.courseGroupId) {
+        throw new Error("Schedule ID and Course Group ID are required");
+      }
+
       try {
-        if (!currentCurseId) {
-          throw new Error("currentCurseId is required");
-        }
-        const response = await api.post(
+        const response = await api.put(
           `/Schedual/UpdateSchedualSingle?currentCurseId=${currentCurseId}`,
           scheduleData,
           {
@@ -132,16 +173,18 @@ export const useUpdateSchedule = (currentCurseId) => {
             },
           }
         );
-        return response;
+        console.log("Updating schedule response:", response);
+        return response.data;
       } catch (error) {
-        console.log("error", error);
+        console.error("Error updating schedule:", error);
+        throw error; // خطا را به caller برگردانید
       }
     },
   });
 };
 
 // edit forming
-export const useEditFroming = () => {
+export const useEditForming = () => {
   return useMutation({
     mutationFn: async ({ id, active }) => {
       try {
@@ -149,7 +192,7 @@ export const useEditFroming = () => {
           id,
           active,
         });
-        return response.data;
+        return response;
       } catch (error) {
         console.error("خطا در تغییر حالت دوره:", error);
         throw error;
@@ -159,12 +202,12 @@ export const useEditFroming = () => {
 };
 
 // edit lock to rasie
-export const useEditLockToRiase = () => {
+export const useEditLockToRaise = () => {
   return useMutation({
     mutationFn: async ({ id, active }) => {
       try {
         const response = await api.put("/Schedual/LockToRiase", { id, active });
-        return response.data;
+        return response;
       } catch (error) {
         console.error("خطا در تغییر حضور:", error);
         throw error;

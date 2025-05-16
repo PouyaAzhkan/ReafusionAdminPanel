@@ -10,15 +10,16 @@ import {
     DropdownMenu,
     DropdownToggle,
     UncontrolledDropdown,
-    CardHeader,
-    CardTitle,
-    Label,
-    CardBody,
 } from "reactstrap";
-import { MoreVertical, ChevronDown, Edit } from "react-feather";
+import { MoreVertical, ChevronDown, Edit, Check, X } from "react-feather";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
-import { getTeacherSchedual } from "../../../@core/Services/Api/Schedual/Schedual";
+import {
+    getCourseGroupDetail,
+    useEditForming,
+    useEditLockToRaise,
+    getTeacherSchedual,
+} from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import DateObject from "react-date-object";
@@ -26,15 +27,22 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { gregorian } from "react-date-object/calendars/gregorian";
 import SchedualCalendar from "../Calendar";
+import EditSchedualModal from "../EditSchedualModal"; // اضافه کردن مودال ویرایش
 
 // تعریف ستون‌ها
-export const columns = () => [
+export const columns = (handleEditModal, toggleForming, toggleLockToRaise) => [
     {
         name: "نام گروه",
         width: "150px",
         sortField: "title",
         selector: (row) => row.id,
-        cell: (row) => <span className="text-truncate">{row.id || "—"}</span>,
+        cell: (row) => {
+            const { data, isLoading, isError } = getCourseGroupDetail(row.courseGroupId);
+            if (isLoading) return <span className="text-truncate">در حال بارگذاری...</span>;
+            if (isError) return <span className="text-truncate">خطا در دریافت</span>;
+            const groupName = data?.courseGroupDto?.groupName || "—";
+            return <span className="text-truncate">{groupName}</span>;
+        },
     },
     {
         name: "ساعت",
@@ -43,7 +51,7 @@ export const columns = () => [
         selector: (row) => row.startTime,
         cell: (row) => (
             <span className="text-truncate">
-                {row.startTime + " " + "تا" + " " + row.endTime || "—"}
+                {row.startTime && row.endTime ? `${row.startTime} تا ${row.endTime}` : "—"}
             </span>
         ),
     },
@@ -56,7 +64,7 @@ export const columns = () => [
     },
     {
         name: "تاریخ شروع و پایان",
-        width: "160px",
+        width: "150px",
         sortField: "startDate",
         selector: (row) => row.startDate,
         cell: (row) => {
@@ -101,7 +109,7 @@ export const columns = () => [
     },
     {
         name: "عملیات",
-        width: "80px",
+        width: "100px",
         cell: (row) => (
             <div className="column-action">
                 <UncontrolledDropdown className="dropend">
@@ -112,10 +120,39 @@ export const columns = () => [
                         <DropdownItem
                             tag="span"
                             className="w-100"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleEditModal(row);
+                            }}
                         >
                             <Edit size={14} className="me-50" />
                             <span className="align-middle">ویرایش</span>
+                        </DropdownItem>
+                        <DropdownItem
+                            tag="span"
+                            className="w-100"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleForming(row);
+                            }}
+                        >
+                            {row.forming ? <X size={14} className="me-50" /> : <Check size={14} className="me-50" />}
+                            <span className="align-middle">
+                                {row.forming ? "غیرفعال کردن دوره" : "فعال کردن دوره"}
+                            </span>
+                        </DropdownItem>
+                        <DropdownItem
+                            tag="span"
+                            className="w-100"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleLockToRaise(row);
+                            }}
+                        >
+                            {row.lockToRaise ? <X size={14} className="me-50" /> : <Check size={14} className="me-50" />}
+                            <span className="align-middle">
+                                {row.lockToRaise ? "غیرفعال کردن حضور" : "فعال کردن حضور"}
+                            </span>
                         </DropdownItem>
                     </DropdownMenu>
                 </UncontrolledDropdown>
@@ -155,41 +192,114 @@ const CustomHeader = ({ handlePerPage, rowsPerPage }) => {
 const TeacherSchedualList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+    const [dateRange, setDateRange] = useState({ startDate: "2020-01-01", endDate: "" });
+    const [openEditModal, setOpenEditModal] = useState(false); // حالت مودال ویرایش
+    const [selectedRow, setSelectedRow] = useState(null); // ردیف انتخاب‌شده برای ویرایش
+    const [tableData, setTableData] = useState([]); // داده‌های جدول
 
-    // فراخوانی API با تاریخ‌های انتخاب‌شده
+    const today = new Date();
+    const formattedToday = today.toISOString().split("T")[0];
+
+    useEffect(() => {
+        setDateRange((prev) => ({ ...prev, endDate: formattedToday }));
+    }, []);
+
+    const handleEditModal = (row) => {
+        setSelectedRow(row);
+        setOpenEditModal(!openEditModal);
+    };
+
+    const handleScheduleUpdate = (updatedData) => {
+        setTableData((prevData) =>
+            prevData.map((item) =>
+                item.id === updatedData.id ? { ...item, ...updatedData } : item
+            )
+        );
+    };
+
+    const { mutate: editForming } = useEditForming();
+    const { mutate: editLockToRaise } = useEditLockToRaise();
+
+    const toggleForming = (row) => {
+        const newStatus = !row.forming;
+        editForming(
+            { id: row.id, active: newStatus },
+            {
+                onSuccess: (response) => {
+                    if (response?.success) {
+                        toast.success(`حالت دوره ${newStatus ? "فعال" : "غیرفعال"} شد!`);
+                        setTableData((prevData) =>
+                            prevData.map((item) =>
+                                item.id === row.id ? { ...item, forming: newStatus } : item
+                            )
+                        );
+                    } else {
+                        toast.error("خطا در تغییر حالت دوره");
+                    }
+                },
+                onError: (error) => {
+                    toast.error(error.message || "خطا در تغییر حالت دوره");
+                },
+            }
+        );
+    };
+
+    const toggleLockToRaise = (row) => {
+        const newStatus = !row.lockToRaise;
+        editLockToRaise(
+            { id: row.id, active: newStatus },
+            {
+                onSuccess: (response) => {
+                    if (response?.success) {
+                        toast.success(`حالت حضور ${newStatus ? "فعال" : "غیرفعال"} شد!`);
+                        setTableData((prevData) =>
+                            prevData.map((item) =>
+                                item.id === row.id ? { ...item, lockToRaise: newStatus } : item
+                            )
+                        );
+                    } else {
+                        toast.error("خطا در تغییر حالت حضور");
+                    }
+                },
+                onError: (error) => {
+                    toast.error(error.message || "خطا در تغییر حالت حضور");
+                },
+            }
+        );
+    };
+
     const { data, isError, isLoading } = getTeacherSchedual({
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
     });
 
-    // نمایش وضعیت API با toast و console.log
     useEffect(() => {
         if (isLoading) {
             toast.loading("در حال بارگذاری داده‌ها...");
-            console.log("درخواست API ارسال شد:", {
+            console.log("در حال ارسال درخواست به API:", {
                 startDate: dateRange.startDate,
                 endDate: dateRange.endDate,
             });
         } else {
-            toast.dismiss(); // بستن toast بارگذاری
+            toast.dismiss();
         }
         if (isError) {
             toast.error("خطا در دریافت داده‌ها!");
-            console.log("خطای API:", isError);
+            console.error("خطای API:", isError);
         }
-    }, [isLoading, isError, dateRange.startDate, dateRange.endDate]); // وابستگی‌های دقیق‌تر
+        if (data) {
+            setTableData(data);
+            console.log("پاسخ API دریافت شد:", data);
+        }
+    }, [isLoading, isError, data, dateRange.startDate, dateRange.endDate]);
 
-    // داده‌های دریافتی از API
-    const filteredData = data || [];
+    const filteredData = tableData || [];
 
-    // صفحه‌بندی داده‌ها
     const paginatedData = filteredData.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
 
-    // هندلرها
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
     };
@@ -200,9 +310,7 @@ const TeacherSchedualList = () => {
         setCurrentPage(1);
     };
 
-    // هندلر برای دریافت تاریخ‌ها
     const handleDateRangeChange = ({ startDate, endDate }) => {
-        // اعتبارسنجی: اطمینان از اینکه تاریخ پایان بعد از تاریخ شروع است
         if (endDate && startDate && new Date(endDate) < new Date(startDate)) {
             toast.error("تاریخ پایان باید بعد از تاریخ شروع باشد!");
             return;
@@ -212,7 +320,6 @@ const TeacherSchedualList = () => {
         setCurrentPage(1);
     };
 
-    // کامپوننت صفحه‌بندی سفارشی
     const CustomPagination = () => {
         const totalRows = filteredData.length;
         const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
@@ -252,7 +359,7 @@ const TeacherSchedualList = () => {
                                 pagination
                                 responsive
                                 paginationServer
-                                columns={columns()}
+                                columns={columns(handleEditModal, toggleForming, toggleLockToRaise)}
                                 onSort={() => { }}
                                 sortIcon={<ChevronDown />}
                                 className="react-dataTable"
@@ -268,11 +375,16 @@ const TeacherSchedualList = () => {
                         </div>
                     </Card>
                 </Col>
-                {/* calendar */}
                 <Col md={4} className="pb-1">
                     <SchedualCalendar onDateRangeChange={handleDateRangeChange} />
                 </Col>
             </Row>
+            <EditSchedualModal
+                handleModal={handleEditModal}
+                open={openEditModal}
+                scheduleData={selectedRow}
+                onScheduleUpdate={handleScheduleUpdate}
+            />
         </Fragment>
     );
 };

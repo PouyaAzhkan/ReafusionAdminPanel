@@ -70,7 +70,7 @@ export const columns = (handleEditModal, toggleForming, toggleLockToRaise) => [
     },
     {
         name: "تاریخ شروع و پایان",
-        width: "160px",
+        width: "150px",
         sortField: "startDate",
         selector: (row) => row.startDate,
         cell: (row) => {

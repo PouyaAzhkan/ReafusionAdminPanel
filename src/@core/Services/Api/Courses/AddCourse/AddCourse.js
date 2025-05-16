@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from "../../../../../@core/Services/interceptor";
 
-const AddCourse = () => {
+const AddCourses = () => {
    return useMutation({
-     mutationKey: ['AddCourse'],
+     mutationKey: ['AddCourses'],
      mutationFn: async (formData) => {
        const response = await Api.post(`/Course`, formData);
        
@@ -12,4 +12,4 @@ const AddCourse = () => {
    })
 }
 
-export default AddCourse
+export default AddCourses

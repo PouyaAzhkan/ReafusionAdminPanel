@@ -81,6 +81,30 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/AddCourse",
       },
+      {
+        id: "manageTecnolojy",
+        title: "مدیریت تکنولوژی دوره ها",
+        icon: <Circle size={12} />,
+        navLink: "/manageCourseCategory",
+      },
+      {
+        id: "manageStatus",
+        title: "مدیریت وضعیت دوره ها",
+        icon: <Circle size={12} />,
+        navLink: "/manageCourseStatus",
+      },
+      {
+        id: "manageLevel",
+        title: "مدیریت سطح دوره ها",
+        icon: <Circle size={12} />,
+        navLink: "/manageCourseLevel",
+      },
+      {
+        id: "manageClassRoom",
+        title: "لیست کلاس ها",
+        icon: <Circle size={12} />,
+        navLink: "/manageCourseClassRoom",
+      },
     ],
   },
 ];

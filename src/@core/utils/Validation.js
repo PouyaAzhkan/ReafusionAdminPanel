@@ -27,3 +27,73 @@ export const EditCourseValidation = yup.object({
     MiniDescribe: yup.string().min(3,'طول  نویسه کم تر از حد مجاز').max(290,'طول نویسه بیش از حد مجاز').required("فیلد الزامی!"),
     Describe: yup.string().min(3,'طول  نویسه کم تر از حد مجاز').max(850,'طول نویسه بیش از حد مجاز').required("فیلد الزامی!"),
 });
+
+export const validCreateCourseLv1 = yup.object().shape({
+  Title: yup.string()
+    .min(3, "طول نویسه باید بیشتر از 3 حرف باشد")
+    .required("نام دوره الزامی است"),
+  GoogleTitle: yup.string(),
+  Capacity: yup.number()
+    .typeError("ظرفیت دوره باید عدد باشد")
+    .min(1, "ظرفیت دوره باید حداقل ۱ باشد")
+    .required("ظرفیت دوره الزامی است"),
+  Cost: yup.number()
+    .typeError("قیمت دوره باید یک عدد باشد")
+    .required("قیمت دوره الزامی است"),
+});
+export const validCreateCourseLv2 = yup.object().shape({
+  CourseTypeId: yup.number().required("نوع دوره الزامی است"),
+  CourseLvlId: yup.number().required("سطح دوره الزامی است"),
+  TeacherId: yup.number().required("استاد دوره الزامی است"),
+  TremId: yup.number()
+    .typeError("آیدی ترم باید یک عدد باشد")
+    .required("آیدی ترم الزامی است"),
+  ClassId: yup.number().required("کلاس دوره الزامی است"),
+  SessionNumber: yup.number()
+    .typeError("تعداد جلسات باید یک عدد باشد")
+    .required("تعداد جلسات الزامی است"),
+});
+
+export const validCreateCourseLv3 = yup.object().shape({
+  StartTime: yup.date().required("زمان شروع دوره الزامی است"),
+  EndTime: yup.date()
+    .required("زمان پایان دوره الزامی است")
+    .min(
+      yup.ref("StartTime"),
+      "زمان پایان دوره باید بعد از زمان شروع دوره باشد"
+    ),
+  MiniDescribe: yup.string().required("توضیحات کوتاه الزامی می باشد"),
+  UniqeUrlString: yup.string()
+    .max(30, "شناسه دوره حداکثر باید 30 کاراکتر باشد")
+    .required("شناسه دوره الزامی می باشد"),
+});
+
+export const validCreateImageCourse = yup.object().shape({
+  Text: yup.string()
+    .typeError("لطفا نوشته وارد کنید")
+    .required("متن جستجو را وارد کنید!"),
+});
+
+export const TechnologiesValidation = yup.object({
+  techName: yup.string().required("فیلد الزامی!"),
+  describe: yup.string().required("فیلد الزامی!"),
+});
+
+export const CourseStatusValidation = yup.object({
+  statusName: yup.string().required("فیلد الزامی!"),
+  describe: yup.string().required("فیلد الزامی!"),
+  statusNumber: yup.string().required('شماره یکتا الزامی هست')
+});
+
+export const CourseLevelsValidation = yup.object({
+  levelName: yup.string().required("فیلد الزامی!").min(5, 'تعداد کاراکتر های سطح دوره باید بیشتر از 5 تا باشد')
+  .max(50, 'تعداد کاراکتر های سطح دوره نباید بیشتر از 50 تا باشد')
+});
+
+export const ClassroomValidations = yup.object({
+  classRoomName: yup.string()
+    .required("فیلد الزامی!")
+    .min(5, "تعداد کارکتر های نام کلاس بین 5 الی 50 میباشد.")
+    .max(50, "تعداد کارکتر های نام کلاس بین 5 الی 50 میباشد."),
+  capacity: yup.string().required("فیلد الزامی!")
+});

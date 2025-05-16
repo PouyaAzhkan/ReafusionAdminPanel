@@ -5,7 +5,7 @@ import Select from "react-select";
 // ** Reactstrap Imports
 import { Row, Col } from "reactstrap";
 
-const ListHeader = ({ rowsFunc, sortOptions,styleDisplay,colWidth }) => {
+const ListHeader = ({ rowsFunc, sortOptions,styleDisplay,colWidth, rowsPerPage }) => {
   const dispatch = useDispatch();
 
   // ** User Current options
@@ -14,6 +14,10 @@ const ListHeader = ({ rowsFunc, sortOptions,styleDisplay,colWidth }) => {
     { label: "24", value: 24 },
     { label: "48", value: 48 },
   ];
+
+  const selectedOption = ShowCurrentOption.find(
+    (option) => option.value === rowsPerPage
+  ) || ShowCurrentOption[0];
 
   return (
     <div className="align-items-center">
@@ -24,7 +28,7 @@ const ListHeader = ({ rowsFunc, sortOptions,styleDisplay,colWidth }) => {
             <Select
               className="react-select rounded-3"
               classNamePrefix="select"
-              defaultValue={ShowCurrentOption[0]}
+              value={selectedOption}
               name="rowsFunc"
               options={ShowCurrentOption}
               onChange={(option) => dispatch(rowsFunc(option.value))}

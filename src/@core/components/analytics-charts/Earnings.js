@@ -77,7 +77,7 @@ const Earnings = ({ success, Api }) => {
               options={options}
               series={[Math.abs(activeUser), Math.abs(interActiveUser)]}
               type="donut"
-              height={125}
+              height={175}
               className="earnings-chart"
               chartId="earningsChart"
             />

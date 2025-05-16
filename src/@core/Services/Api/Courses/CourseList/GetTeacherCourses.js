@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import Api from "../../../../../@core/Services/interceptor";
 
-const GetTeacherCourses = () => {
+const GetTeacherCourses = (paramsTab4) => {
   return useQuery({
-     queryKey: ['GetTeacherCourses'],
-     queryFn: async () => {
-       const response = await Api.get(`/Course/TeacherCourseList`);
-       
-       return response
-     }
-  })
-}
+    queryKey: ['GetTeacherCourses', paramsTab4],
+    queryFn: async () => {
+      const response = await Api.get('/Course/TeacherCourseList', { params: paramsTab4 });
+      return response;
+    }
+  });
+};
+
 
 export default GetTeacherCourses

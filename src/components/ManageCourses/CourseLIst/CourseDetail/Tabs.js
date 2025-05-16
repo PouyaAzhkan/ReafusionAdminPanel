@@ -48,21 +48,21 @@ const UserTabs = ({
 
   return (
     <Fragment>
-      <Nav pills className="mb-2">
+      <Nav pills className="mb-2 gap-1 justify-content-around">
         {navItems.map((items, index) => (
           <NavItem key={index}>
             <NavLink
               active={active === items.id}
               onClick={() => toggleTab(items.id)}
             >
-              <items.icon className="font-medium-3 me-50" />
+              <items.icon className="font-medium-3 me-10" />
               <span className="fw-bold">{items.text}</span>
             </NavLink>
           </NavItem>
         ))}
       </Nav>
 
-      <TabContent activeTab={active}>
+      <TabContent  activeTab={active}>
         <TabPane tabId="1">
           {data && (
             <Row>
@@ -93,7 +93,7 @@ const UserTabs = ({
               <Col sm={12}>
                 <Card style={{ minHeight: "347px" }}>
                   <CardHeader>
-                    <div className="divider-text fs-2">جزئیات</div>
+                    <div className="divider-text fs-2">توضیحات</div>
                   </CardHeader>
                   <CardBody className="text-primary">
                          <div>{data.describe ? data.describe : "هیچ جزئیات یا توضیحاتی برای این دوره وجود ندارد"}</div>
@@ -103,7 +103,6 @@ const UserTabs = ({
             </Row>
           )}
         </TabPane>
-
         <TabPane tabId="2"><CourseCommment /></TabPane>
         <TabPane tabId="3">   
             <CourseUsers

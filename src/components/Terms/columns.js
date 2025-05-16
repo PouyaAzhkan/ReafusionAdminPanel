@@ -16,7 +16,7 @@ import {
 import toast from "react-hot-toast";
 import moment from "jalali-moment";
 
-export const columns = ({ refetch, setShowEditModal, setSelectedBuilding }) => [
+export const columns = ({ refetch, setShowEditModal, setSelectedTerm }) => [
   {
     name: "آیدی",
     sortable: true,
@@ -90,7 +90,7 @@ export const columns = ({ refetch, setShowEditModal, setSelectedBuilding }) => [
               className="w-100"
               onClick={(e) => {
                 e.preventDefault();
-                setSelectedBuilding(row); // تنظیم ساختمان انتخاب‌شده
+                setSelectedTerm(row); // تنظیم ساختمان انتخاب‌شده
                 setShowEditModal(true); // باز کردن مودال
               }}
             >

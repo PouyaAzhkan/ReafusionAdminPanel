@@ -19,8 +19,8 @@ import {
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 
-import AddBuildingModal from "./AddBuildingModal";
-import EditBuildingInfo from "./EditBuildingInfo"; // ایمپورت کامپوننت جدید
+import AddTermModal from "./AddTermModal";
+import EditBuildingInfo from "./EditTermInfo"; // ایمپورت کامپوننت جدید
 import { getAllTerms } from "./../../@core/Services/Api/Terms/Terms";
 
 const statusOptions = [
@@ -77,7 +77,7 @@ const CustomHeader = ({
               color="primary"
               onClick={handleModal}
             >
-              افزودن ساختمان
+              افزودن ترم
             </Button>
           </div>
         </Col>
@@ -93,7 +93,7 @@ const TermsList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedBuilding, setSelectedBuilding] = useState(null); // اضافه کردن state برای ساختمان انتخاب‌شده
+  const [selectedTerm, setSelectedTerm] = useState(null); // اضافه کردن state برای ساختمان انتخاب‌شده
   const [currentStatus, setCurrentStatus] = useState({
     value: "",
     label: "انتخاب",
@@ -152,7 +152,7 @@ const TermsList = () => {
     setCurrentPage(1);
   };
 
-  const handleBuildingUpdated = (updatedBuilding) => {
+  const handleTermUpdated = (updatedBuilding) => {
     refetch(); // به‌روزرسانی داده‌ها پس از ویرایش
   };
 
@@ -218,7 +218,7 @@ const TermsList = () => {
             columns={columns({
               refetch,
               setShowEditModal,
-              setSelectedBuilding,
+              setSelectedTerm,
             })}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
@@ -239,13 +239,13 @@ const TermsList = () => {
         </div>
       </Card>
 
-      <AddBuildingModal open={sidebarOpen} handleModal={handleModal} />
+      <AddTermModal open={sidebarOpen} handleModal={handleModal} />
 
       <EditBuildingInfo
         showEditModal={showEditModal}
         setShowEditModal={setShowEditModal}
-        selectedBuilding={selectedBuilding}
-        onBuildingUpdated={handleBuildingUpdated}
+        selectedTerm={selectedTerm}
+        onBuildingUpdated={handleTermUpdated}
       />
     </Fragment>
   );

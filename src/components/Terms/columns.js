@@ -1,22 +1,15 @@
-import {
-  Archive,
-  CheckSquare,
-  Edit,
-  MoreVertical,
-  XSquare,
-} from "react-feather";
-import { Link } from "react-router-dom";
-import {
-  Badge,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-  UncontrolledDropdown,
-} from "reactstrap";
+import { Archive, CheckSquare, Edit, MoreVertical, XSquare } from "react-feather";
+import { Badge, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import toast from "react-hot-toast";
 import moment from "jalali-moment";
 
-export const columns = ({ refetch, setShowEditModal, setSelectedTerm }) => [
+export const columns = ({
+  refetch,
+  setShowEditModal,
+  setShowEditTermTimeModal,
+  setSelectedTerm,
+  setSelectedTermTime, // اضافه کردن به پراپ‌ها
+}) => [
   {
     name: "آیدی",
     sortable: true,
@@ -46,9 +39,7 @@ export const columns = ({ refetch, setShowEditModal, setSelectedTerm }) => [
     cell: (row) => (
       <span>
         {row.startDate && row.endDate
-          ? `${moment(row.startDate).locale("fa").format("YYYY/MM/DD")}
-               تا 
-               ${moment(row.endDate).locale("fa").format("YYYY/MM/DD")}`
+          ? `${moment(row.startDate).locale("fa").format("YYYY/MM/DD")} تا ${moment(row.endDate).locale("fa").format("YYYY/MM/DD")}`
           : "—"}
       </span>
     ),
@@ -90,12 +81,32 @@ export const columns = ({ refetch, setShowEditModal, setSelectedTerm }) => [
               className="w-100"
               onClick={(e) => {
                 e.preventDefault();
-                setSelectedTerm(row); // تنظیم ساختمان انتخاب‌شده
-                setShowEditModal(true); // باز کردن مودال
+                setSelectedTerm(row);
+                setShowEditModal(true);
               }}
             >
               <Edit size={14} className="me-50" />
-              <span className="align-middle">ویرایش</span>
+              <span className="align-middle">ویرایش ترم</span>
+            </DropdownItem>
+            <DropdownItem
+              tag="span"
+              className="w-100"
+              onClick={(e) => {
+                e.preventDefault();
+                // تنظیم داده‌های زمان بسته شدن
+                setSelectedTermTime({
+                  id: row.id,
+                  termId: row.id,
+                  termName: row.termName,
+                  closeReason: row.closeReason || "",
+                  startCloseDate: row.startCloseDate || "",
+                  endCloseDate: row.endCloseDate || "",
+                });
+                setShowEditTermTimeModal(true);
+              }}
+            >
+              <Edit size={14} className="me-50" />
+              <span className="align-middle">ویرایش زمان</span>
             </DropdownItem>
           </DropdownMenu>
         </UncontrolledDropdown>

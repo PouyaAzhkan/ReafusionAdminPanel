@@ -20,8 +20,10 @@ import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 
 import AddTermModal from "./AddTermModal";
-import EditBuildingInfo from "./EditTermInfo"; // ایمپورت کامپوننت جدید
-import { getAllTerms } from "./../../@core/Services/Api/Terms/Terms";
+import AddTermTimeModal from "./AddTermTimeModal";
+import EditTermInfo from "./EditTermInfo";
+import EditTermTimeInfo from "./EditTermTimeInfo";
+import { getAllTerms } from "../../@core/Services/Api/Terms/Terms";
 
 const statusOptions = [
   { value: "", label: "انتخاب" },
@@ -31,7 +33,8 @@ const statusOptions = [
 
 const CustomHeader = ({
   data,
-  handleModal,
+  handleAddTermModal,
+  handleAddTermTimeModal,
   handlePerPage,
   rowsPerPage,
   handleSearch,
@@ -75,9 +78,16 @@ const CustomHeader = ({
             <Button
               className="add-new-user"
               color="primary"
-              onClick={handleModal}
+              onClick={handleAddTermModal}
             >
               افزودن ترم
+            </Button>
+            <Button
+              className="add-new-user ms-1"
+              color="primary"
+              onClick={handleAddTermTimeModal}
+            >
+              افزودن زمان
             </Button>
           </div>
         </Col>
@@ -92,8 +102,11 @@ const TermsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [addTermTimeOpen, setAddTermTimeOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedTerm, setSelectedTerm] = useState(null); // اضافه کردن state برای ساختمان انتخاب‌شده
+  const [showEditTermTimeModal, setShowEditTermTimeModal] = useState(false);
+  const [selectedTerm, setSelectedTerm] = useState(null);
+  const [selectedTermTime, setSelectedTermTime] = useState(null); // متغیر جدید برای زمان بسته شدن
   const [currentStatus, setCurrentStatus] = useState({
     value: "",
     label: "انتخاب",
@@ -113,15 +126,12 @@ const TermsList = () => {
   const filteredData =
     data?.filter((item) => {
       const searchText = debouncedSearch?.toLowerCase() || "";
-
       const matchesSearch = debouncedSearch
         ? item.departmentName?.toLowerCase().includes(searchText) ||
           item.termName?.toLowerCase().includes(searchText)
         : true;
-
       const matchesStatus =
         currentStatus.value !== "" ? item.expire === currentStatus.value : true;
-
       return matchesSearch && matchesStatus;
     }) || [];
 
@@ -131,7 +141,9 @@ const TermsList = () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  const handleModal = () => setSidebarOpen(!sidebarOpen);
+  const handleAddTermModal = () => setSidebarOpen(!sidebarOpen);
+
+  const handleAddTermTimeModal = () => setAddTermTimeOpen(!addTermTimeOpen);
 
   const handlePagination = (page) => {
     setCurrentPage(page.selected + 1);
@@ -152,8 +164,12 @@ const TermsList = () => {
     setCurrentPage(1);
   };
 
-  const handleTermUpdated = (updatedBuilding) => {
-    refetch(); // به‌روزرسانی داده‌ها پس از ویرایش
+  const handleTermUpdated = () => {
+    refetch();
+  };
+
+  const handleTermTimeUpdated = () => {
+    refetch();
   };
 
   const CustomPagination = () => {
@@ -180,7 +196,7 @@ const TermsList = () => {
   };
 
   if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (isError) return <div>خطا در بارگذاری ساختمان‌ها.</div>;
+  if (isError) return <div>خطا در بارگذاری داده‌ها.</div>;
 
   return (
     <Fragment>
@@ -218,7 +234,9 @@ const TermsList = () => {
             columns={columns({
               refetch,
               setShowEditModal,
+              setShowEditTermTimeModal,
               setSelectedTerm,
+              setSelectedTermTime, // اضافه کردن به پراپ‌ها
             })}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
@@ -232,20 +250,33 @@ const TermsList = () => {
                 rowsPerPage={rowsPerPage}
                 handleSearch={handleSearch}
                 handlePerPage={handlePerPage}
-                handleModal={handleModal}
+                handleAddTermModal={handleAddTermModal}
+                handleAddTermTimeModal={handleAddTermTimeModal}
               />
             }
           />
         </div>
       </Card>
 
-      <AddTermModal open={sidebarOpen} handleModal={handleModal} />
+      <AddTermModal open={sidebarOpen} handleModal={handleAddTermModal} />
 
-      <EditBuildingInfo
+      <AddTermTimeModal
+        open={addTermTimeOpen}
+        handleModal={handleAddTermTimeModal}
+      />
+
+      <EditTermInfo
         showEditModal={showEditModal}
         setShowEditModal={setShowEditModal}
         selectedTerm={selectedTerm}
         onBuildingUpdated={handleTermUpdated}
+      />
+
+      <EditTermTimeInfo
+        showEditModal={showEditTermTimeModal}
+        setShowEditModal={setShowEditTermTimeModal}
+        selectedTermTime={selectedTermTime} // استفاده از selectedTermTime
+        onBuildingUpdated={handleTermTimeUpdated}
       />
     </Fragment>
   );

@@ -66,3 +66,40 @@ export const useEditTerm = () => {
     },
   });
 };
+
+// add time
+export const useAddTermTime = () => {
+  return useMutation({
+    mutationFn: async (termTimeData) => {
+      try {
+        const response = await api.post("/Term/AddTermCloseDate", termTimeData);
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to add term:", error);
+    },
+  });
+};
+
+// edit term
+export const useEditTermTime = () => {
+  return useMutation({
+    mutationFn: async (termTimeData) => {
+      try {
+        const response = await api.put(
+          "/Term/UpdateTermCloseDate",
+          termTimeData
+        );
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to edit term:", error);
+    },
+  });
+};

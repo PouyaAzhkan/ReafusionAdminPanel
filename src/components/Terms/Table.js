@@ -18,17 +18,15 @@ import {
 } from "reactstrap";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
-import {
-  getAllBuildings,
-  useChangeBuildingStatus,
-} from "../../../@core/Services/Api/Buildings/Buildings";
+
 import AddBuildingModal from "./AddBuildingModal";
 import EditBuildingInfo from "./EditBuildingInfo"; // ایمپورت کامپوننت جدید
+import { getAllTerms } from "./../../@core/Services/Api/Terms/Terms";
 
 const statusOptions = [
   { value: "", label: "انتخاب" },
-  { value: true, label: "فعال" },
-  { value: false, label: "غیرفعال" },
+  { value: true, label: "منقضی شده" },
+  { value: false, label: "منقضی نشده" },
 ];
 
 const CustomHeader = ({
@@ -88,7 +86,7 @@ const CustomHeader = ({
   );
 };
 
-const UsersList = () => {
+const TermsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,19 +108,20 @@ const UsersList = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isError, isLoading, refetch } = getAllBuildings();
-  const { mutate: changeBuildingStatus } = useChangeBuildingStatus({});
+  const { data, isError, isLoading, refetch } = getAllTerms();
 
   const filteredData =
     data?.filter((item) => {
+      const searchText = debouncedSearch?.toLowerCase() || "";
+
       const matchesSearch = debouncedSearch
-        ? item.buildingName &&
-          item.buildingName
-            .toLowerCase()
-            .includes(debouncedSearch.toLowerCase())
+        ? item.departmentName?.toLowerCase().includes(searchText) ||
+          item.termName?.toLowerCase().includes(searchText)
         : true;
+
       const matchesStatus =
-        currentStatus.value !== "" ? item.active === currentStatus.value : true;
+        currentStatus.value !== "" ? item.expire === currentStatus.value : true;
+
       return matchesSearch && matchesStatus;
     }) || [];
 
@@ -217,7 +216,6 @@ const UsersList = () => {
             responsive
             paginationServer
             columns={columns({
-              changeBuildingStatus,
               refetch,
               setShowEditModal,
               setSelectedBuilding,
@@ -253,4 +251,4 @@ const UsersList = () => {
   );
 };
 
-export default UsersList;
+export default TermsList;

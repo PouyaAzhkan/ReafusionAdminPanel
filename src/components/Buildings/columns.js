@@ -7,7 +7,7 @@ import {
   DropdownToggle,
   UncontrolledDropdown,
 } from "reactstrap";
-import { usefetchBuildingsAddress } from "../../../@core/Services/Api/Buildings/Buildings";
+import { usefetchBuildingsAddress } from "../../@core/Services/Api/Buildings/Buildings";
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 

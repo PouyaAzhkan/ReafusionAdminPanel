@@ -2,7 +2,7 @@ import React from 'react';
 import { Row, Col } from 'reactstrap';
 import StatsHorizontal from '@components/widgets/stats/StatsHorizontal';
 import { X, Check, Trello } from 'react-feather';
-import { getAllBuildings } from './../../../@core/Services/Api/Buildings/Buildings';
+import { getAllBuildings } from './../../@core/Services/Api/Buildings/Buildings';
 
 const Report = () => {
     const { data, isLoading, isError, error } = getAllBuildings();

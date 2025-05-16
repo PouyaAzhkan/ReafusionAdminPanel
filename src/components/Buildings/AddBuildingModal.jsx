@@ -10,7 +10,7 @@ import {
   InputGroup,
   InputGroupText
 } from 'reactstrap'
-import { useCreateBuilding } from '../../../@core/Services/Api/Buildings/Buildings'
+import { useCreateBuilding } from '../../@core/Services/Api/Buildings/Buildings'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import { useQueryClient } from '@tanstack/react-query' // وارد کردن useQueryClient
 import toast from 'react-hot-toast'

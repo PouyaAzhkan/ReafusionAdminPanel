@@ -90,6 +90,12 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/AddCourse",
       },
+      {
+        id: "terms",
+        title: "مدیریت ترم ها",
+        icon: <Circle size={12} />,
+        navLink: "/terms",
+      },
     ],
   },
   {

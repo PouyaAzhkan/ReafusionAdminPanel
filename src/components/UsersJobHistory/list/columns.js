@@ -8,6 +8,7 @@ import {
 } from "reactstrap";
 import { Archive, Edit, MoreVertical, Trash2 } from "react-feather";
 import { useUserDetail } from "../../../@core/Services/Api/UserManage/user";
+import moment from "jalali-moment";
 
 export const columns = (
   setDeleteModal,
@@ -77,8 +78,11 @@ export const columns = (
     selector: (row) => row.workStartDate,
     cell: (row) => (
       <span className="text-capitalize">
-        از {row.workStartDate?.split("T")[0] || "—"} تا{" "}
-        {row.workEndDate?.split("T")[0] || "—"}
+        {row.workStartDate && row.workEndDate
+          ? `${moment(row.workStartDate).locale("fa").format("YYYY/MM/DD")}
+               تا 
+               ${moment(row.workEndDate).locale("fa").format("YYYY/MM/DD")}`
+          : "—"}
       </span>
     ),
   },

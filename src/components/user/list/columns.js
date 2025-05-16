@@ -9,6 +9,7 @@ import {
 } from "reactstrap";
 
 import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
+import moment from "jalali-moment";
 
 const renderRole = (row) => {
   return (
@@ -80,7 +81,7 @@ export const columns = (setDeleteModal, setUserToDelete) => [
     selector: (row) => row.insertDate,
     cell: (row) => (
       <span className="text-capitalize">
-        {row.insertDate?.split("T")[0] || "—"}
+        {moment(row.insertDate).locale("fa").format("YYYY/MM/DD")}
       </span>
     ),
   },

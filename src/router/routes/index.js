@@ -18,8 +18,6 @@ import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblo
 import Courses from "../../components/ManageCourses/CourseLIst/list";
 import CourseDetail from "../../components/ManageCourses/CourseLIst/CourseDetail/CourseDetail";
 import AddCourse from "../../components/ManageCourses/AddCourse/AddCourse";
-import AllBuildingList from "../../components/Buildings/list/AllBuildingList";
-import AllCommentList from "../../components/CommentManage/list/AllCommentList";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -56,7 +54,6 @@ const Comments = lazy(() => import("../../pages/Comments"));
 // buildings
 const Buildings = lazy(() => import("../../pages/Buildings"));
 // schedual
-
 const AdminSchedual = lazy(() => import("../../pages/Scheduals/AdminSchedual"));
 const TeacherSchedual = lazy(() =>
   import("../../pages/Scheduals/TeacherSchedual")
@@ -161,11 +158,11 @@ const Routes = [
   },
   {
     path: "/buildings",
-    element: <AllBuildingList />,
+    element: <Buildings />,
   },
   {
     path: "/comments",
-    element: <AllCommentList />,
+    element: <Comments />,
   },
   {
     path: "/adminSchedual",

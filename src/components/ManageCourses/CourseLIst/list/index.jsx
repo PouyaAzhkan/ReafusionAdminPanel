@@ -5,7 +5,7 @@ import Tabs from "./Tabs";
 import Select from "react-select";
 import { Row, Col, Input, TabContent, TabPane } from "reactstrap";
 import CourseCard from "./CourseCard";
-import CustomPagination from "../../../../@core/components/pagination";
+import CustomPagination2 from "../../../../@core/components/pagination/index2";
 import StatsHorizontal from "../../../../@core/components/widgets/stats/StatsHorizontal";
 import { Activity, Book, Clock, X } from "react-feather";
 import CourseReserve from "./tabs/CourseReserve";
@@ -148,7 +148,7 @@ const Courses = () => {
             {renderFilters(1)}
             <Input type="text" onChange={e => handleDebounceSearch(e, 1)} placeholder="جستجو در دوره‌ها" className="mt-2" />
             <CourseCard activeView="flex" item={sortedCoursesTab1} handleActiveOrDetective={activeOrDeActive} />
-            <CustomPagination total={totalCount} rowsPerPage={paramsTab1.RowsOfPage} current={paramsTab1.PageNumber} handleClickFunc={page => handlePagination(page, 1)} />
+            <CustomPagination2 total={totalCount} rowsPerPage={paramsTab1.RowsOfPage} current={paramsTab1.PageNumber} handleClickFunc={page => handlePagination(page, 1)} />
           </TabPane>
           <TabPane tabId="2">
             <CourseReserve />
@@ -160,7 +160,7 @@ const Courses = () => {
             {renderFilters(4)}
             <Input type="text" onChange={e => handleDebounceSearch(e, 4)} placeholder="جستجو در دوره‌ها" className="mt-2" />
             <CourseCard activeView="flex" item={sortedCoursesTab4} />
-            <CustomPagination total={GetTeacherCourse?.totalCount || 0} rowsPerPage={paramsTab4.RowsOfPage} current={paramsTab4.PageNumber} handleClickFunc={page => handlePagination(page, 4)} />
+            <CustomPagination2 total={GetTeacherCourse?.totalCount || 0} rowsPerPage={paramsTab4.RowsOfPage} current={paramsTab4.PageNumber} handleClickFunc={page => handlePagination(page, 4)} />
           </TabPane>
         </TabContent>
       </div>

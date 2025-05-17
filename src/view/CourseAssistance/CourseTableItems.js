@@ -2,7 +2,6 @@ import { Button } from "reactstrap";
 import fallback from "../../assets/images/element/CourseImage.jpg";
 
 const CourseTableItems = ({ item, setId, toggle }) => {
-  console.log("Rendering CourseTableItems, item:", item);
   return (
     <tr className="text-center" style={{ whiteSpace: "nowrap" }}>
       <td style={{ width: "100px" }} className="px-0">
@@ -29,8 +28,8 @@ const CourseTableItems = ({ item, setId, toggle }) => {
           style={{ width: "120px", float: "left" }}
           color="primary"
           onClick={() => {
-            setId(item.courseId || item.id); // سازگار با هر دو فرمت داده
-            toggle(); // اول آیدی رو تنظیم می‌کنه، بعد مودال رو می‌بنده
+            toggle();
+            setId(item.courseId);
           }}
         >
           <span className="mx-auto">انتخاب</span>

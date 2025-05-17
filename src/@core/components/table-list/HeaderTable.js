@@ -12,7 +12,7 @@ const HeaderTable = ({
   buttonText,
   isCreate = true,
   isSearching = true,
-  handleSearch, // این در واقع handleQuery است
+  handleSearch, 
 }) => {
   const dispatch = useDispatch();
 

@@ -97,3 +97,24 @@ export const ClassroomValidations = yup.object({
     .max(50, "تعداد کارکتر های نام کلاس بین 5 الی 50 میباشد."),
   capacity: yup.string().required("فیلد الزامی!")
 });
+
+export const DepartmentValidations = yup.object({
+  depName: yup.string()
+    .required("فیلد الزامی!")
+    .min(5, "تعداد کارکتر های نام دپارتمان بین 5 الی 70 میباشد.")
+    .max(70, "تعداد کارکتر های نام دپارتمان بین 5 الی 70 میباشد."),
+  buildingId: yup.string().required("فیلد الزامی!")
+});
+
+export const AssistanceWorkValidations = yup.object({
+  worktitle: yup.string()
+    .required("فیلد الزامی!")
+    .min(5, "تعداد کارکتر های عنوان کار بین 5 الی 90 میباشد.")
+    .max(90, "تعداد کارکتر های عنوان کار بین 5 الی 90 میباشد."),
+  workDescribe: yup.string()
+    .required("فیلد الزامی!")
+    .min(5, "تعداد کارکتر های عنوان کار بین 5 الی 90 میباشد.")
+    .max(450, "تعداد کارکتر های عنوان کار بین 5 الی 90 میباشد."),
+  assistanceId: yup.string().required("فیلد الزامی!"),
+  workDate: yup.string().required("فیلد الزامی!")
+});

@@ -105,6 +105,24 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/manageCourseClassRoom",
       },
+      {
+        id: "manageDepartment",
+        title: "لیست بخش ها",
+        icon: <Circle size={12} />,
+        navLink: "/manageCourseDepartment",
+      },
+      {
+        id: "manageAssistanceWork",
+        title: "مدیریت تسک ها",
+        icon: <Circle size={12} />,
+        navLink: "/manageAssistanceWork",
+      },
+      {
+        id: "manageCourseuser",
+        title: "مدیریت کاربران دوره",
+        icon: <Circle size={12} />,
+        navLink: "/manageCourseUser",
+      },
     ],
   },
 ];

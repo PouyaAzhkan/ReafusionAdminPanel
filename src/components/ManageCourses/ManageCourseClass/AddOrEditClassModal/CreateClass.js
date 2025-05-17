@@ -28,7 +28,7 @@ const CreateClass = ({ refetch, isOpen, toggle }) => {
       capacity: 0,
       buildingId: "",
     },
-    // resolver: yupResolver(ClassroomValidations), // در صورت نیاز فعالش کن
+    resolver: yupResolver(ClassroomValidations), // در صورت نیاز فعالش کن
   });
 
   useEffect(() => {

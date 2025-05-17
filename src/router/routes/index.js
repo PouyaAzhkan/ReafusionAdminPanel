@@ -24,6 +24,9 @@ import ManageCourseCategory from "../../components/ManageCourses/ManageCourseCat
 import ManageCourseStatus from "../../components/ManageCourses/ManageCourseStatus/ManageCourseStatus";
 import ManageCourseLevel from "../../components/ManageCourses/ManageCourseLevel/ManageCourseLevel";
 import ManageCourseClass from "../../components/ManageCourses/ManageCourseClass/ManageCourseClass";
+import CourseDepartment from "../../components/ManageCourses/ManageCourseDepartment/CourseDepartment";
+import AssistanceWork from "../../components/ManageCourses/ManageAssistance-Work/AssistanceWork";
+import MnanageCourseUser from "../../components/ManageCourses/MnanageCourseUser/MnanageCourseUser";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -169,6 +172,18 @@ const Routes = [
   {
     path: "/manageCourseClassRoom",
     element: <ManageCourseClass />,
+  },
+  {
+    path: "/manageCourseDepartment",
+    element: <CourseDepartment />,
+  },
+  {
+    path: "/manageAssistanceWork",
+    element: <AssistanceWork />,
+  },
+  {
+    path: "/manageCourseUser",
+    element: <MnanageCourseUser />,
   },
   {
     path: "/buildings",

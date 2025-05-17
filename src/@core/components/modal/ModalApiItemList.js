@@ -1,8 +1,8 @@
 import { Card, Modal, ModalBody, ModalHeader, Table } from "reactstrap";
 import { ListSearchbar } from "../products-list";
 import HeaderTable from "../header-table/HeaderTable";
-import CustomPagination from "../pagination";
 import { useDispatch } from "react-redux";
+import CustomPagination2 from "../pagination/index2";
 
 const ModalApiItemList = ({
   isOpen,
@@ -16,7 +16,7 @@ const ModalApiItemList = ({
   modalTitle,
   handlePageNumber,
 }) => {
-  const dispatch = useDispatch();
+ const dispatch = useDispatch();
 
   const handleWithDispatch = (page) => {
     dispatch(handlePageNumber(page.selected + 1));
@@ -42,7 +42,7 @@ const ModalApiItemList = ({
             </Table>
           </Card>
         </ModalBody>
-        <CustomPagination
+        <CustomPagination2
           total={totalCount}
           current={PageNumber}
           rowsPerPage={RowsOfPage}

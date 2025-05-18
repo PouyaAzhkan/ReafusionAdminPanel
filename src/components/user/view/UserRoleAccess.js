@@ -3,6 +3,7 @@ import { Card, CardBody, CardTitle, Input, Label, Button } from "reactstrap";
 import { Check, X, Link } from "react-feather";
 import telegramIcon from "../../../assets/images/logo/telegram.png";
 import linkdinIcon from "../../../assets/images/logo/linkdin.png";
+import { toast } from "react-hot-toast";
 import {
   addUserRole,
   GetUserList,
@@ -121,52 +122,46 @@ const UserRoleAccess = ({ userData }) => {
             </span>{" "}
             بدهید.
           </p>
-          {isAllRoleLoading ? (
-            <p>در حال بارگذاری نقش‌ها...</p>
-          ) : isAllRoleError ? (
-            <p className="text-danger">خطا در بارگذاری نقش‌ها</p>
-          ) : userRoles.length === 0 ? (
-            <p>هیچ نقشی یافت نشد</p>
-          ) : (
-            userRoles.map((item, index) => (
-              <div key={index} className="d-flex mt-2">
-                <div className="d-flex align-items-center justify-content-between flex-grow-1">
-                  <div className="me-1">
-                    <p className="mb-0">{item.title}</p>
-                  </div>
-                  <div className="mt-50 mt-sm-0">
-                    <div className="form-switch">
-                      <Input
-                        type="switch"
-                        checked={accountStates[index] || false}
-                        id={`account-${item.title}`}
-                        onChange={() =>
-                          handleSwitchChange(index, item.id, item.title)
-                        }
-                        disabled={isLoading}
-                      />
-                      <Label
-                        className="form-check-label"
-                        htmlFor={`account-${item.title}`}
-                      >
-                        <span className="switch-icon-left">
-                          <Check size={14} />
-                        </span>
-                        <span className="switch-icon-right">
-                          <X size={14} />
-                        </span>
-                      </Label>
+          {isAllRoleLoading
+            ? toast("در حال بارگذاری نقش‌ها")
+            : isAllRoleError
+            ? toast.error("!خطا در بارگذاری نقش‌ها")
+            : userRoles.length === 0
+            ? toast.error("!هیچ نقشی یافت نشد")
+            : userRoles.map((item, index) => (
+                <div key={index} className="d-flex mt-2">
+                  <div className="d-flex align-items-center justify-content-between flex-grow-1">
+                    <div className="me-1">
+                      <p className="mb-0">{item.title}</p>
+                    </div>
+                    <div className="mt-50 mt-sm-0">
+                      <div className="form-switch">
+                        <Input
+                          type="switch"
+                          checked={accountStates[index] || false}
+                          id={`account-${item.title}`}
+                          onChange={() =>
+                            handleSwitchChange(index, item.id, item.title)
+                          }
+                          disabled={isLoading}
+                        />
+                        <Label
+                          className="form-check-label"
+                          htmlFor={`account-${item.title}`}
+                        >
+                          <span className="switch-icon-left">
+                            <Check size={14} />
+                          </span>
+                          <span className="switch-icon-right">
+                            <X size={14} />
+                          </span>
+                        </Label>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
-          {isError && (
-            <p className="text-danger mt-1">
-              خطا در تنظیم دسترسی: {error.message || "لطفاً دوباره تلاش کنید"}
-            </p>
-          )}
+              ))}
+          {isError && toast.error("خطا در تنظیم دسترسی")}
         </CardBody>
       </Card>
     </Fragment>

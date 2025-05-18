@@ -3,12 +3,14 @@ import Api from "../../../../../../../@core/Services/interceptor";
 
 const GetPaymentList = (id) => {
   return useQuery({
-    queryKey: ['GetPaymentList'],
+    queryKey: ["GetPaymentList"],
     queryFn: async () => {
-      const response = await Api.get(`/CoursePayment/ListOfWhoIsPay?CourseId=${id}`);
+      const response = await Api.get(
+        `/CoursePayment/ListOfWhoIsPay?CourseId=${id}`
+      );
       return response;
     },
-    enabled: !!id // ✅ فقط وقتی id موجوده
+    enabled: !!id, // ✅ فقط وقتی id موجوده
   });
 };
 

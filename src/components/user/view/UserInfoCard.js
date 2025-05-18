@@ -3,9 +3,10 @@ import { Row, Col, Card, CardBody, Button, Badge } from "reactstrap";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Avatar from "@components/avatar";
-import { Check, Loader } from "react-feather";
+import { Percent } from "react-feather";
 import { changeUserActivity } from "../../../@core/Services/Api/UserManage/user";
 import EditUserInfo from "./EditUserInfo";
+import moment from "jalali-moment";
 
 const MySwal = withReactContent(Swal);
 
@@ -139,24 +140,15 @@ const UserInfoCard = ({ selectedUser }) => {
             </div>
           </div>
           <div className="d-flex justify-content-around my-2 pt-75">
-            <div className="d-flex align-items-start me-2">
-              <Badge color="light-primary" className="rounded p-75">
-                <Check className="font-medium-2" />
-              </Badge>
-              <div className="ms-75">
-                <h4 className="mb-0">{userData?.courses?.length || 0}</h4>
-                <small>دوره‌های تأیید شده</small>
-              </div>
-            </div>
             <div className="d-flex align-items-start">
               <Badge color="light-primary" className="rounded p-75">
-                <Loader className="font-medium-2" />
+                <Percent className="font-medium-2" />
               </Badge>
               <div className="ms-75">
                 <h4 className="mb-0">
-                  {userData?.coursesReseves?.length || 0}
+                  {userData?.profileCompletionPercentage + "%" || 0}
                 </h4>
-                <small>دوره‌های رزرو شده</small>
+                <small>درصد تکمیل پروفایل</small>
               </div>
             </div>
           </div>
@@ -164,14 +156,6 @@ const UserInfoCard = ({ selectedUser }) => {
           <div className="info-container">
             {userData ? (
               <ul className="list-unstyled">
-                <li className="mb-75">
-                  <span className="fw-bolder me-25">نام کاربری:</span>
-                  <span>{userData.userName}</span>
-                </li>
-                <li className="mb-75">
-                  <span className="fw-bolder me-25">ایمیل:</span>
-                  <span>{userData.gmail}</span>
-                </li>
                 <li className="mb-75">
                   <span className="fw-bolder me-25">وضعیت:</span>
                   <Badge
@@ -182,31 +166,24 @@ const UserInfoCard = ({ selectedUser }) => {
                   </Badge>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">نقش‌ها:</span>
-                  <span className="text-capitalize">
-                    {userData.roles?.map((role, index) => (
-                      <span key={index}>
-                        {role.roleName}
-                        {index < userData.roles.length - 1 && ", "}
-                      </span>
-                    ))}
+                  <span className="fw-bolder me-25">جنسیت:</span>
+                  <span>{userData.gender ? "مرد" : "زن"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">تاریخ ثبت نام:</span>
+                  <span>
+                    {moment(userData?.insertDate)
+                      .locale("fa")
+                      .format("YYYY/MM/DD")}
                   </span>
-                </li>
-                <li className="mb-75">
-                  <span className="fw-bolder me-25">کد ملی:</span>
-                  <span>{userData.nationalCode}</span>
-                </li>
-                <li className="mb-75">
-                  <span className="fw-bolder me-25">تاریخ تولد:</span>
-                  <span>{userData.birthDay?.split("T")[0]}</span>
                 </li>
                 <li className="mb-75">
                   <span className="fw-bolder me-25">شماره موبایل:</span>
                   <span>{userData.phoneNumber}</span>
                 </li>
                 <li className="mb-75">
-                  <span className="fw-bolder me-25">آدرس:</span>
-                  <span>{userData.homeAdderess}</span>
+                  <span className="fw-bolder me-25">ایمیل:</span>
+                  <span>{userData.gmail}</span>
                 </li>
               </ul>
             ) : null}

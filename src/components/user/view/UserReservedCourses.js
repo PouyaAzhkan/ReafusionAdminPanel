@@ -8,7 +8,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import emptyImg from "../../../assets/images/emptyImage/CourseImage.jpg";
 
-
 export const columns = [
   {
     name: "عنوان دوره",
@@ -18,12 +17,7 @@ export const columns = [
     cell: (row) => (
       <div className="d-flex align-items-center">
         <Link to={`/course-details/${row.courseId}`}>
-          <Avatar
-            className="me-1"
-            img={emptyImg}
-            alt=""
-            imgWidth="32"
-          />
+          <Avatar className="me-1" img={emptyImg} alt="" imgWidth="32" />
         </Link>
         <div className="d-flex flex-column">
           <Link
@@ -66,7 +60,7 @@ export const columns = [
 
 const UserReservedCourses = ({ reservedCourses }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
 
   // Handle page change
   const handlePagination = (page) => {

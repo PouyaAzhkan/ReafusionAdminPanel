@@ -1,10 +1,7 @@
-import { useDispatch, useSelector } from "react-redux";
-import { Button, Card, Col, Row, Table } from "reactstrap";
 import { useState, useEffect } from "react";
-import { handleCourseId, handleQueryCU, handleRowsOfPage, handlePageNumber } from "./store";
+import { Button, Card, Col, Row, Table } from "reactstrap";
 import headerTable from "../../../@core/constants/course-user/HeaderTable";
 import ModalApiItemList from "../../../@core/components/modal/ModalApiItemList";
-import { handleCoursePageNumber, handleQueryCourse } from "../../../components/ManageCourses/CourseLIst/store/CourseList";
 import TableItems from "./TableItems";
 import CourseTableItems from "../../../view/CourseAssistance/CourseTableItems";
 import GetCoursesList from "../../../@core/Services/Api/Courses/ManangeCourseUser/GetCourseList";
@@ -12,46 +9,64 @@ import GetCourseUserList from "../../../@core/Services/Api/Courses/ManangeCourse
 import CustomPagination2 from "../../../@core/components/pagination/index2";
 import HeaderTable2 from "../../../@core/components/table-list/HeaderTable2";
 
-const MnanageCourseUser = () => {
-  const params = useSelector((state) => state.CourseUserSlice) || {};
-  const courseParams = useSelector((state) => state.CoursesList) || {};
-  const dispatch = useDispatch();
+const ManageCourseUser = () => {
+  // Local state replacing Redux
+  const [params, setParams] = useState({
+    CourseId: null,
+    PageNumber: 1,
+    RowsOfPage: 10,
+    Query: "",
+  });
+  const [courseParams, setCourseParams] = useState({
+    PageNumber: 1,
+    RowsOfPage: 6,
+    Query: "",
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [courseId, setCourseId] = useState(null);
-
-  // Update courseId in Redux store
-  useEffect(() => {
-    if (courseId) {
-      dispatch(handleCourseId(courseId));
-    }
-  }, [courseId, dispatch]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch user list for the selected course
-  const { data: userList , isLoading: userLoading, error: UserError } = GetCourseUserList({
+  const { data: userList, isLoading: userLoading, error: userError } = GetCourseUserList({
     ...params,
     CourseId: courseId || params.CourseId,
   });
 
+  // Fetch courses list
+  const { data: courses, isLoading: courseLoading, error: courseError } = GetCoursesList({
+    ...courseParams,
+  });
+
   // Pagination
-  const [currentPage, setCurrentPage] = useState(params.PageNumber || 1);
-  const rowsPerPage = params.RowsOfPage || 10;
+  const rowsPerPage = params.RowsOfPage;
   const totalItems = userList?.length || 0;
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
 
   const handleMovePage = (page) => {
     const newPage = page.selected + 1; // ReactPaginate is 0-based
     setCurrentPage(newPage);
-    dispatch(handlePageNumber(newPage));
+    setParams((prev) => ({ ...prev, PageNumber: newPage }));
   };
 
-  // Handle RowOfPage for list
-    const handleRows = (e) => {
-      const value = parseInt(e.currentTarget.value);
-      dispatch(handleRowsOfPage(value));
-      setCurrentPage(1);
-    };
+  // Handle RowsOfPage for list
+  const handleRows = (e) => {
+    const value = parseInt(e.currentTarget.value);
+    setParams((prev) => ({ ...prev, RowsOfPage: value, PageNumber: 1 }));
+    setCurrentPage(1);
+  };
+
+  // Handle search query
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setParams((prev) => ({ ...prev, Query: value }));
+  };
+
+  // Handle course selection
+  useEffect(() => {
+    if (courseId) {
+      setParams((prev) => ({ ...prev, CourseId: courseId }));
+    }
+  }, [courseId]);
 
   // Choose Course Modal
   const [chooseCourseModal, setChooseCourseModal] = useState(false);
@@ -59,23 +74,22 @@ const MnanageCourseUser = () => {
 
   const courseTableHeader = ["", "نام دوره", "وضعیت", "عملیات"];
 
-const filteredAndSortedUsers = userList
-  ?.filter((item) => item.studentName.toLowerCase().includes(searchTerm.toLowerCase()))
-  .sort((a, b) => {
-    if (sortOrder === "asc") return a.studentName.localeCompare(b.studentName);
-    else return b.studentName.localeCompare(a.studentName);
-  });
+  // Filter and sort users
+  const filteredAndSortedUsers = userList
+    ?.filter((item) => item.studentName.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (sortOrder === "asc") return a.studentName.localeCompare(b.studentName);
+      else return b.studentName.localeCompare(a.studentName);
+    });
 
- const paginatedUsers = filteredAndSortedUsers?.slice(
-  (currentPage - 1) * rowsPerPage,
-  currentPage * rowsPerPage
-);
+  const paginatedUsers = filteredAndSortedUsers?.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
-  // Get All Courses
-  const { data: courses, isLoading: CourseLoading, error: CourseError} = GetCoursesList({ ...courseParams, RowsOfPage: 6 });
-
-  if (userLoading || CourseLoading) return <p>در حال بارگزاری اطلاعات</p>
-  if (UserError || CourseError) return <p>خطا در بارگزرای اطلاعات</p>
+  // Loading and error handling
+  if (userLoading || courseLoading) return <p>در حال بارگزاری اطلاعات</p>;
+  if (userError || courseError) return <p>خطا در بارگزرای اطلاعات</p>;
 
   return (
     <div className="app-user-list">
@@ -88,7 +102,7 @@ const filteredAndSortedUsers = userList
                   isCreate={false}
                   rowOfPage={rowsPerPage}
                   handleRowOfPage={handleRows}
-                  handleSearch={(value) => setSearchTerm(value)}
+                  handleSearch={handleSearch}
                 />
                 <Button
                   style={{ width: "120px", height: "39px", marginLeft: "14px" }}
@@ -98,7 +112,7 @@ const filteredAndSortedUsers = userList
                   انتخاب دوره
                 </Button>
               </div>
-            <Table hover>
+              <Table hover>
                 <thead className="text-center">
                   <tr>
                     {headerTable.map((item, index) => (
@@ -108,7 +122,7 @@ const filteredAndSortedUsers = userList
                     ))}
                   </tr>
                 </thead>
-               <tbody>
+                <tbody>
                   {paginatedUsers?.length > 0 ? (
                     paginatedUsers.map((item, index) => (
                       <TableItems key={item.id || index} item={item} />
@@ -116,12 +130,12 @@ const filteredAndSortedUsers = userList
                   ) : (
                     <tr>
                       <td colSpan={headerTable.length} className="text-center py-5 fs-1 text-primary">
-                        دوره مورد نظر را انتخاب کنید    
+                        دوره مورد نظر را انتخاب کنید
                       </td>
                     </tr>
                   )}
                 </tbody>
-            </Table>
+              </Table>
             </div>
             <CustomPagination2
               total={totalItems}
@@ -133,14 +147,18 @@ const filteredAndSortedUsers = userList
         </Col>
       </Row>
       <ModalApiItemList
-        PageNumber={courseParams.PageNumber || 1}
-        RowsOfPage={courseParams.RowsOfPage || 6}
+        PageNumber={courseParams.PageNumber}
+        RowsOfPage={courseParams.RowsOfPage}
         isOpen={chooseCourseModal}
         toggle={toggleChooseCourseModal}
-        handlePageNumber={handleCoursePageNumber}
-        handleQuery={handleQueryCourse}
+        handlePageNumber={(page) =>
+          setCourseParams((prev) => ({ ...prev, PageNumber: page }))
+        }
+        handleQuery={(query) =>
+          setCourseParams((prev) => ({ ...prev, Query: query }))
+        }
         modalTitle={"دوره را انتخاب کنید"}
-        totalCount={courses?.totalCount || 0}
+        totalCount={courses?.totalCount}
         headerTitles={courseTableHeader}
       >
         {courses?.courseDtos?.map((item, index) => (
@@ -156,4 +174,4 @@ const filteredAndSortedUsers = userList
   );
 };
 
-export default MnanageCourseUser;
+export default ManageCourseUser;

@@ -21,6 +21,9 @@ const AssistanceWork = () => {
   const { data: assWork, isLoading, error, refetch } = GetAssistanceList();
   const { data: assDetail, isSuccess: detailSuccess } = GetAssistanceDetail(id);
 
+  // Log the updated assDetail to verify the data structure
+  console.log("assDetail in AssistanceWork:", assDetail);
+
   useEffect(() => {
     if (!assWork) return;
     setCurrentPage(0);
@@ -122,11 +125,12 @@ const AssistanceWork = () => {
         </Col>
 
         <ModalTask
-          data={detailSuccess && assDetail}
+          data={detailSuccess ? assDetail : undefined}
           refetch={refetch}
           isOpen={editModal}
           toggle={toggleEditModal}
           section={"update"}
+          id={id} // Pass the actual id value, not the setId function
         />
 
         <ModalTask
@@ -140,6 +144,7 @@ const AssistanceWork = () => {
           isOpen={createModal}
           toggle={toggleCreateModal}
           section={"create"}
+          id={id} // Pass the actual id value, not the setId function
         />
       </Row>
     </div>

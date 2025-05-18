@@ -18,30 +18,25 @@ import gregorian from "react-date-object/calendars/gregorian";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import DatePicker from "react-multi-date-picker";
-import { useDispatch, useSelector } from "react-redux";
 import { EditAssWorkFields } from "../../../../@core/constants/assistance-work/EditBuildingFields";
 import ChangeMoment from "../../../../utility/moment";
 import ModalApiItemList from "../../../../@core/components/modal/ModalApiItemList";
-import {
-  handleData,
-  handlePageNumber,
-  handleQuery,
-} from "../store/AssistanceCourseSlice";
 import { AssistanceWorkValidations } from "../../../../@core/utils/Validation";
 import GetAssistanceList from "../../../../@core/Services/Api/Courses/ManageAssistanceWork/GetAssistanceList";
 import GetAssistanceDetail from "../../../../@core/Services/Api/Courses/ManageAssistanceWork/GetAssistanceDetail";
 import AddAsistance from "../../../../@core/Services/Api/Courses/ManageAssistanceWork/AddAsistance";
-import AssWorkTableItems from "../AssWorkTableItems";
 import EditAsistance from "../../../../@core/Services/Api/Courses/ManageAssistanceWork/EditAsistance";
+import AssWorkTableItems from "../AssWorkTableItems";
 
-const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
-  const dispatch = useDispatch();
-  const AssistanceCourseSlice = useSelector(
-    (state) => state.AssistanceCourseSlice
-  );
+const ModalTask = ({ isOpen, toggle, data, refetch, section, id }) => {
+  const [assistanceId, setAssistanceId] = useState(id);
+  const [assistanceParams, setAssistanceParams] = useState({
+    PageNumber: 1,
+    RowsOfPage: 5,
+    Query: "",
+  });
+  const [selectedCourseName, setSelectedCourseName] = useState("");
 
-  const [assistanceid, setAssistanceId] = useState(null);
-  
   const {
     control,
     handleSubmit,
@@ -54,45 +49,88 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
     defaultValues: {},
   });
 
+  // Fetch assistance list and details
+  const {
+    data: assCourse,
+    isLoading: assCourseLoading,
+    error: assCourseError,
+  } = GetAssistanceList(assistanceParams);
+  const {
+    data: assDetails,
+    isLoading: assDetailsLoading,
+    error: assDetailsError,
+  } = GetAssistanceDetail(assistanceId);
+
+  // Log debugging information
+  console.log("assistanceId:", assistanceId);
+  console.log("assDetails in ModalTask:", assDetails);
+  console.log("data in ModalTask:", data);
+  console.log("selectedCourseName:", selectedCourseName);
+
+  // Set initial form values and assistanceId
   useEffect(() => {
     if (data) {
       const defaults = EditAssWorkFields(data);
       reset(defaults);
-      setAssistanceId(defaults.assistanceId);
+      const initialAssistanceId = data.assistanceId || null;
+      setAssistanceId(initialAssistanceId);
+      setSelectedCourseName(data.courseName || "");
+      console.log("Initial assistanceId set to:", initialAssistanceId);
+    } else {
+      reset({});
+      setSelectedCourseName("");
     }
   }, [data, reset]);
 
-  const { data: assCourse, isSuccess } = GetAssistanceList();
-
+  // Update form with selected assistanceId and courseName
   useEffect(() => {
-    if (isSuccess) {
-      dispatch(handleData(assCourse));
+    if (assistanceId) {
+      setValue("assistanceId", assistanceId);
+      // Find course name from assCourse or assDetails
+      const selectedCourse = assCourse?.find(
+        (course) => course.id === assistanceId
+      );
+      const courseName =
+        selectedCourse?.courseName ||
+        assDetails?.courseName ||
+        data?.courseName ||
+        "";
+      setSelectedCourseName(courseName);
+      console.log(
+        "Form assistanceId updated to:",
+        assistanceId,
+        "CourseName:",
+        courseName
+      );
+    } else {
+      setSelectedCourseName("");
     }
-  }, [isSuccess, assCourse, dispatch]);
+  }, [assistanceId, assCourse, assDetails, setValue, data]);
 
-  const { data: assDetails } = GetAssistanceDetail(
-    assistanceid ? assistanceid : null
-  );
-
-  useEffect(() => {
-    if (assistanceid) {
-      setValue("assistanceId", assistanceid);
-    }
-  }, [assistanceid, setValue]);
-
+  // API mutations
   const { mutate: create } = AddAsistance();
-  const { mutate: update } = EditAsistance()
+  const { mutate: update } = EditAsistance();
 
+  // Form submission
   const onSubmit = (values) => {
     if (section === "update") {
-      update(values, { onSuccess: () => {refetch(), toggle() }});
+      update(values, {
+        onSuccess: () => {
+          refetch();
+          toggle();
+        },
+      });
     } else {
-      create(values, { onSuccess: () => {refetch(), toggle()}});
+      create(values, {
+        onSuccess: () => {
+          refetch();
+          toggle();
+        },
+      });
     }
   };
-  
-  console.log(assDetails?.courseAssistanceDto?.courseName);
 
+  // Date picker handler
   const handleDatePicker = (date) => {
     if (!date) return;
     const gregorianDate = new DateObject(date)
@@ -101,8 +139,27 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
     setValue("workDate", gregorianDate);
   };
 
+  // Modal for choosing assistance
   const [chooseUserModal, setChooseUserModal] = useState(false);
   const toggleChooseUserModal = () => setChooseUserModal((v) => !v);
+
+  // Pagination and query handlers
+  const handlePageNumber = (page) => {
+    setAssistanceParams((prev) => ({ ...prev, PageNumber: page }));
+  };
+
+  const handleQuery = (query) => {
+    setAssistanceParams((prev) => ({ ...prev, Query: query }));
+  };
+
+  // Loading and error handling
+  if (assCourseLoading || assDetailsLoading) {
+    return <p>در حال بارگذاری...</p>;
+  }
+  if (assCourseError || assDetailsError) {
+    console.log("Error in ModalTask:", { assCourseError, assDetailsError });
+    return <p>خطا در بارگذاری داده‌ها</p>;
+  }
 
   return (
     <Fragment>
@@ -162,13 +219,20 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
                 <Label className="form-label" for="assistanceId">
                   دوره
                 </Label>
-                <Input
-                  id="assistanceId"
-                  className="text-primary"
-                  placeholder="انتخاب دوره"
-                  onClick={toggleChooseUserModal}
-                  value={assDetails?.courseAssistanceDto?.courseName}
-                  invalid={!!errors.assistanceId}
+                <Controller
+                  name="assistanceId"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="assistanceId"
+                      placeholder="انتخاب دوره"
+                      onClick={toggleChooseUserModal}
+                      value={selectedCourseName || data?.courseName}
+                      invalid={!!errors.assistanceId}
+                      className="form-control text-primary cursor-pointer"
+                      readOnly
+                    />
+                  )}
                 />
                 <FormFeedback>{errors.assistanceId?.message}</FormFeedback>
               </Col>
@@ -196,7 +260,7 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
                   )}
                 />
               </Col>
-              <Col xs={12} className="text-center mt-2 pt-50">
+              <Col xs="12" className="text-center mt-2 pt-50">
                 <Button type="submit" className="me-1" color="primary">
                   {section === "update" ? "ویرایش" : "ساختن"}
                 </Button>
@@ -210,17 +274,17 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
       </Modal>
 
       <ModalApiItemList
-        PageNumber={AssistanceCourseSlice.PageNumber}
-        RowsOfPage={AssistanceCourseSlice.RowsOfPage}
+        PageNumber={assistanceParams.PageNumber}
+        RowsOfPage={assistanceParams.RowsOfPage}
         isOpen={chooseUserModal}
         toggle={toggleChooseUserModal}
         handlePageNumber={handlePageNumber}
         handleQuery={handleQuery}
         modalTitle={"دوره را انتخاب کنید"}
-        totalCount={AssistanceCourseSlice.FilteredData?.length}
+        totalCount={assCourse?.length || 0} // اصلاح خطای سینتکسی
         headerTitles={["نام دوره", "منتور", "تاریخ ایجاد", "عملیات"]}
       >
-        {AssistanceCourseSlice.FilteredData?.map((item, index) => (
+        {assCourse?.map((item, index) => (
           <AssWorkTableItems
             key={index}
             item={item}
@@ -233,4 +297,4 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section }) => {
   );
 };
 
-export default ModalTask
+export default ModalTask;

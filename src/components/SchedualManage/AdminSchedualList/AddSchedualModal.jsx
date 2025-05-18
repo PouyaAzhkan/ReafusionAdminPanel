@@ -95,20 +95,11 @@ const AddSchedualModal = ({ open, handleModal }) => {
   const { data: courseDetail, isLoading: courseDetailLoading, error: courseDetailError } =
     useGetCourseDetailInfo(selectedCourseId || null);
 
-  const courseId =
-    courseDetail && !courseDetailLoading && !courseDetailError
-      ? courseDetail.courseId || selectedCourseId
-      : null;
-  const teacherId =
-    courseDetail && !courseDetailLoading && !courseDetailError
-      ? courseDetail.teacherId || null
-      : null;
-
   const {
     data: courseGroup,
     isLoading: courseGroupLoading,
     error: courseGroupError,
-  } = GetCourseGroup(courseId && teacherId ? courseId : null, teacherId);
+  } = GetCourseGroup(courseDetail?.courseId, courseDetail?.teacherId);
 
   const convertTimeToDouble = (timeString) => {
     if (!timeString) return null;

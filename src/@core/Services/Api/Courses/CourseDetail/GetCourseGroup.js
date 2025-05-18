@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Api from "../../../../../@core/Services/interceptor";
+// import { boolean } from "yup";
 
 const GetCourseGroup = (id, teacherId) => {
   return useQuery({
@@ -8,7 +9,7 @@ const GetCourseGroup = (id, teacherId) => {
       const response = await Api.get(`/CourseGroup/GetCourseGroup?TeacherId=${teacherId}&CourseId=${id}`);
       return response;
     },
-    enabled: !!id && !!teacherId, // فقط زمانی اجرا شود که هر دو مقدار معتبر باشند
+    enabled: Boolean(id && teacherId), // فقط زمانی اجرا شود که هر دو مقدار معتبر باشند
   });
 };
 

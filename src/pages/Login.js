@@ -174,12 +174,12 @@ const Login = () => {
           <Col className="px-xl-2 mx-auto" sm="8" md="6" lg="12">
             <CardTitle tag="h2" className="fw-bold mb-1 text-center">
               به پنل ادمین سایت <br />
-              <span className="text-danger">DrunkCoders</span>
+              <span className="text-danger">Reafusion</span>
               <br />
               خوش آمدید 👋
             </CardTitle>
-            <CardText className="mb-2 text-center">
-              لطفا وارد سایت شوید و از ماجراجویی لذت ببرید
+            <CardText className="mb-2 text-center text-primary">
+              لطفا وارد پنل شوید تا به قدرت ریفیوژن پی ببرید
             </CardText>
             <Form
               className="auth-login-form mt-2"
@@ -202,7 +202,7 @@ const Login = () => {
                       {...field}
                       type="phoneOrGmail"
                       className="text-right"
-                      placeholder="bruce.wayne@email.com"
+                      placeholder="ایمیل را وارد کنید"
                       invalid={errors.phoneOrGmail && true}
                     />
                   )}
@@ -218,11 +218,12 @@ const Login = () => {
                 <Controller
                   id="password"
                   name="password"
+                  className="text-primary"
                   control={control}
                   render={({ field }) => (
                     <InputPasswordToggle
                       {...field}
-                      className="input-group-merge "
+                      className="input-group-merge text-primary"
                       placeholder="رمز عبور خود را وارد کنید"
                       invalid={errors.password && true}
                     />
@@ -265,7 +266,7 @@ const Login = () => {
               </Button>
             </Form>
             <div className="divider my-2">
-              <div className="divider-text">or</div>
+              <div className="divider-text">یا</div>
             </div>
             <div className="auth-footer-btn d-flex justify-content-center">
               <Button color="facebook">

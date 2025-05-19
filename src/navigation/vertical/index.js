@@ -7,6 +7,7 @@ import {
   Trello,
   Calendar,
   BookOpen,
+  Headphones,
 } from "react-feather";
 
 export default [
@@ -163,8 +164,26 @@ export default [
         title: "دانشجو",
         icon: <Circle size={12} />,
         navLink: "/studentSchedual",
+      },  
+    ],
+  },
+  {
+    id: "support",
+    title: "پشتیبانی",
+    icon: <Headphones size={20} />,
+    children: [
+      {
+        id: "supportAdmin",
+        title: "ادمین ها",
+        icon: <Circle size={12} />,
+        navLink: "/AdminSuports",
       },
-     
+      {
+        id: "supportTeacher",
+        title: "اساتید",
+        icon: <Circle size={12} />,
+        navLink: "/TeacherSupport",
+      },
     ],
   },
 ];

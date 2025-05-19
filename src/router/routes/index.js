@@ -27,6 +27,8 @@ import CourseDepartment from "../../components/ManageCourses/ManageCourseDepartm
 import AssistanceWork from "../../components/ManageCourses/ManageAssistance-Work/AssistanceWork";
 import MnanageCourseUser from "../../components/ManageCourses/MnanageCourseUser/MnanageCourseUser";
 import AllBuildingList from "../../components/Buildings/AllBuildingList";
+import AdminSupports from "../../components/PanelSupports/AdminSupports";
+import TeacherSupport from "../../components/PanelSupports/TeacherSupport";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -226,6 +228,14 @@ const Routes = [
   {
     path: "/buildings",
     element: <AllBuildingList />,
+  },
+  {
+    path: "/AdminSuports",
+    element: <AdminSupports />,
+  },
+   {
+    path: "/TeacherSupport",
+    element: <TeacherSupport />,
   },
 ];
 

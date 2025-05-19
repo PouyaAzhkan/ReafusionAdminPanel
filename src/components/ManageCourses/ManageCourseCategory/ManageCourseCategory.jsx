@@ -21,7 +21,7 @@ const ManageCourseCategory = () => {
   const [query, setQuery] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(15);
   const [itemOffset, setItemOffset] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch categories using react-query
   const { data, isLoading, error, isSuccess, refetch } = GetCategoryList();
@@ -181,7 +181,7 @@ const ManageCourseCategory = () => {
             )}
             <CustomPagination
               total={filteredData.length || 0}
-              current={currentPage}
+              current={currentPage - 1}
               rowsPerPage={rowsPerPage}
               handleClickFunc={handlePageChange}
             />

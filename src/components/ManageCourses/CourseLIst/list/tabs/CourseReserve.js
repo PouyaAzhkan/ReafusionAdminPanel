@@ -67,7 +67,7 @@ const CourseReserve = () => {
       </Table>
       <CustomPagination
         total={coursesState?.length}
-        current={PageNumber}
+        current={PageNumber - 1}
         rowsPerPage={RowsOfPage}
         handleClickFunc={handleWithOutDispatch}
       />

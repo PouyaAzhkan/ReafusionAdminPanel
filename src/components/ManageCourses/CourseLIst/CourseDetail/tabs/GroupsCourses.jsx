@@ -56,7 +56,7 @@ const CoursesGroups = ({ groupData, refetchGroup }) => {
   };
 
 
-  const [PageNumber, setPageNumber] = useState(1);
+  const [PageNumber, setPageNumber] = useState(0);
   const [RowsOfPage, setRowsOfPage] = useState(8);
   const [itemOffset, setItemOffset] = useState(0);
   const endOffset = itemOffset + RowsOfPage;
@@ -156,7 +156,7 @@ const CoursesGroups = ({ groupData, refetchGroup }) => {
       />
       <CustomPagination
         total={groupData?.length || 0}
-        current={PageNumber}
+        current={PageNumber - 1}
         rowsPerPage={RowsOfPage}
         handleClickFunc={handleWithOutDispatch}
       />

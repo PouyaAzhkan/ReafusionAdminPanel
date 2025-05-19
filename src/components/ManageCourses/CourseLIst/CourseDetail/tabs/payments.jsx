@@ -13,7 +13,7 @@ const Payments = () => {
   const { data, isLoading, error } = GetPaymentList(id);
 
   // Pagination
-  const [PageNumber, setPageNumber] = useState(1);
+  const [PageNumber, setPageNumber] = useState(0);
   const [RowsOfPage, setRowsOfPage] = useState(8);
   const [itemOffset, setItemOffset] = useState(0);
 

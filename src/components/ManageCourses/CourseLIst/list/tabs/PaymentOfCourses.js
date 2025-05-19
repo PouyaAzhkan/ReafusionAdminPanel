@@ -129,7 +129,7 @@ const PaymentOfCourses = ({ courseId }) => {
 
       <CustomPagination
         total={paymentsData?.length || 0}
-        current={pageNumber}
+        current={pageNumber - 1}
         rowsPerPage={rowsOfPage}
         handleClickFunc={handlePagination}
       />

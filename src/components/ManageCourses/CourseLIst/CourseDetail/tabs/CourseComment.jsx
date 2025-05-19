@@ -152,7 +152,7 @@ const CourseCommment = () => {
       ) : (
         <CustomPagination
           total={commentData?.length}
-          current={PageNumber}
+          current={PageNumber - 1}
           rowsPerPage={RowsOfPage}
           handleClickFunc={handleWithOutDispatch}
         />

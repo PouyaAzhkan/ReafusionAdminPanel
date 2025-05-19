@@ -108,7 +108,7 @@ const CourseUsers = ({ setUserSel, centeredModal, setCenteredModal }) => {
                             </DropdownItem>
                           </DropdownMenu>
                         </UncontrolledDropdown>
-                      ) : <p className="text-danger">غیر قابل دسترس</p>}
+                      ) : <p className="text-danger">---</p>}
                     </td>
                   </tr>
                 ))
@@ -120,7 +120,7 @@ const CourseUsers = ({ setUserSel, centeredModal, setCenteredModal }) => {
 
       <CustomPagination
         total={data.length}
-        current={PageNumber}
+        current={PageNumber - 1}
         rowsPerPage={RowsOfPage}
         handleClickFunc={handleWithOutDispatch}
       />

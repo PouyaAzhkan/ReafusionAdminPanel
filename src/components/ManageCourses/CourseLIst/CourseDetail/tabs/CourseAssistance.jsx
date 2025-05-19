@@ -1,47 +1,64 @@
 import { Fragment, useEffect, useState } from "react";
-import { Button, Card, Table } from "reactstrap";
+import { Button, Card, Table, Collapse, Row, Col } from "reactstrap";
 import { CourseAssistanceTable } from "../../../../../@core/constants/courses/CourseAssistanceTable";
 import TableItems from "../../../../../view/CourseAssistance/TableItems";
 import ModalAssistance from "../../../../../view/CourseAssistance/ModalAssistance";
+import { useParams } from "react-router-dom";
+import { Edit } from "react-feather";
 import GetAssistanceDetail from "../../../../../@core/Services/Api/Courses/CourseDetail/tabsApi/CourseAssistance/GetAssistanceDetail";
+import { AssistanceWorkTable } from "./AssistanceWork/AssistanceWorkTable";
 import GetCourseAssistance from "../../../../../@core/Services/Api/Courses/CourseDetail/tabsApi/CourseAssistance/GetCourseAssistance";
 
 const CourseAssistance = ({ id }) => {
+  const { id: courseId } = useParams(); // برای دریافت آیدی دوره
   const [filteredData, setFilteredData] = useState([]);
   const [accId, setAccId] = useState("");
+  const [openRow, setOpenRow] = useState(null); // برای کنترل آکاردئون
+  const [editModal, setEditModal] = useState({ show: false, currentAssistance: null });
+  const [createModal, setCreateModal] = useState(false);
 
+  // دریافت داده‌های منتورها
+  const {
+    data: assistance,
+    isLoading: assistanceLoading,
+    error: assistanceError,
+  } = GetCourseAssistance();
+
+  // دریافت جزئیات منتور
   const {
     data: details,
     isLoading: detailsLoading,
     error: detailsError,
-    isSuccess: detailsSuccess,
-    isRefetching,
     refetch,
   } = GetAssistanceDetail(accId);
-  const {
-    data: assistance,
-    isLoading: assistanceLoading,
-    error: assistanceError, // Fixed typo
-  } = GetCourseAssistance();
 
-  // Edit Modal
-  const [editModal, setEditModal] = useState(false);
-  const toggleEditModal = () => setEditModal(!editModal);
-
-  // Create Modal
-  const [createModal, setCreateModal] = useState(false);
-  const toggleCreateModal = () => setCreateModal(!createModal);
-
+  // فیلتر کردن داده‌ها بر اساس courseId
   useEffect(() => {
-    // Only filter if assistance is defined and is an array
     if (assistance && Array.isArray(assistance)) {
-      setFilteredData(assistance.filter((ev) => ev.courseId === id));
+      setFilteredData(assistance.filter((ev) => ev.courseId === courseId));
     } else {
-      setFilteredData([]); // Ensure filteredData is always an array
+      setFilteredData([]);
     }
-  }, [assistance, id]); // Removed isSuccess and isRefetching from dependencies
+  }, [assistance, courseId]);
 
-  // Comprehensive loading and error handling
+  // کنترل باز و بسته شدن آکاردئون
+  const toggleRow = (index) => {
+    setOpenRow(openRow === index ? null : index);
+  };
+
+  // باز کردن مودال ویرایش
+  const handleEditModal = (event, item) => {
+    event.stopPropagation();
+    setAccId(item.id);
+    setEditModal({ show: true, currentAssistance: item });
+  };
+
+  // باز کردن مودال افزودن
+  const toggleCreateModal = () => {
+    setCreateModal(!createModal);
+  };
+
+  // مدیریت لودینگ و خطا
   if (assistanceLoading || detailsLoading) {
     return <p>در حال بارگذاری اطلاعات...</p>;
   }
@@ -50,7 +67,7 @@ const CourseAssistance = ({ id }) => {
     return <p>خطا در بارگذاری اطلاعات: {assistanceError?.message || detailsError?.message}</p>;
   }
 
-  if (!assistance) {
+  if (!assistance || filteredData.length === 0) {
     return <p>داده‌ای برای نمایش وجود ندارد</p>;
   }
 
@@ -73,32 +90,43 @@ const CourseAssistance = ({ id }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
+              {filteredData.map((item, index) => (
+                <Fragment key={item.id}>
                   <TableItems
-                    key={index}
                     setAccId={setAccId}
-                    toggle={toggleEditModal}
+                    toggle={() => handleEditModal({ stopPropagation: () => {} }, item)}
                     item={item}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={CourseAssistanceTable.length} className="text-center py-5">
-                    منتوری برای این دوره وجود ندارد
+                    onClick={() => toggleRow(index)}
+                    openRow={openRow}
+                    index={index}
+                    toggleRow={toggleRow}
+                  />                    
+                  <td colSpan={CourseAssistanceTable.length + 1}>
+                      <Collapse isOpen={openRow === index}>
+                        <Row className="p-2">
+                          <Col>
+                            <h5 className="text-primary"><span className="text-dark">وظایف :</span> {item.assistanceName}</h5>
+                            <AssistanceWorkTable
+                              user={{ id: item.userId }}
+                              singleCourse={courseId}
+                              isCurrentUserAssistance={[item]}
+                            />
+                          </Col>
+                        </Row>
+                      </Collapse>
                   </td>
-                </tr>
-              )}
+                </Fragment>
+              ))}
             </tbody>
           </Table>
         </div>
       </Card>
       <ModalAssistance
-        isOpen={editModal}
-        toggle={toggleEditModal}
-        data={details?.courseAssistanceDto}
+        isOpen={editModal.show}
+        toggle={() => setEditModal({ ...editModal, show: false })}
+        data={details?.courseAssistanceDto || editModal.currentAssistance}
         refetch={refetch}
-        courseId={id}
+        courseId={courseId}
         section="update"
       />
       <ModalAssistance
@@ -106,7 +134,7 @@ const CourseAssistance = ({ id }) => {
         toggle={toggleCreateModal}
         data={{ userId: "", courseId: "" }}
         refetch={refetch}
-        courseId={id}
+        courseId={courseId}
         section="create"
       />
     </Fragment>

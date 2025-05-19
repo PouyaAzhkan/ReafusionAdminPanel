@@ -13,7 +13,7 @@ const AssistanceWork = () => {
   const [query, setQuery] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [itemOffset, setItemOffset] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState();
   const [editModal, setEditModal] = useState(false);
   const [createModal, setCreateModal] = useState(false);
   const [id, setId] = useState("");

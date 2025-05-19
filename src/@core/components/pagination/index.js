@@ -9,7 +9,7 @@ const CustomPagination = ({ total, current, rowsPerPage, handleClickFunc }) => {
       nextLabel={""}
       pageCount={count || 1}
       activeClassName="active"
-      forcePage={current - 1}
+      forcePage={current}
       onPageChange={(page) => {
         handleClickFunc(page);
       }}

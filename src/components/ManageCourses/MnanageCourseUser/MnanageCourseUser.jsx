@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button, Card, Col, Row, Table } from "reactstrap";
 import headerTable from "../../../@core/constants/course-user/HeaderTable";
 import ModalApiItemList from "../../../@core/components/modal/ModalApiItemList";
@@ -8,21 +8,21 @@ import GetCoursesList from "../../../@core/Services/Api/Courses/ManangeCourseUse
 import GetCourseUserList from "../../../@core/Services/Api/Courses/ManangeCourseUser/GetCourseUserList";
 import CustomPagination2 from "../../../@core/components/pagination/index2";
 import HeaderTable2 from "../../../@core/components/table-list/HeaderTable2";
+import debounce from "lodash/debounce"; // نیاز به نصب lodash یا پیاده‌سازی دستی debounce
 
 const ManageCourseUser = () => {
-  // Local state replacing Redux
   const [params, setParams] = useState({
     CourseId: null,
     PageNumber: 1,
     RowsOfPage: 10,
-    Query: "",
   });
   const [courseParams, setCourseParams] = useState({
     PageNumber: 1,
     RowsOfPage: 6,
     Query: "",
   });
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchTermRef = useRef(""); // برای ذخیره مقدار جستجو
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState(""); // برای اعمال جستجو
   const [sortOrder, setSortOrder] = useState("asc");
   const [courseId, setCourseId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,28 +38,39 @@ const ManageCourseUser = () => {
     ...courseParams,
   });
 
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      setAppliedSearchTerm(value); // به‌روزرسانی state برای اعمال فیلتر
+      setCurrentPage(1); // بازگشت به صفحه اول
+    }, 300),
+    []
+  );
+
+  // Handle search input change
+  const handleSearch = useCallback(
+    (value) => {
+      searchTermRef.current = value; // ذخیره مقدار جستجو
+      debouncedSearch(value); // اجرای جستجو با تأخیر
+    },
+    [debouncedSearch]
+  );
+
   // Pagination
   const rowsPerPage = params.RowsOfPage;
   const totalItems = userList?.length || 0;
 
-  const handleMovePage = (page) => {
-    const newPage = page.selected + 1; // ReactPaginate is 0-based
+  const handleMovePage = useCallback((page) => {
+    const newPage = page.selected + 1;
     setCurrentPage(newPage);
     setParams((prev) => ({ ...prev, PageNumber: newPage }));
-  };
+  }, []);
 
-  // Handle RowsOfPage for list
-  const handleRows = (e) => {
+  const handleRows = useCallback((e) => {
     const value = parseInt(e.currentTarget.value);
     setParams((prev) => ({ ...prev, RowsOfPage: value, PageNumber: 1 }));
     setCurrentPage(1);
-  };
-
-  // Handle search query
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    setParams((prev) => ({ ...prev, Query: value }));
-  };
+  }, []);
 
   // Handle course selection
   useEffect(() => {
@@ -70,22 +81,30 @@ const ManageCourseUser = () => {
 
   // Choose Course Modal
   const [chooseCourseModal, setChooseCourseModal] = useState(false);
-  const toggleChooseCourseModal = () => setChooseCourseModal(!chooseCourseModal);
+  const toggleChooseCourseModal = useCallback(() => setChooseCourseModal((prev) => !prev), []);
 
   const courseTableHeader = ["", "نام دوره", "وضعیت", "عملیات"];
 
-  // Filter and sort users
-  const filteredAndSortedUsers = userList
-    ?.filter((item) => item.studentName.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => {
-      if (sortOrder === "asc") return a.studentName.localeCompare(b.studentName);
-      else return b.studentName.localeCompare(a.studentName);
-    });
+  // Memoized filtered and sorted users
+  const filteredAndSortedUsers = useMemo(() => {
+    if (!userList) return [];
+    return userList
+      .filter((item) =>
+        item.studentName.toLowerCase().includes(appliedSearchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortOrder === "asc") return a.studentName.localeCompare(b.studentName);
+        else return b.studentName.localeCompare(a.studentName);
+      });
+  }, [userList, appliedSearchTerm, sortOrder]);
 
-  const paginatedUsers = filteredAndSortedUsers?.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  // Memoized paginated users
+  const paginatedUsers = useMemo(() => {
+    return filteredAndSortedUsers.slice(
+      (currentPage - 1) * rowsPerPage,
+      currentPage * rowsPerPage
+    );
+  }, [filteredAndSortedUsers, currentPage, rowsPerPage]);
 
   // Loading and error handling
   if (userLoading || courseLoading) return <p>در حال بارگزاری اطلاعات</p>;

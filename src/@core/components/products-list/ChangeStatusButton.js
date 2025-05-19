@@ -4,19 +4,18 @@ import { Button, Tooltip } from "reactstrap";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
-const ChangeStatusButton = ({ handleActiveOrDetective, id, status }) => {
+const ChangeStatusButton = ({ handleActiveOrDetective, id, status, view = "table" }) => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const MySwal = withReactContent(Swal);
 
   const handleSuspendedClick = (boolean, id) => {
     return MySwal.fire({
-      title: "آیا مطمعن هستید؟",
-      text: "البته امکان بازگشت نیز وجود دارد ",
+      title: "آیا مطمئن هستید؟",
+      text: "البته امکان بازگشت نیز وجود دارد",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: " بله ",
-      cancelButtonText: " لغو ",
-
+      confirmButtonText: "بله",
+      cancelButtonText: "لغو",
       customClass: {
         confirmButton: "btn btn-primary",
         cancelButton: "btn btn-outline-danger ms-1",
@@ -27,10 +26,9 @@ const ChangeStatusButton = ({ handleActiveOrDetective, id, status }) => {
         handleActiveOrDetective(boolean, id);
         MySwal.fire({
           icon: "success",
-          title: "موفقیت ",
+          title: "موفقیت",
           text: "عملیات با موفقیت انجام گردید",
-          confirmButtonText: " باشه ",
-
+          confirmButtonText: "باشه",
           customClass: {
             confirmButton: "btn btn-success",
           },
@@ -40,8 +38,7 @@ const ChangeStatusButton = ({ handleActiveOrDetective, id, status }) => {
           title: "لغو",
           text: "عملیات لغو شد",
           icon: "error",
-          confirmButtonText: " باشه ",
-
+          confirmButtonText: "باشه",
           customClass: {
             confirmButton: "btn btn-success",
           },
@@ -50,27 +47,39 @@ const ChangeStatusButton = ({ handleActiveOrDetective, id, status }) => {
     });
   };
 
+  // استایل‌های شرطی برای گرید و جدول
+  const buttonStyle = view === "flex"
+    ? {
+        width: "40px",
+        height: "40px",
+        borderRadius: "100%",
+        position: "absolute",
+        top: "5px",
+        left: "5px",
+        zIndex: 10, // اطمینان از قرار گرفتن روی تصویر
+      }
+    : {
+        width: "40px",
+        height: "40px",
+        borderRadius: "100%",
+        margin: "auto",
+        display: "flex",
+      };
+
   return (
     <Fragment>
       <Tooltip
         placement="top"
         isOpen={tooltipOpen}
-        target="ChangeStatus"
+        target={`ChangeStatus-${id}`}
         toggle={() => setTooltipOpen(!tooltipOpen)}
       >
-        تغییر وضیعت
+        تغییر وضعیت
       </Tooltip>
       <Button
-        id="ChangeStatus"
-        className="d-flex align-items-center justify-content-center p-0"
-        style={{
-          width: "40px",
-          height: "40px",
-          borderRadius: "100%",
-          position: "absolute",
-          top: "5px",
-          left: "5px",
-        }}
+        id={`ChangeStatus-${id}`}
+        className="d-flex align-items-center justify-content-center p-0 change-status-button"
+        style={buttonStyle}
         color="primary"
         onClick={() => {
           status

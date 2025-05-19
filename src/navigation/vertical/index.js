@@ -78,7 +78,7 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/AddCourse",
       },
-       {
+      {
         id: "manageTecnolojy",
         title: "مدیریت تکنولوژی دوره ها",
         icon: <Circle size={12} />,
@@ -125,20 +125,8 @@ export default [
         title: "مدیریت کاربران دوره",
         icon: <Circle size={12} />,
         navLink: "/manageCourseUser",
-      },  
+      },
     ],
-  },
-  {
-    id: "comments",
-    title: "مدیریت کامنت ها",
-    icon: <MessageSquare size={20} />,
-    navLink: "/comments",
-  },
-  {
-    id: "buildingsManage",
-    title: "مدیریت ساختمان ها",
-    icon: <Trello size={20} />,
-    navLink: "/buildings",
   },
   {
     id: "schedualManage",
@@ -164,7 +152,18 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/studentSchedual",
       },
-     
     ],
+  },
+  {
+    id: "comments",
+    title: "مدیریت کامنت ها",
+    icon: <MessageSquare size={20} />,
+    navLink: "/comments",
+  },
+  {
+    id: "buildingsManage",
+    title: "مدیریت ساختمان ها",
+    icon: <Trello size={20} />,
+    navLink: "/buildings",
   },
 ];

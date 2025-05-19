@@ -219,14 +219,6 @@ const Routes = [
     path: "/terms",
     element: <Terms />,
   },
-  {
-    path: "/comments",
-    element: <AllCommentList />,
-  },
-  {
-    path: "/buildings",
-    element: <AllBuildingList />,
-  },
 ];
 
 const getRouteMeta = (route) => {

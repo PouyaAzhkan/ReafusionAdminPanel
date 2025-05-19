@@ -62,18 +62,6 @@ export default [
     ],
   },
   {
-    id: "comments",
-    title: "مدیریت کامنت ها",
-    icon: <MessageSquare size={20} />,
-    navLink: "/comments",
-  },
-  {
-    id: "buildingsManage",
-    title: "مدیریت ساختمان ها",
-    icon: <Trello size={20} />,
-    navLink: "/buildings",
-  },
-  {
     id: "Course",
     title: "مدیریت دوره ها",
     icon: <BookOpen size={20} />,
@@ -139,6 +127,18 @@ export default [
         navLink: "/manageCourseUser",
       },  
     ],
+  },
+  {
+    id: "comments",
+    title: "مدیریت کامنت ها",
+    icon: <MessageSquare size={20} />,
+    navLink: "/comments",
+  },
+  {
+    id: "buildingsManage",
+    title: "مدیریت ساختمان ها",
+    icon: <Trello size={20} />,
+    navLink: "/buildings",
   },
   {
     id: "schedualManage",

@@ -105,12 +105,21 @@ const EditUserModal = ({ editModal, setEditModal, userId, refetch }) => {
 
         mutate(payload, {
             onSuccess: async () => {
-                console.log("Mutation successful, calling refetch...");
+                console.log("Mutation successful, invalidating queries...");
                 toast.success("اطلاعات با موفقیت به‌روزرسانی شد!");
-                // بی‌اعتبار کردن کوئری‌های مرتبط
-                await queryClient.invalidateQueries({ queryKey: ["UserDetail", userId] });
-                await refetch(); // اطمینان از اجرای refetch
-                setEditModal(false); // بستن مدال بعد از refetch
+                // بی‌اعتبار کردن تمام کوئری‌های مرتبط
+                await queryClient.invalidateQueries({ queryKey: ["UserDetail", userId] }); // اطلاعات کاربر
+                await queryClient.invalidateQueries({ queryKey: ["UserCourses", userId] }); // دوره‌های تاییدشده
+                await queryClient.invalidateQueries({ queryKey: ["UserReservedCourses", userId] }); // دوره‌های رزروشده
+                await queryClient.invalidateQueries({ queryKey: ["UserComments", userId] }); // کامنت‌ها
+                await queryClient.invalidateQueries({ queryKey: ["UserRoles", userId] }); // نقش‌ها
+                await queryClient.invalidateQueries({ queryKey: ["UserPayments", userId] }); // پرداختی‌ها
+                // اجرای refetch در صورت وجود
+                if (refetch && typeof refetch === "function") {
+                    console.log("Calling refetch...");
+                    await refetch();
+                }
+                setEditModal(false);
             },
             onError: (error) => {
                 console.error("API Error:", JSON.stringify(error.response?.data, null, 2));

@@ -1,18 +1,18 @@
-import { useState, useEffect, Fragment } from "react"; // اضافه کردن useEffect
+import { useState, useEffect, Fragment } from "react";
 import { Row, Col, Card, CardBody, Button, Badge } from "reactstrap";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Avatar from "@components/avatar";
 import { Percent } from "react-feather";
 import { changeUserActivity } from "../../../@core/Services/Api/UserManage/user";
-import EditUserInfo from "./EditUserInfo";
 import moment from "jalali-moment";
+import EditUserModal from "../list/EditUserModal";
 
 const MySwal = withReactContent(Swal);
 
-const UserInfoCard = ({ selectedUser }) => {
-  const [show, setShow] = useState(false);
-  const [userData, setUserData] = useState(selectedUser); // state برای مدیریت کاربر
+const UserInfoCard = ({ selectedUser, refetch }) => {
+  const [editModal, setEditModal] = useState(false);
+  const [userData, setUserData] = useState(selectedUser);
   const { mutate: mutateActivity } = changeUserActivity();
 
   // به‌روزرسانی userData وقتی selectedUser تغییر کند
@@ -21,11 +21,8 @@ const UserInfoCard = ({ selectedUser }) => {
   }, [selectedUser]);
 
   // تابع برای به‌روزرسانی اطلاعات کاربر پس از ویرایش
-  const handleUserUpdated = (updatedUser) => {
-    setUserData((prevUser) => ({
-      ...prevUser,
-      ...updatedUser,
-    }));
+  const handleEditModal = () => {
+    setEditModal(!editModal);
   };
 
   const renderUserImg = () => {
@@ -75,6 +72,12 @@ const UserInfoCard = ({ selectedUser }) => {
       buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
+        // به‌روزرسانی محلی برای تغییر فوری UI
+        setUserData((prevUser) => ({
+          ...prevUser,
+          active: !prevUser.active,
+        }));
+
         mutateActivity(
           { userId },
           {
@@ -85,13 +88,17 @@ const UserInfoCard = ({ selectedUser }) => {
                 text: "وضعیت کاربر به فعال / غیرفعال تغییر کرد",
                 customClass: { confirmButton: "btn btn-success" },
               });
-              // به‌روزرسانی وضعیت کاربر در state
-              setUserData((prevUser) => ({
-                ...prevUser,
-                active: !prevUser.active, // تغییر وضعیت
-              }));
+              // دریافت داده‌های به‌روز از سرور
+              if (refetch) {
+                refetch();
+              }
             },
             onError: (error) => {
+              // در صورت خطا، وضعیت را به حالت قبلی برگردان
+              setUserData((prevUser) => ({
+                ...prevUser,
+                active: !prevUser.active,
+              }));
               MySwal.fire({
                 icon: "error",
                 title: "خطا در تغییر وضعیت",
@@ -189,7 +196,7 @@ const UserInfoCard = ({ selectedUser }) => {
             ) : null}
           </div>
           <div className="d-flex justify-content-center pt-2">
-            <Button color="primary" onClick={() => setShow(true)}>
+            <Button color="primary" onClick={handleEditModal}>
               ویرایش
             </Button>
             <Button
@@ -203,11 +210,12 @@ const UserInfoCard = ({ selectedUser }) => {
           </div>
         </CardBody>
       </Card>
-      <EditUserInfo
-        show={show}
-        setShow={setShow}
-        selectedUser={userData}
-        onUserUpdated={handleUserUpdated}
+
+      <EditUserModal
+        editModal={editModal}
+        setEditModal={setEditModal}
+        userId={userData?.id}
+        refetch={refetch} // پاس دادن refetch
       />
     </Fragment>
   );

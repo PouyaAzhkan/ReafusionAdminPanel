@@ -16,7 +16,7 @@ import { useUserDetail } from "../../../@core/Services/Api/UserManage/user";
 const UserView = () => {
   // ** Hooks
   const { id } = useParams();
-  const { data, isLoading, isError, error } = useUserDetail(id);
+  const { data, isLoading, isError, error, refetch } = useUserDetail(id);
 
   // ** State for Tabs
   const [active, setActive] = useState("1");
@@ -52,7 +52,7 @@ const UserView = () => {
     <div className="app-user-view">
       <Row>
         <Col xl="4" lg="5" xs={{ order: 1 }} md={{ order: 0, size: 5 }}>
-          <UserInfoCard selectedUser={selectedUser} />
+          <UserInfoCard selectedUser={selectedUser} refetch={refetch} />
         </Col>
         <Col xl="8" lg="7" xs={{ order: 0 }} md={{ order: 1, size: 7 }}>
           <UserTabs

@@ -14,7 +14,7 @@ import Select from "react-select";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { selectThemeColors } from "@utils";
-import { editUserInfo } from "../../../@core/Services/Api/UserManage/user";
+import { editUserInfo } from "../../@core/Services/Api/UserManage/user";
 import "@styles/react/libs/react-select/_react-select.scss";
 import { useEffect } from "react";
 

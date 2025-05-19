@@ -19,7 +19,7 @@ const renderRole = (row) => {
   );
 };
 
-export const columns = (setDeleteModal, setUserToDelete) => [
+export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
   {
     name: "نام کاربر",
     sortable: true,
@@ -118,12 +118,13 @@ export const columns = (setDeleteModal, setUserToDelete) => [
             <DropdownItem
               tag="span"
               className="w-100"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                handleEditModal(row);
+              }}
             >
-              <Link to={`/users/view/${row.id}`}>
-                <Edit size={14} className="me-50" />
-                <span className="align-middle">ویرایش</span>
-              </Link>
+              <Edit size={14} className="me-50" />
+              <span className="align-middle">ویرایش</span>
             </DropdownItem>
             <DropdownItem
               tag="a"

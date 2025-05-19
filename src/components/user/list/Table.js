@@ -1,19 +1,12 @@
-// ** React Imports
 import { Fragment, useState, useEffect } from "react";
-
-// ** Components
 import AddUserModal from "./AddUserModal";
-import DeleteUserModal from "./DeleteUserModal"; // اضافه کردن مودال حذف
+import DeleteUserModal from "./DeleteUserModal";
 import { columns } from "./columns";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
 import { ChevronDown } from "react-feather";
-
-// ** Utils
 import { selectThemeColors } from "@utils";
-
-// ** Reactstrap Imports
 import {
   Row,
   Col,
@@ -25,14 +18,14 @@ import {
   CardTitle,
   CardHeader,
 } from "reactstrap";
-
-// ** Styles
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import {
   GetUserList,
   useDeleteUser,
 } from "../../../@core/Services/Api/UserManage/user";
+import { toast } from "react-hot-toast";
+import EditUserModal from "./EditUserModal";
 
 // ** Table Header
 const CustomHeader = ({
@@ -77,7 +70,6 @@ const CustomHeader = ({
               onChange={(e) => handleSearch(e.target.value)}
             />
           </div>
-
           <div className="d-flex align-items-center table-header-actions">
             <Button
               className="add-new-user"
@@ -103,63 +95,17 @@ const UsersList = () => {
     value: "",
     label: "انتخاب",
   });
-
   const [currentStatus, setCurrentStatus] = useState({
     value: null,
     label: "انتخاب",
     number: 0,
   });
-
   const [deleteModal, setDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [editModal, setEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  // Delete User
   const { mutate: deleteUser, isLoading: isDeleting } = useDeleteUser();
-
-  const handleConfirmDelete = () => {
-    if (userToDelete) {
-      console.log("Attempting to delete user with id:", userToDelete);
-      deleteUser(userToDelete, {
-        onSuccess: (response) => {
-          console.log("API Response (Success):", response);
-          alert("کاربر با موفقیت حذف شد!");
-          setDeleteModal(false);
-          setUserToDelete(null);
-          refetch();
-        },
-        onError: (error) => {
-          console.error("API Error Response:", {
-            ErrorType: error.response?.data?.ErrorType,
-            ErrorMessage: error.response?.data?.ErrorMessage,
-            StatusCode: error.response?.data?.StatusCode,
-            FullResponseData: error.response?.data,
-            FullError: error,
-          });
-          const errorMessage =
-            error.response?.data?.ErrorMessage?.[0] ||
-            "خطای ناشناخته در حذف کاربر";
-          alert(`خطا در حذف کاربر: ${errorMessage}`);
-          setDeleteModal(false);
-          setUserToDelete(null);
-        },
-      });
-    } else {
-      console.warn("No id provided for deletion");
-      setDeleteModal(false);
-    }
-  };
-
-  // Debounce search with useEffect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // بازگشت به صفحه اول
-    }, 1000);
-
-    return () => clearTimeout(timer); // پاکسازی تایمر
-  }, [searchQuery]);
-
-  // Fetch data
   const { data, isError, isLoading, refetch } = GetUserList({
     PageNumber: currentPage,
     RowsOfPage: rowsPerPage,
@@ -167,6 +113,41 @@ const UsersList = () => {
     IsActiveUser: currentStatus.value,
     Query: debouncedSearch,
   });
+
+  const handleEditModal = (user) => {
+    setEditModal(!editModal);
+    setSelectedUser(user);
+  };
+
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      deleteUser(userToDelete, {
+        onSuccess: () => {
+          toast.success("کاربر با موفقیت حذف شد!");
+          setDeleteModal(false);
+          setUserToDelete(null);
+          refetch();
+        },
+        onError: (error) => {
+          const errorMessage =
+            error.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در حذف کاربر";
+          toast.error(errorMessage);
+          setDeleteModal(false);
+          setUserToDelete(null);
+        },
+      });
+    } else {
+      setDeleteModal(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleModal = () => setSidebarOpen(!sidebarOpen);
 
@@ -177,18 +158,16 @@ const UsersList = () => {
   const handlePerPage = (e) => {
     const newRowsPerPage = parseInt(e.target.value);
     setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1); // بازگشت به صفحه اول
+    setCurrentPage(1);
   };
 
   const handleSearch = (val) => {
     setSearchQuery(val);
   };
 
-  // Pagination component
   const CustomPagination = () => {
-    const totalRows = data?.totalCount || 0; // تعداد کل ردیف‌ها
-    const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage)); // حداقل 1 صفحه
-
+    const totalRows = data?.totalCount || 0;
+    const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
     return (
       <ReactPaginate
         previousLabel={"قبلی"}
@@ -211,7 +190,6 @@ const UsersList = () => {
     );
   };
 
-  // Role options from API
   const roleOptions = data?.roles
     ? [
         { value: "", label: "انتخاب" },
@@ -223,7 +201,6 @@ const UsersList = () => {
       ]
     : [{ value: "", label: "انتخاب" }];
 
-  // Status options
   const statusOptions = [
     { value: "", label: "انتخاب" },
     { value: true, label: "فعال" },
@@ -252,11 +229,10 @@ const UsersList = () => {
                 theme={selectThemeColors}
                 onChange={(data) => {
                   setCurrentRole(data);
-                  setCurrentPage(1); // بازگشت به صفحه اول
+                  setCurrentPage(1);
                 }}
               />
             </Col>
-
             <Col md="4">
               <Label for="status-select">وضعیت</Label>
               <Select
@@ -268,7 +244,7 @@ const UsersList = () => {
                 value={currentStatus}
                 onChange={(data) => {
                   setCurrentStatus(data);
-                  setCurrentPage(1); // بازگشت به صفحه اول
+                  setCurrentPage(1);
                 }}
               />
             </Col>
@@ -285,7 +261,7 @@ const UsersList = () => {
             pagination
             responsive
             paginationServer
-            columns={columns(setDeleteModal, setUserToDelete)} // پاس دادن توابع
+            columns={columns(setDeleteModal, setUserToDelete, handleEditModal)}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
             className="react-dataTable"
@@ -306,7 +282,6 @@ const UsersList = () => {
       </Card>
 
       <AddUserModal open={sidebarOpen} handleModal={handleModal} />
-
       <DeleteUserModal
         deleteModal={deleteModal}
         setDeleteModal={setDeleteModal}
@@ -314,6 +289,12 @@ const UsersList = () => {
         setUserToDelete={setUserToDelete}
         handleConfirmDelete={handleConfirmDelete}
         isDeleting={isDeleting}
+      />
+      <EditUserModal
+        editModal={editModal}
+        setEditModal={setEditModal}
+        userId={selectedUser?.id}
+        refetch={refetch} // پاس دادن refetch به EditUserModal
       />
     </Fragment>
   );

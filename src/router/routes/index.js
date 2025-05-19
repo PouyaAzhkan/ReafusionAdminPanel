@@ -18,7 +18,6 @@ import ManageWeblogCategory from "../../components/ManegeWeblog&News/ManageWeblo
 import Courses from "../../components/ManageCourses/CourseLIst/list";
 import CourseDetail from "../../components/ManageCourses/CourseLIst/CourseDetail/CourseDetail";
 import AddCourse from "../../components/ManageCourses/AddCourse/AddCourse";
-import AllBuildingList from "../../components/Buildings/list/AllBuildingList";
 import AllCommentList from "../../components/CommentManage/list/AllCommentList";
 import ManageCourseCategory from "../../components/ManageCourses/ManageCourseCategory/ManageCourseCategory";
 import ManageCourseStatus from "../../components/ManageCourses/ManageCourseStatus/ManageCourseStatus";
@@ -27,6 +26,7 @@ import ManageCourseClass from "../../components/ManageCourses/ManageCourseClass/
 import CourseDepartment from "../../components/ManageCourses/ManageCourseDepartment/CourseDepartment";
 import AssistanceWork from "../../components/ManageCourses/ManageAssistance-Work/AssistanceWork";
 import MnanageCourseUser from "../../components/ManageCourses/MnanageCourseUser/MnanageCourseUser";
+import AllBuildingList from "../../components/Buildings/AllBuildingList";
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -215,9 +215,17 @@ const Routes = [
     path: "/studentSchedual",
     element: <StudentSchedual />,
   },
-    {
+  {
     path: "/terms",
     element: <Terms />,
+  },
+  {
+    path: "/comments",
+    element: <AllCommentList />,
+  },
+  {
+    path: "/buildings",
+    element: <AllBuildingList />,
   },
 ];
 

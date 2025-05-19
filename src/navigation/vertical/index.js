@@ -90,39 +90,7 @@ export default [
         icon: <Circle size={12} />,
         navLink: "/AddCourse",
       },
-      {
-        id: "terms",
-        title: "مدیریت ترم ها",
-        icon: <Circle size={12} />,
-        navLink: "/terms",
-      },
-    ],
-  },
-  {
-    id: "schedualManage",
-    title: "مدیریت بازه های زمانی",
-    icon: <Calendar size={20} />,
-    // navLink: "/sample",
-    children: [
-      {
-        id: "adminSchedual",
-        title: "ادمین",
-        icon: <Circle size={12} />,
-        navLink: "/adminSchedual",
-      },
-      {
-        id: "teacherSchedual",
-        title: "استاد",
-        icon: <Circle size={12} />,
-        navLink: "/teacherSchedual",
-      },
-      {
-        id: "studentSchedual",
-        title: "دانشجو",
-        icon: <Circle size={12} />,
-        navLink: "/studentSchedual",
-      },
-      {
+       {
         id: "manageTecnolojy",
         title: "مدیریت تکنولوژی دوره ها",
         icon: <Circle size={12} />,
@@ -159,11 +127,44 @@ export default [
         navLink: "/manageAssistanceWork",
       },
       {
+        id: "terms",
+        title: "مدیریت ترم ها",
+        icon: <Circle size={12} />,
+        navLink: "/terms",
+      },
+      {
         id: "manageCourseuser",
         title: "مدیریت کاربران دوره",
         icon: <Circle size={12} />,
         navLink: "/manageCourseUser",
+      },  
+    ],
+  },
+  {
+    id: "schedualManage",
+    title: "مدیریت بازه های زمانی",
+    icon: <Calendar size={20} />,
+    // navLink: "/sample",
+    children: [
+      {
+        id: "adminSchedual",
+        title: "ادمین",
+        icon: <Circle size={12} />,
+        navLink: "/adminSchedual",
       },
+      {
+        id: "teacherSchedual",
+        title: "استاد",
+        icon: <Circle size={12} />,
+        navLink: "/teacherSchedual",
+      },
+      {
+        id: "studentSchedual",
+        title: "دانشجو",
+        icon: <Circle size={12} />,
+        navLink: "/studentSchedual",
+      },
+     
     ],
   },
 ];

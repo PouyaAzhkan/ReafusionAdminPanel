@@ -6,10 +6,16 @@ import {
   DropdownToggle,
   UncontrolledDropdown,
 } from "reactstrap";
-import { Archive, MoreVertical, Trash2 } from "react-feather";
+import { Archive, Edit, MoreVertical, Trash2 } from "react-feather";
 import { useUserDetail } from "../../../@core/Services/Api/UserManage/user";
+import moment from "jalali-moment";
 
-export const columns = (setDeleteModal, setUserToDelete, setShowEditModal, setSelectedJobHistory) => [
+export const columns = (
+  setDeleteModal,
+  setUserToDelete,
+  setShowEditModal,
+  setSelectedJobHistory
+) => [
   {
     name: "کاربر",
     sortable: true,
@@ -72,8 +78,11 @@ export const columns = (setDeleteModal, setUserToDelete, setShowEditModal, setSe
     selector: (row) => row.workStartDate,
     cell: (row) => (
       <span className="text-capitalize">
-        از {row.workStartDate?.split("T")[0] || "—"} تا{" "}
-        {row.workEndDate?.split("T")[0] || "—"}
+        {row.workStartDate && row.workEndDate
+          ? `${moment(row.workStartDate).locale("fa").format("YYYY/MM/DD")}
+               تا 
+               ${moment(row.workEndDate).locale("fa").format("YYYY/MM/DD")}`
+          : "—"}
       </span>
     ),
   },
@@ -123,7 +132,7 @@ export const columns = (setDeleteModal, setUserToDelete, setShowEditModal, setSe
           <DropdownToggle tag="div" className="btn btn-sm">
             <MoreVertical size={14} className="cursor-pointer" />
           </DropdownToggle>
-          <DropdownMenu>
+          <DropdownMenu container="body">
             <DropdownItem
               tag="a"
               href="/"
@@ -134,7 +143,7 @@ export const columns = (setDeleteModal, setUserToDelete, setShowEditModal, setSe
                 setShowEditModal(true); // باز کردن مودال ویرایش
               }}
             >
-              <Archive size={14} className="me-50" />
+              <Edit size={14} className="me-50" />
               <span className="align-middle">ویرایش</span>
             </DropdownItem>
             <DropdownItem

@@ -1,4 +1,4 @@
-import { Archive, FileText, MoreVertical, Trash2 } from "react-feather";
+import { Archive, Edit, FileText, MoreVertical, Trash2 } from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,
@@ -9,6 +9,7 @@ import {
 } from "reactstrap";
 
 import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
+import moment from "jalali-moment";
 
 const renderRole = (row) => {
   return (
@@ -18,7 +19,7 @@ const renderRole = (row) => {
   );
 };
 
-export const columns = (setDeleteModal, setUserToDelete) => [
+export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
   {
     name: "نام کاربر",
     sortable: true,
@@ -80,7 +81,7 @@ export const columns = (setDeleteModal, setUserToDelete) => [
     selector: (row) => row.insertDate,
     cell: (row) => (
       <span className="text-capitalize">
-        {row.insertDate?.split("T")[0] || "—"}
+        {moment(row.insertDate).locale("fa").format("YYYY/MM/DD")}
       </span>
     ),
   },
@@ -99,11 +100,8 @@ export const columns = (setDeleteModal, setUserToDelete) => [
     sortField: "active",
     selector: (row) => row.active,
     cell: (row) => (
-      <Badge
-        color={row.active === "True" ? "light-success" : "light-danger"}
-        pill
-      >
-        {row.active === "True" ? "فعال" : "غیرفعال"}
+      <Badge color={row.active ? "light-success" : "light-danger"} pill>
+        {row.active ? "فعال" : "غیرفعال"}
       </Badge>
     ),
   },
@@ -116,16 +114,17 @@ export const columns = (setDeleteModal, setUserToDelete) => [
           <DropdownToggle tag="div" className="btn btn-sm">
             <MoreVertical size={14} className="cursor-pointer" />
           </DropdownToggle>
-          <DropdownMenu>
+          <DropdownMenu container="body">
             <DropdownItem
               tag="span"
               className="w-100"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.preventDefault();
+                handleEditModal(row);
+              }}
             >
-              <Link to={`/users/view/${row.id}`}>
-                <Archive size={14} className="me-50" />
-                <span className="align-middle">ویرایش</span>
-              </Link>
+              <Edit size={14} className="me-50" />
+              <span className="align-middle">ویرایش</span>
             </DropdownItem>
             <DropdownItem
               tag="a"

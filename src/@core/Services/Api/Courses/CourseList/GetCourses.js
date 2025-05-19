@@ -13,7 +13,6 @@ const GetCourses = (initialParams, coursePageParams, params, apiParams) => {
           params
         },
       });
-      console.log("API Response:", response); // برای دیباگ
       return response; // فقط داده‌ها را برگردان
     },
   });

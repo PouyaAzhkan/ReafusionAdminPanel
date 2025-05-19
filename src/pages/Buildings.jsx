@@ -1,5 +1,5 @@
 import React from 'react'
-import AllBuildingList from '../components/Buildings/list/AllBuildingList'
+import AllBuildingList from '../components/Buildings/AllBuildingList'
 
 const Buildings = () => {
     return (

@@ -1,6 +1,4 @@
 import { Fragment, useState, useEffect } from "react";
-import AddUserModal from "./AddUserModal";
-import DeleteUserModal from "./DeleteUserModal";
 import { columns } from "./columns";
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
@@ -20,17 +18,23 @@ import {
 } from "reactstrap";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
-import {
-  GetUserList,
-  useDeleteUser,
-} from "../../../@core/Services/Api/UserManage/user";
-import { toast } from "react-hot-toast";
-import EditUserModal from "./EditUserModal";
 
-// ** Table Header
+import AddTermModal from "./AddTermModal";
+import AddTermTimeModal from "./AddTermTimeModal";
+import EditTermInfo from "./EditTermInfo";
+import EditTermTimeInfo from "./EditTermTimeInfo";
+import { getAllTerms } from "../../@core/Services/Api/Terms/Terms";
+
+const statusOptions = [
+  { value: "", label: "انتخاب" },
+  { value: true, label: "منقضی شده" },
+  { value: false, label: "منقضی نشده" },
+];
+
 const CustomHeader = ({
   data,
-  handleModal,
+  handleAddTermModal,
+  handleAddTermTimeModal,
   handlePerPage,
   rowsPerPage,
   handleSearch,
@@ -74,9 +78,16 @@ const CustomHeader = ({
             <Button
               className="add-new-user"
               color="primary"
-              onClick={handleModal}
+              onClick={handleAddTermModal}
             >
-              افزودن کاربر
+              افزودن ترم
+            </Button>
+            <Button
+              className="add-new-user ms-1"
+              color="primary"
+              onClick={handleAddTermTimeModal}
+            >
+              افزودن زمان
             </Button>
           </div>
         </Col>
@@ -85,71 +96,54 @@ const CustomHeader = ({
   );
 };
 
-const UsersList = () => {
+const TermsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentRole, setCurrentRole] = useState({
+  const [addTermTimeOpen, setAddTermTimeOpen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditTermTimeModal, setShowEditTermTimeModal] = useState(false);
+  const [selectedTerm, setSelectedTerm] = useState(null);
+  const [selectedTermTime, setSelectedTermTime] = useState(null); // متغیر جدید برای زمان بسته شدن
+  const [currentStatus, setCurrentStatus] = useState({
     value: "",
     label: "انتخاب",
   });
-  const [currentStatus, setCurrentStatus] = useState({
-    value: null,
-    label: "انتخاب",
-    number: 0,
-  });
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [editModal, setEditModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-
-  const { mutate: deleteUser, isLoading: isDeleting } = useDeleteUser();
-  const { data, isError, isLoading, refetch } = GetUserList({
-    PageNumber: currentPage,
-    RowsOfPage: rowsPerPage,
-    roleId: currentRole.number,
-    IsActiveUser: currentStatus.value,
-    Query: debouncedSearch,
-  });
-
-  const handleEditModal = (user) => {
-    setEditModal(!editModal);
-    setSelectedUser(user);
-  };
-
-  const handleConfirmDelete = () => {
-    if (userToDelete) {
-      deleteUser(userToDelete, {
-        onSuccess: () => {
-          toast.success("کاربر با موفقیت حذف شد!");
-          setDeleteModal(false);
-          setUserToDelete(null);
-          refetch();
-        },
-        onError: (error) => {
-          const errorMessage =
-            error.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در حذف کاربر";
-          toast.error(errorMessage);
-          setDeleteModal(false);
-          setUserToDelete(null);
-        },
-      });
-    } else {
-      setDeleteModal(false);
-    }
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
       setCurrentPage(1);
     }, 1000);
+
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleModal = () => setSidebarOpen(!sidebarOpen);
+  const { data, isError, isLoading, refetch } = getAllTerms();
+
+  const filteredData =
+    data?.filter((item) => {
+      const searchText = debouncedSearch?.toLowerCase() || "";
+      const matchesSearch = debouncedSearch
+        ? item.departmentName?.toLowerCase().includes(searchText) ||
+          item.termName?.toLowerCase().includes(searchText)
+        : true;
+      const matchesStatus =
+        currentStatus.value !== "" ? item.expire === currentStatus.value : true;
+      return matchesSearch && matchesStatus;
+    }) || [];
+
+  const totalRows = filteredData.length;
+  const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  const handleAddTermModal = () => setSidebarOpen(!sidebarOpen);
+
+  const handleAddTermTimeModal = () => setAddTermTimeOpen(!addTermTimeOpen);
 
   const handlePagination = (page) => {
     setCurrentPage(page.selected + 1);
@@ -165,9 +159,20 @@ const UsersList = () => {
     setSearchQuery(val);
   };
 
+  const handleStatusChange = (option) => {
+    setCurrentStatus(option);
+    setCurrentPage(1);
+  };
+
+  const handleTermUpdated = () => {
+    refetch();
+  };
+
+  const handleTermTimeUpdated = () => {
+    refetch();
+  };
+
   const CustomPagination = () => {
-    const totalRows = data?.totalCount || 0;
-    const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
     return (
       <ReactPaginate
         previousLabel={"قبلی"}
@@ -190,25 +195,8 @@ const UsersList = () => {
     );
   };
 
-  const roleOptions = data?.roles
-    ? [
-        { value: "", label: "انتخاب" },
-        ...data?.roles.map((role) => ({
-          number: role.id,
-          value: role.roleName,
-          label: role.roleName,
-        })),
-      ]
-    : [{ value: "", label: "انتخاب" }];
-
-  const statusOptions = [
-    { value: "", label: "انتخاب" },
-    { value: true, label: "فعال" },
-    { value: false, label: "غیرفعال" },
-  ];
-
   if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (isError) return <div>خطا در بارگذاری کاربران.</div>;
+  if (isError) return <div>خطا در بارگذاری داده‌ها.</div>;
 
   return (
     <Fragment>
@@ -219,21 +207,6 @@ const UsersList = () => {
         <CardBody>
           <Row>
             <Col md="4">
-              <Label for="role-select">نقش</Label>
-              <Select
-                isClearable={false}
-                value={currentRole}
-                options={roleOptions}
-                className="react-select"
-                classNamePrefix="select"
-                theme={selectThemeColors}
-                onChange={(data) => {
-                  setCurrentRole(data);
-                  setCurrentPage(1);
-                }}
-              />
-            </Col>
-            <Col md="4">
               <Label for="status-select">وضعیت</Label>
               <Select
                 theme={selectThemeColors}
@@ -242,10 +215,7 @@ const UsersList = () => {
                 classNamePrefix="select"
                 options={statusOptions}
                 value={currentStatus}
-                onChange={(data) => {
-                  setCurrentStatus(data);
-                  setCurrentPage(1);
-                }}
+                onChange={handleStatusChange}
               />
             </Col>
           </Row>
@@ -261,43 +231,55 @@ const UsersList = () => {
             pagination
             responsive
             paginationServer
-            columns={columns(setDeleteModal, setUserToDelete, handleEditModal)}
+            columns={columns({
+              refetch,
+              setShowEditModal,
+              setShowEditTermTimeModal,
+              setSelectedTerm,
+              setSelectedTermTime, // اضافه کردن به پراپ‌ها
+            })}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
             className="react-dataTable"
             paginationComponent={CustomPagination}
-            data={data?.listUser || []}
+            data={paginatedData}
             subHeaderComponent={
               <CustomHeader
-                data={data?.listUser}
+                data={data}
                 searchQuery={searchQuery}
                 rowsPerPage={rowsPerPage}
                 handleSearch={handleSearch}
                 handlePerPage={handlePerPage}
-                handleModal={handleModal}
+                handleAddTermModal={handleAddTermModal}
+                handleAddTermTimeModal={handleAddTermTimeModal}
               />
             }
           />
         </div>
       </Card>
 
-      <AddUserModal open={sidebarOpen} handleModal={handleModal} />
-      <DeleteUserModal
-        deleteModal={deleteModal}
-        setDeleteModal={setDeleteModal}
-        userToDelete={userToDelete}
-        setUserToDelete={setUserToDelete}
-        handleConfirmDelete={handleConfirmDelete}
-        isDeleting={isDeleting}
+      <AddTermModal open={sidebarOpen} handleModal={handleAddTermModal} />
+
+      <AddTermTimeModal
+        open={addTermTimeOpen}
+        handleModal={handleAddTermTimeModal}
       />
-      <EditUserModal
-        editModal={editModal}
-        setEditModal={setEditModal}
-        userId={selectedUser?.id}
-        refetch={refetch} // پاس دادن refetch به EditUserModal
+
+      <EditTermInfo
+        showEditModal={showEditModal}
+        setShowEditModal={setShowEditModal}
+        selectedTerm={selectedTerm}
+        onBuildingUpdated={handleTermUpdated}
+      />
+
+      <EditTermTimeInfo
+        showEditModal={showEditTermTimeModal}
+        setShowEditModal={setShowEditTermTimeModal}
+        selectedTermTime={selectedTermTime} // استفاده از selectedTermTime
+        onBuildingUpdated={handleTermTimeUpdated}
       />
     </Fragment>
   );
 };
 
-export default UsersList;
+export default TermsList;

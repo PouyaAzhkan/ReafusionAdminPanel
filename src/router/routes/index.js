@@ -62,6 +62,16 @@ const ManegeWeblogNews = lazy(() =>
 const Comments = lazy(() => import("../../pages/Comments"));
 // buildings
 const Buildings = lazy(() => import("../../pages/Buildings"));
+// schedual
+const AdminSchedual = lazy(() => import("../../pages/Scheduals/AdminSchedual"));
+const TeacherSchedual = lazy(() =>
+  import("../../pages/Scheduals/TeacherSchedual")
+);
+const StudentSchedual = lazy(() =>
+  import("../../pages/Scheduals/StudentSchedual")
+);
+// terms
+const Terms = lazy(() => import("../../pages/Terms"));
 
 // ** Merge Routes
 const Routes = [
@@ -187,11 +197,27 @@ const Routes = [
   },
   {
     path: "/buildings",
-    element: <AllBuildingList />,
+    element: <Buildings />,
   },
   {
     path: "/comments",
-    element: <AllCommentList />,
+    element: <Comments />,
+  },
+  {
+    path: "/adminSchedual",
+    element: <AdminSchedual />,
+  },
+  {
+    path: "/teacherSchedual",
+    element: <TeacherSchedual />,
+  },
+  {
+    path: "/studentSchedual",
+    element: <StudentSchedual />,
+  },
+    {
+    path: "/terms",
+    element: <Terms />,
   },
 ];
 

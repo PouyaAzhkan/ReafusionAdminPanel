@@ -16,7 +16,7 @@ import withReactContent from "sweetalert2-react-content";
 import { selectThemeColors } from "@utils";
 import "@styles/react/libs/react-select/_react-select.scss";
 import { useEffect, useRef, useState } from "react";
-import { useEditBuilding } from "../../../@core/Services/Api/Buildings/Buildings";
+import { useEditBuilding } from "../../@core/Services/Api/Buildings/Buildings";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "@styles/react/libs/flatpickr/flatpickr.scss";
 import "leaflet/dist/leaflet.css";

@@ -55,7 +55,7 @@ export const columns = [
 
 const UserCourses = ({ userCourses }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
 
   // Handle page change
   const handlePagination = (page) => {

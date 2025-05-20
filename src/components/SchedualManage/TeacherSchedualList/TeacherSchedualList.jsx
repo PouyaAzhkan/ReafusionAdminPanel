@@ -5,161 +5,17 @@ import {
     Card,
     Input,
     Button,
-    Badge,
-    DropdownItem,
-    DropdownMenu,
-    DropdownToggle,
-    UncontrolledDropdown,
 } from "reactstrap";
-import { MoreVertical, ChevronDown, Edit, Check, X } from "react-feather";
+import { ChevronDown } from "react-feather";
 import ReactPaginate from "react-paginate";
 import DataTable from "react-data-table-component";
-import {
-    getCourseGroupDetail,
-    useEditForming,
-    useEditLockToRaise,
-    getTeacherSchedual,
-} from "../../../@core/Services/Api/Schedual/Schedual";
 import toast from "react-hot-toast";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
-import DateObject from "react-date-object";
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
-import { gregorian } from "react-date-object/calendars/gregorian";
 import SchedualCalendar from "../Calendar";
-import EditSchedualModal from "../EditSchedualModal"; // اضافه کردن مودال ویرایش
-
-// تعریف ستون‌ها
-export const columns = (handleEditModal, toggleForming, toggleLockToRaise) => [
-    {
-        name: "نام گروه",
-        width: "150px",
-        sortField: "title",
-        selector: (row) => row.id,
-        cell: (row) => {
-            const { data, isLoading, isError } = getCourseGroupDetail(row.courseGroupId);
-            if (isLoading) return <span className="text-truncate">در حال بارگذاری...</span>;
-            if (isError) return <span className="text-truncate">خطا در دریافت</span>;
-            const groupName = data?.courseGroupDto?.groupName || "—";
-            return <span className="text-truncate">{groupName}</span>;
-        },
-    },
-    {
-        name: "ساعت",
-        width: "90px",
-        sortField: "title",
-        selector: (row) => row.startTime,
-        cell: (row) => (
-            <span className="text-truncate">
-                {row.startTime && row.endTime ? `${row.startTime} تا ${row.endTime}` : "—"}
-            </span>
-        ),
-    },
-    {
-        name: "تعداد در هفته",
-        width: "110px",
-        sortField: "weekNumber",
-        selector: (row) => row.weekNumber,
-        cell: (row) => <span className="text-truncate">{row.weekNumber || "—"}</span>,
-    },
-    {
-        name: "تاریخ شروع و پایان",
-        width: "150px",
-        sortField: "startDate",
-        selector: (row) => row.startDate,
-        cell: (row) => {
-            const startDate = row.startDate?.split("T")[0];
-            const endDate = row.endDate?.split("T")[0];
-
-            const startPersian = startDate
-                ? new DateObject({ date: startDate, calendar: gregorian })
-                    .convert(persian, persian_fa)
-                    .format("YYYY/MM/DD")
-                : "";
-            const endPersian = endDate
-                ? new DateObject({ date: endDate, calendar: gregorian })
-                    .convert(persian, persian_fa)
-                    .format("YYYY/MM/DD")
-                : "";
-
-            return startPersian && endPersian ? `${startPersian} تا ${endPersian}` : "—";
-        },
-    },
-    {
-        name: "حالت دوره",
-        width: "100px",
-        sortField: "forming",
-        selector: (row) => row.forming,
-        cell: (row) => (
-            <Badge color={row.forming ? "light-success" : "light-danger"} pill>
-                {row.forming ? "تشکیل شده" : "تشکیل نشده"}
-            </Badge>
-        ),
-    },
-    {
-        name: "حالت حضور",
-        width: "100px",
-        sortField: "lockToRaise",
-        selector: (row) => row.lockToRaise,
-        cell: (row) => (
-            <Badge color={row.lockToRaise ? "light-success" : "light-danger"} pill>
-                {row.lockToRaise ? "فعال" : "غیرفعال"}
-            </Badge>
-        ),
-    },
-    {
-        name: "عملیات",
-        width: "100px",
-        cell: (row) => (
-            <div className="column-action">
-                <UncontrolledDropdown className="dropend">
-                    <DropdownToggle tag="div" className="btn btn-sm">
-                        <MoreVertical size={14} className="cursor-pointer" />
-                    </DropdownToggle>
-                    <DropdownMenu container="body">
-                        <DropdownItem
-                            tag="span"
-                            className="w-100"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                handleEditModal(row);
-                            }}
-                        >
-                            <Edit size={14} className="me-50" />
-                            <span className="align-middle">ویرایش</span>
-                        </DropdownItem>
-                        <DropdownItem
-                            tag="span"
-                            className="w-100"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                toggleForming(row);
-                            }}
-                        >
-                            {row.forming ? <X size={14} className="me-50" /> : <Check size={14} className="me-50" />}
-                            <span className="align-middle">
-                                {row.forming ? "غیرفعال کردن دوره" : "فعال کردن دوره"}
-                            </span>
-                        </DropdownItem>
-                        <DropdownItem
-                            tag="span"
-                            className="w-100"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                toggleLockToRaise(row);
-                            }}
-                        >
-                            {row.lockToRaise ? <X size={14} className="me-50" /> : <Check size={14} className="me-50" />}
-                            <span className="align-middle">
-                                {row.lockToRaise ? "غیرفعال کردن حضور" : "فعال کردن حضور"}
-                            </span>
-                        </DropdownItem>
-                    </DropdownMenu>
-                </UncontrolledDropdown>
-            </div>
-        ),
-    },
-];
+import EditSchedualModal from "../EditSchedualModal";
+import { columns } from "../columns";
+import { getTeacherSchedual, useEditForming, useEditLockToRaise } from "../../../@core/Services/Api/Schedual/Schedual";
+import SchedualSessionModal from "../Sessions/SchedualSessionModal";
 
 // کامپوننت هدر سفارشی
 const CustomHeader = ({ handlePerPage, rowsPerPage }) => {
@@ -193,9 +49,10 @@ const TeacherSchedualList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [dateRange, setDateRange] = useState({ startDate: "2020-01-01", endDate: "" });
-    const [openEditModal, setOpenEditModal] = useState(false); // حالت مودال ویرایش
-    const [selectedRow, setSelectedRow] = useState(null); // ردیف انتخاب‌شده برای ویرایش
-    const [tableData, setTableData] = useState([]); // داده‌های جدول
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [openSessionModal, setOpenSessionModal] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [tableData, setTableData] = useState([]);
 
     const today = new Date();
     const formattedToday = today.toISOString().split("T")[0];
@@ -203,6 +60,11 @@ const TeacherSchedualList = () => {
     useEffect(() => {
         setDateRange((prev) => ({ ...prev, endDate: formattedToday }));
     }, []);
+
+    const handleSessionModal = (row) => {
+        setSelectedRow(row);
+        setOpenSessionModal(!openSessionModal);
+    };
 
     const handleEditModal = (row) => {
         setSelectedRow(row);
@@ -218,7 +80,13 @@ const TeacherSchedualList = () => {
     };
 
     const { mutate: editForming } = useEditForming();
+
     const { mutate: editLockToRaise } = useEditLockToRaise();
+
+    const { data, isError, isLoading } = getTeacherSchedual({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+    });
 
     const toggleForming = (row) => {
         const newStatus = !row.forming;
@@ -267,11 +135,6 @@ const TeacherSchedualList = () => {
             }
         );
     };
-
-    const { data, isError, isLoading } = getTeacherSchedual({
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-    });
 
     useEffect(() => {
         if (isLoading) {
@@ -359,7 +222,7 @@ const TeacherSchedualList = () => {
                                 pagination
                                 responsive
                                 paginationServer
-                                columns={columns(handleEditModal, toggleForming, toggleLockToRaise)}
+                                columns={columns(handleEditModal, toggleForming, toggleLockToRaise, handleSessionModal)}
                                 onSort={() => { }}
                                 sortIcon={<ChevronDown />}
                                 className="react-dataTable"
@@ -379,11 +242,19 @@ const TeacherSchedualList = () => {
                     <SchedualCalendar onDateRangeChange={handleDateRangeChange} />
                 </Col>
             </Row>
+
             <EditSchedualModal
                 handleModal={handleEditModal}
                 open={openEditModal}
                 scheduleData={selectedRow}
                 onScheduleUpdate={handleScheduleUpdate}
+            />
+
+            <SchedualSessionModal
+                handleModal={handleSessionModal}
+                open={openSessionModal}
+                schedualData={selectedRow}
+                Sc
             />
         </Fragment>
     );

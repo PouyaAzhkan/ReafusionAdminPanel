@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import {
   Button, Col, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Row,
+  Spinner,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { EditDepartmentFields } from "../../../../@core/constants/department-manage/EditDepartmentFields";
@@ -11,7 +12,7 @@ import GetDepartmantDetail from "../../../../@core/Services/Api/Courses/ManageDe
 const EditDepartment = ({ id, refetch, isOpen, toggle }) => {
   const { data: buildings, isSuccess: buildingSuccess } = GetBuildingList();
   const { data, isSuccess } = GetDepartmantDetail(id);
-  const { mutate } = EditDepartments(refetch, toggle);
+  const { mutate, isPending } = EditDepartments(refetch, toggle);
 
   const {
     control,
@@ -82,7 +83,9 @@ const EditDepartment = ({ id, refetch, isOpen, toggle }) => {
             </Col>
 
             <Col xs={12} className="d-flex justify-content-center gap-1 mt-2">
-              <Button type="submit" color="primary">ذخیره تغییرات</Button>
+              <Button type="submit" color="primary" disabled={isPending}> ذخیره تغییرات
+                {isPending && <Spinner size="sm" color="light" />}
+              </Button>
               <Button type="button" color="danger" outline onClick={() => { toggle(); reset(); }}>
                 لغو
               </Button>

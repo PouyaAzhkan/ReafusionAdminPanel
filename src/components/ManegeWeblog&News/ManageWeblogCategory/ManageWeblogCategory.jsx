@@ -158,5 +158,4 @@ const ManageWeblogCategory = () => {
     </div>
   );
 };
-
 export default ManageWeblogCategory;

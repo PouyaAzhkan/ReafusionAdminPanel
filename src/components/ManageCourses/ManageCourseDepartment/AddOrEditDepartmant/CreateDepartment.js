@@ -1,5 +1,5 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Col,FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Row, } from "reactstrap";
+import { Button, Col,FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Row, Spinner, } from "reactstrap";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect } from "react";
 import {DepartmentValidations} from "../../../../@core/utils/Validation";
@@ -22,7 +22,7 @@ const CreateDepartment = ({ refetch, isOpen, toggle }) => {
 
   const { data: buildings, isSuccess: buildingSuccess } = GetBuildingList();
 
-  const { mutate } = AddDepartment();
+  const { mutate, isPending } = AddDepartment();
 
   const onSubmit = (values) => {
     mutate(values, {
@@ -105,8 +105,8 @@ const CreateDepartment = ({ refetch, isOpen, toggle }) => {
             </Col>
 
             <Col xs={12} className="text-center mt-2 pt-50">
-              <Button type="submit" className="me-1" color="primary">
-                ساختن
+              <Button type="submit" className="me-1" color="primary" disabled={isPending}>
+                ساختن {isPending && <Spinner size="sm" color="light" />} 
               </Button>
               <Button
                 type="button"

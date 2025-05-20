@@ -9,6 +9,7 @@ import {
   ModalBody,
   ModalHeader,
   Row,
+  Spinner,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -108,8 +109,8 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section, id }) => {
   }, [assistanceId, assCourse, assDetails, setValue, data]);
 
   // API mutations
-  const { mutate: create } = AddAsistance();
-  const { mutate: update } = EditAsistance();
+  const { mutate: create, isPending: CreactPending } = AddAsistance();
+  const { mutate: update, isPending: UpdatePending } = EditAsistance();
 
   // Form submission
   const onSubmit = (values) => {
@@ -261,8 +262,8 @@ const ModalTask = ({ isOpen, toggle, data, refetch, section, id }) => {
                 />
               </Col>
               <Col xs="12" className="text-center mt-2 pt-50">
-                <Button type="submit" className="me-1" color="primary">
-                  {section === "update" ? "ویرایش" : "ساختن"}
+                <Button type="submit" className="me-1" color="primary" disabled={CreactPending || UpdatePending}>
+                  {section === "update" ? "ویرایش" : "ساختن"} {CreactPending || UpdatePending && <Spinner size="sm" color="light" />}
                 </Button>
                 <Button type="reset" color="secondary" outline onClick={toggle}>
                   لغو

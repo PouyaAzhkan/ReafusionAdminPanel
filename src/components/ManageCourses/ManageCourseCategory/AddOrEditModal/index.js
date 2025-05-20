@@ -37,8 +37,8 @@ const AddTechnologyModal = ({
   };
 
   // Mutation برای ایجاد تکنولوژی
-  const { mutate: AddTechnology } = AddTecnology();
-  const { mutate: EditTecnologys } = EditTecnology();
+  const { mutate: AddTechnology, isPending: addPending } = AddTecnology();
+  const { mutate: EditTecnologys, isPending: EditPending } = EditTecnology();
 
   const handleAddtecnology = (data) => {
       AddTechnology(data, {
@@ -231,9 +231,9 @@ const AddTechnologyModal = ({
                     className="me-1"
                     color="primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={addPending || EditPending}
                   >
-                    {isSubmitting ? "در حال ثبت..." : "ثبت"}
+                    {addPending || EditPending ? "در حال ثبت..." : "ثبت"}
                   </Button>
                   <Button
                     outline

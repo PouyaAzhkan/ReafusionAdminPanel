@@ -9,6 +9,7 @@ import {
   ModalBody,
   ModalHeader,
   Row,
+  Spinner,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import GetClassDetail from "../../../../@core/Services/Api/Courses/ManageClass/GetClassRoomDetail";
@@ -31,7 +32,7 @@ const EditClass = ({ id, isOpen, toggle, refetch }) => {
   const { data: buildings, isSuccess: buildingSuccess } = GetBuildingList();
 
   // تابع ویرایش کلاس
-  const { mutate } = EditClassRoom();
+  const { mutate, isPending } = EditClassRoom();
 
   const {
     control,
@@ -165,8 +166,8 @@ const EditClass = ({ id, isOpen, toggle, refetch }) => {
             </Col>
 
             <Col sm="12" className="d-flex justify-content-center gap-1 mt-2">
-              <Button color="primary" type="submit" disabled={isFetching}>
-                ذخیره تغییرات
+              <Button color="primary" type="submit" disabled={isPending}>
+                ذخیره تغییرات {isPending && <Spinner size="sm" color="light" />}
               </Button>
               <Button
                 type="button"

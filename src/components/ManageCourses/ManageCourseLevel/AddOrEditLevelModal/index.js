@@ -20,8 +20,8 @@ const AddLevelModal = ({
     update: "ویرایش سطح",
   };
 
-  const { mutate: AddLevel } = AddCourseLevel();
-  const { mutate: UpdateLevel } = EditCourseLevel();
+  const { mutate: AddLevel, isPending: Addpending } = AddCourseLevel();
+  const { mutate: UpdateLevel, isPending: EditPending } = EditCourseLevel();
 
   const handleAddLevel = (data) => {
     AddLevel(data, {
@@ -136,9 +136,9 @@ const AddLevelModal = ({
                     className="me-1"
                     color="primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={Addpending || EditPending}
                   >
-                    {isSubmitting ? "در حال ثبت..." : "ثبت"}
+                    {Addpending || EditPending ? "در حال ثبت..." : "ثبت"}
                   </Button>
                   <Button
                     outline

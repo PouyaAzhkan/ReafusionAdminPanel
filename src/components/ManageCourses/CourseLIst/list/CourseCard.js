@@ -1,7 +1,7 @@
 import classNames from "classnames";
-import { Badge, Card, CardBody, Col, Row, Table } from "reactstrap";
+import { Badge, Card, CardBody, Col, Row, Table, Tooltip } from "reactstrap";
 import { Link } from "react-router-dom";
-import { Calendar, ShoppingCart, User } from "react-feather";
+import { Calendar, Edit, ShoppingCart, User } from "react-feather";
 import HandleIdentityEditorJs from "../../../../utility/create-editorjs-blocks/IdentityEditorJs";
 import ImageFallback from "../../../../@core/components/image-fallback";
 import fallback from "../../../../assets/images/element/CourseImage.jpg";
@@ -20,6 +20,8 @@ const CourseCard = ({ activeView, item, handleActiveOrDetective }) => {
               status={item.isActive}
               view="flex"
             />
+            <div style={{ width: "40px", height: "40px", top: "5px", right: "5px", background: "#7367f0" }} 
+            className="position-absolute left-100 rounded-circle d-flex align-items-center justify-content-center cursor-pointer"><Edit color="white" size={17}/></div>
             <Link to={`/courses/${item.courseId}`}>
               <div className="item-img text-center p-0" style={{ height: "200px", width: "100%" }}>
                 <ImageFallback

@@ -21,8 +21,8 @@ const AddStatusModal = ({
   };
 
   // Mutation برای افزودن و ویرایش وضعیت
-  const { mutate: addStatus } = AddStatus();
-  const { mutate: updateStatus } = EditStatus();
+  const { mutate: addStatus, isPending: AddPending } = AddStatus();
+  const { mutate: updateStatus, isPending: EditPending } = EditStatus();
 
   // مقادیر اولیه فرم
   const defaultValues = {
@@ -211,9 +211,9 @@ const AddStatusModal = ({
                     className="me-1"
                     color="primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={AddPending || EditPending}
                   >
-                    {isSubmitting ? "در حال ثبت..." : "ثبت"}
+                    {AddPending || EditPending ? "در حال ثبت..." : "ثبت"}
                   </Button>
                   <Button
                     outline

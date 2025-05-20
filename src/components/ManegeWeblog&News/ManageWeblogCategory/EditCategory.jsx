@@ -13,8 +13,9 @@ import {
   Spinner,
 } from "reactstrap";
 import { Camera } from "react-feather";
-import { EditCategoryWeblog } from "../../../@core/Services/Api/Weblog&News/EditWeblogCategory";
+import EditCategoryWeblog from "../../../@core/Services/Api/Weblog&News/EditWeblogCategory";
 import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const EditCategory = ({ isOpen, toggle, category, refetch }) => {
   const {
@@ -33,9 +34,11 @@ const EditCategory = ({ isOpen, toggle, category, refetch }) => {
 
   const [imageSrc, setImageSrc] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const queryClient = useQueryClient();
 
-  // تنظیم مقادیر فرم بعد از دریافت category از API
+  // تنظیم مقادیر اولیه فرم
   useEffect(() => {
+    console.log("Category received:", category);
     if (category) {
       reset({
         title: category.categoryName || "",
@@ -49,35 +52,37 @@ const EditCategory = ({ isOpen, toggle, category, refetch }) => {
   const { mutate, isPending } = EditCategoryWeblog();
 
   const onSubmit = (data) => {
-    const formData = new FormData();
-    formData.append("Id", category.id);
-    formData.append("CategoryName", data.title);
-    formData.append("GoogleTitle", data.googleTitle);
-    formData.append("GoogleDescribe", data.googleDescribe);
-    if (imageFile) formData.append("Image", imageFile);
+    try {
+      const formData = new FormData();
+      formData.append("Id", category.id);
+      formData.append("CategoryName", data.title);
+      formData.append("GoogleTitle", data.googleTitle);
+      formData.append("GoogleDescribe", data.googleDescribe);
+      if (imageFile) formData.append("Image", imageFile);
 
-    // Debug FormData contents
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+      // دیباگ FormData
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
 
-    mutate(formData, {
-      onSuccess: (response) => {
-        console.log("API Response:", response);
-        if (response.success || response.status === 200) {
+      mutate(formData, {
+        onSuccess: (response) => {
+          console.log("Response from server:", response);
           toast.success("دسته‌بندی با موفقیت ویرایش شد");
+          queryClient.invalidateQueries(["EditCategoryWeblog"]); // کلید کش مناسب
           refetch();
           toggle();
-        } else {
-          toast.error("ویرایش انجام نشد: " + (response.message || "خطای ناشناخته"));
-        }
-      },
-      onError: (error) => {
-        toast.error("خطا در ویرایش: " + (error.message || "خطای ناشناخته"));
-        console.error("Mutation Error:", error);
-        toggle();
-      },
-    });
+        },
+        onError: (error) => {
+          console.error("Mutation Error:", error);
+          toast.error(`خطا در ویرایش: ${error.message || "خطای ناشناخته"}`);
+          toggle();
+        },
+      });
+    } catch (error) {
+      console.error("Submit Error:", error);
+      toast.error("خطا در ارسال داده‌ها");
+    }
   };
 
   return (
@@ -90,7 +95,7 @@ const EditCategory = ({ isOpen, toggle, category, refetch }) => {
         <ModalHeader toggle={toggle}>ویرایش دسته‌بندی</ModalHeader>
         <ModalBody className="d-flex gap-2">
           <div className="w-50">
-            <form className="w-100">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-100">
               {/* عنوان دسته‌بندی */}
               <Col md="12" className="mb-1">
                 <Label>عنوان دسته‌بندی</Label>
@@ -226,11 +231,20 @@ const EditCategory = ({ isOpen, toggle, category, refetch }) => {
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={handleSubmit(onSubmit)} disabled={isPending}>
+          <Button
+            color="primary"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
             ویرایش دسته‌بندی
             {isPending && <Spinner size="sm" color="light" />}
           </Button>
-          <Button color="secondary" onClick={toggle} outline disabled={isPending}>
+          <Button
+            color="secondary"
+            onClick={toggle}
+            outline
+            disabled={isPending}
+          >
             لغو
           </Button>
         </ModalFooter>

@@ -9,6 +9,7 @@ import {
   ModalBody,
   ModalHeader,
   Row,
+  Spinner,
 } from "reactstrap";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ClassroomValidations } from "../../../../@core/utils/Validation";
@@ -43,7 +44,7 @@ const CreateClass = ({ refetch, isOpen, toggle }) => {
   }, [isOpen, reset]);
 
   const { data: buildings, isSuccess: buildingSuccess } = GetBuildingList();
-  const { mutate } = AddClass();
+  const { mutate, isPending } = AddClass();
 
   const handleAddClass = (value) => {
     const datatoSend = {
@@ -149,8 +150,8 @@ const CreateClass = ({ refetch, isOpen, toggle }) => {
             </Col>
 
             <Col xs={12} className="text-center mt-2 pt-50">
-              <Button type="submit" className="me-1" color="primary">
-                ثبت کلاس
+              <Button type="submit" className="me-1" color="primary" disabled={isPending}>
+                ثبت کلاس {isPending && <Spinner size="sm" color="light" />}
               </Button>
               <Button
                 type="button"

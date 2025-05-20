@@ -12,6 +12,7 @@ import GetCreateCourse from "../../../../@core/Services/Api/Courses/CourseDetail
 import GetCourseGroup from "../../../../@core/Services/Api/Courses/CourseDetail/GetCourseGroup";
 import ChangeUserReserve from "../../../../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageUser/ChangeUserReserve";
 import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
+import toast from "react-hot-toast";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -26,7 +27,7 @@ const CourseDetail = () => {
   const { data: GetCourseInfo, isLoading: GetCourseInfoLoading, error: GetCourseInfoError, refetch } = useGetCourseDetailInfo(id);
   const { data: GetCreateCourses, isLoading: GetCreateCourseLoading, error: GetCreateCourseError } = GetCreateCourse();
   const { data: GetCourseGroupe, isLoading: GetCourseGroupeLoading, error: GetCourseGroupeErorr, refetch: refetchGroup } = GetCourseGroup(id, teacherId);
-  const { mutate, refetch: ResereveRefetch } = ChangeUserReserve();
+  const { mutate, isPending, refetch: ResereveRefetch } = ChangeUserReserve();
   // the api cals end 
   // get teacherId from api and used them
   useEffect(() => {
@@ -97,7 +98,7 @@ const CourseDetail = () => {
     console.log("Reserve Data:", data);
     mutate(data, {
        onSuccess: (data) => {
-         alert("این دانش آموز به گروه با موفقیت اضافه شد")
+         toast.success("این دانش آموز به گروه با موفقیت اضافه شد")
          ResereveRefetch()
          refetchGroup()
          refetch();
@@ -106,7 +107,7 @@ const CourseDetail = () => {
        onError: (error) => {
         const errorMessage = error?.response?.data?.ErrorMessage?.[0] 
         console.log(error);
-        alert(errorMessage);
+        toast.error(errorMessage);
        }
     });
   };
@@ -152,6 +153,7 @@ const CourseDetail = () => {
         id={id}
         changeReserve={handleChangeReserve}
         toggleTab={toggleTab}
+        isPending={isPending}
       />
     </div>
   );

@@ -15,6 +15,7 @@ import { ClassroomValidations } from "../../../../@core/utils/Validation";
 import GetBuildingList from "../../../../@core/Services/Api/Courses/ManageClass/GetBuildingList";
 import AddClass from "../../../../@core/Services/Api/Courses/ManageClass/AddClass";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const CreateClass = ({ refetch, isOpen, toggle }) => {
   const {
@@ -54,13 +55,13 @@ const CreateClass = ({ refetch, isOpen, toggle }) => {
     mutate(datatoSend, {
       onSuccess: (data) => {
         console.log(data);
-        alert("کلاس با موفقیت اضافه شد");
+        toast.success("کلاس با موفقیت اضافه شد");
         refetch?.();
         toggle();
       },
       onError: (error) => {
         console.log(error);
-        alert("خطا در افزودن کلاس");
+        toast.error("خطا در افزودن کلاس");
       },
     });
   };

@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { CourseStatusValidation } from "../../../../@core/utils/Validation";
 import AddStatus from "../../../../@core/Services/Api/Courses/ManageStatus/AddStatus";
 import EditStatus from "../../../../@core/Services/Api/Courses/ManageStatus/EditStatus";
+import toast from "react-hot-toast";
 
 const AddStatusModal = ({
   showModal,
@@ -64,14 +65,14 @@ const AddStatusModal = ({
   const handleAddStatus = (data) => {
     addStatus(data, {
       onSuccess: () => {
-        alert("وضعیت با موفقیت اضافه شد");
+        toast.success("وضعیت با موفقیت اضافه شد");
         console.log("Added status:", data);
         refetch();
         setShowModal(false);
       },
       onError: (error) => {
         const errorMessage = error.response?.data?.ErrorMessage || error.ErrorMessage || "خطا در افزودن وضعیت";
-        alert(`${errorMessage}`);
+        toast.error(`${errorMessage}`);
       },
     });
   };
@@ -80,13 +81,13 @@ const AddStatusModal = ({
   const handleUpdateStatus = (data) => {
     updateStatus({ ...data, id: categoryDetails.id }, {
       onSuccess: () => {
-        alert("وضعیت با موفقیت ویرایش شد");
+        toast.success("وضعیت با موفقیت ویرایش شد");
         console.log("Updated status:", data);
         refetch();
         setShowModal(false);
       },
       onError: () => {
-        alert("خطا در ویرایش وضعیت");
+        toast.error("خطا در ویرایش وضعیت");
       },
     });
   };

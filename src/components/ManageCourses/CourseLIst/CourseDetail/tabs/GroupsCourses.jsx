@@ -26,6 +26,7 @@ import HeaderTable from "../../../../../@core/components/header-table/HeaderTabl
 import { CourseGroups } from "../../../../../@core/constants/courses";
 import ModalGroup from "../../../../../view/ModalGroupe";
 import DeleteGroupe from "../../../../../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageGroupe/DeleteGroupe";
+import toast from "react-hot-toast";
 
 const CoursesGroups = ({ groupData, refetchGroup }) => {
   const [showModal, setShowModal] = useState(false);
@@ -45,12 +46,12 @@ const CoursesGroups = ({ groupData, refetchGroup }) => {
   DeleteGroupes(formData, {
     onSuccess: async (data) => {
       console.log("گروه با موفقیت حذف شد:", data);
-      alert("گروه با موفقیت حذف شد");
+      toast.success("گروه با موفقیت حذف شد");
       await refetchGroup();
     },
     onError: (error) => {
       console.error("خطا در حذف گروه:", error);
-      alert("خطا در حذف گروه");
+      toast.error("خطا در حذف گروه");
     },
   });
   };

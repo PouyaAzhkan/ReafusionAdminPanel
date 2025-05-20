@@ -9,8 +9,8 @@ const AcceptPaymentModal = ({
   paymentReceipt,
   refetch,
 }) => {
-  const { mutate: acceptPayment, isLoading: isAcceptLoading } = useAcceptCoursePayment(paymentId, refetch);
-  const { mutate: deletePayment, isLoading: isDeleteLoading } = useDeleteCoursePayment(paymentId, refetch);
+  const { mutate: acceptPayment, isLoading: isAcceptLoading, isPending: AcceptPending } = useAcceptCoursePayment(paymentId, refetch);
+  const { mutate: deletePayment, isLoading: isDeleteLoading, isPending: DeletePending } = useDeleteCoursePayment(paymentId, refetch);
 
   if (paymentId) {
      console.log(paymentId);
@@ -54,17 +54,17 @@ const AcceptPaymentModal = ({
               color="primary"
               className={paymentReceipt ? "" : "hidden"}
               onClick={() => handleAcceptPayment("accept")}
-              disabled={isAcceptLoading}
+              disabled={AcceptPending}
             >
-              {isAcceptLoading ? "در حال تأیید..." : "تأیید پرداخت"}
+              {AcceptPending ? "در حال تأیید..." : "تأیید پرداخت"}
             </Button>
             <Button
               color="danger"
               outline
               onClick={() => handleAcceptPayment("delete")}
-              disabled={isDeleteLoading}
+              disabled={DeletePending}
             >
-              {isDeleteLoading ? "در حال حذف..." : "حذف پرداخت"}
+              {DeletePending ? "در حال حذف..." : "حذف پرداخت"}
             </Button>
           </div>
         </ModalBody>

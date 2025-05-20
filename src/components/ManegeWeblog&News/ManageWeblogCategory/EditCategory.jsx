@@ -10,11 +10,13 @@ import {
   Label,
   Col,
   FormFeedback,
+  Spinner,
 } from "reactstrap";
 import { Camera } from "react-feather";
 import { EditCategoryWeblog } from "../../../@core/Services/Api/Weblog&News/EditWeblogCategory";
+import toast from "react-hot-toast";
 
-const EditCategory = ({ isOpen, toggle, category }) => {
+const EditCategory = ({ isOpen, toggle, category, refetch }) => {
   const {
     control,
     handleSubmit,
@@ -44,29 +46,38 @@ const EditCategory = ({ isOpen, toggle, category }) => {
     }
   }, [category, reset]);
 
-  const { mutate } = EditCategoryWeblog();
+  const { mutate, isPending } = EditCategoryWeblog();
 
   const onSubmit = (data) => {
     const formData = new FormData();
-    formData.append('Id', category.id)
+    formData.append("Id", category.id);
     formData.append("CategoryName", data.title);
     formData.append("GoogleTitle", data.googleTitle);
     formData.append("GoogleDescribe", data.googleDescribe);
-    if (Image) formData.append("Image", Image);
+    if (imageFile) formData.append("Image", imageFile);
+
+    // Debug FormData contents
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
 
     mutate(formData, {
-      onSuccess: (data) => {
-         console.log(formData); 
-         console.log(data);
-         alert("دسته بنید با موفقیت ویرایش شد")
-         toggle();       
+      onSuccess: (response) => {
+        console.log("API Response:", response);
+        if (response.success || response.status === 200) {
+          toast.success("دسته‌بندی با موفقیت ویرایش شد");
+          refetch();
+          toggle();
+        } else {
+          toast.error("ویرایش انجام نشد: " + (response.message || "خطای ناشناخته"));
+        }
       },
       onError: (error) => {
-         alert("خطا در ویرایش");
-         console.log(error);
-         toggle();       
-      }
-    })
+        toast.error("خطا در ویرایش: " + (error.message || "خطای ناشناخته"));
+        console.error("Mutation Error:", error);
+        toggle();
+      },
+    });
   };
 
   return (
@@ -178,6 +189,7 @@ const EditCategory = ({ isOpen, toggle, category }) => {
               <img
                 className="w-100 h-100 rounded-4"
                 src={imageSrc || ""}
+                alt="Category Image"
               />
               <Label
                 for="Image"
@@ -214,8 +226,12 @@ const EditCategory = ({ isOpen, toggle, category }) => {
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={handleSubmit(onSubmit)}>
+          <Button color="primary" onClick={handleSubmit(onSubmit)} disabled={isPending}>
             ویرایش دسته‌بندی
+            {isPending && <Spinner size="sm" color="light" />}
+          </Button>
+          <Button color="secondary" onClick={toggle} outline disabled={isPending}>
+            لغو
           </Button>
         </ModalFooter>
       </Modal>

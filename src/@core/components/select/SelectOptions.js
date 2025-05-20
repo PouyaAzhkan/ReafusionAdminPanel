@@ -4,7 +4,7 @@ import { selectThemeColors } from "@utils";
 // ** Third Party Components
 import Select from "react-select";
 import React, { useState } from "react";
-import { Button } from "reactstrap";
+import { Button, Spinner } from "reactstrap";
 
 const colorOptions = [
   { value: "ocean", label: "Ocean", color: "#00B8D9", isFixed: true },
@@ -15,7 +15,7 @@ const colorOptions = [
   { value: "yellow", label: "Yellow", color: "#FFC400", isFixed: false },
 ];
 
-const SelectOptions = ({ tech, setSelectedTech, useTech }) => {
+const SelectOptions = ({ tech, setSelectedTech, useTech, isPending }) => {
   const newTech = tech?.map((t) => ({ value: t.id, label: t.techName }));
 
   const handleSelectChange = (e) => {
@@ -46,8 +46,9 @@ const SelectOptions = ({ tech, setSelectedTech, useTech }) => {
         style={{ width: "100%"}}
         className="mt-3 mx-auto"
         color="primary"
+        disabled={isPending}
       >
-         ثبت نهایی{" "}
+         ثبت نهایی{" "} {isPending && <Spinner size="sm" color="light" />}
       </Button>
     </div>
   );

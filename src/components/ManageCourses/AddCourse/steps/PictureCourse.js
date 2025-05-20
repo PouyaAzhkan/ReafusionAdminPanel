@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Input, Label } from "reactstrap";
+import { Input, Label, Spinner } from "reactstrap";
 import { Camera } from "react-feather";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -11,7 +11,7 @@ const validCreateImageCourse = yup.object().shape({
   Text: yup.string().required("لطفا متن جستجو را وارد کنید"),
 });
 
-const PictureCourse = ({ courseId, stepper, setImage, setCreateBtn }) => {
+const PictureCourse = ({ courseId, stepper, setImage, setCreateBtn, isPending }) => {
   const [src, setSrc] = useState("");
   const [aiImgStatus, setAiImgStatus] = useState(false);
 
@@ -151,8 +151,9 @@ const PictureCourse = ({ courseId, stepper, setImage, setCreateBtn }) => {
           className="btn btn-success ms-2"
           style={{ height: "38px" }}
           onClick={() => setCreateBtn(true)}
+          disabled={isPending}
         >
-          ساخت دوره
+          ساخت دوره {isPending && <Spinner size="sm" color="light" />}
         </button>
       </form>
 

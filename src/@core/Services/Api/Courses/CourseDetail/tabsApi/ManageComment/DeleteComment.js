@@ -11,7 +11,7 @@ const DeleteComment = () => {
          return response
       },
       onSuccess: (data) => {
-         alert("کامنت حذف شد")
+         toast.success("کامنت حذف شد")
          console.log(data);
       },
       onError: (error) => {

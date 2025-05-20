@@ -15,6 +15,7 @@ import GetClassDetail from "../../../../@core/Services/Api/Courses/ManageClass/G
 import EditClassRoom from "../../../../@core/Services/Api/Courses/ManageClass/EditClass";
 import GetBuildingList from "../../../../@core/Services/Api/Courses/ManageClass/GetBuildingList";
 import { EditClassFields } from "../../../../@core/constants/class-manage/EditClassFields";
+import toast from "react-hot-toast";
 
 const EditClass = ({ id, isOpen, toggle, refetch }) => {
   // واکشی اطلاعات کلاس فقط وقتی id معتبر و مودال باز است
@@ -65,12 +66,12 @@ const EditClass = ({ id, isOpen, toggle, refetch }) => {
   const onSubmit = (values) => {
     mutate(values, {
       onSuccess: () => {
-        alert("ویرایش با موفقیت انجام شد");
+        toast.success("ویرایش با موفقیت انجام شد");
         refetch?.();
         toggle();
       },
       onError: () => {
-        alert("خطا در ویرایش کلاس");
+        toast.error("خطا در ویرایش کلاس");
       },
     });
   };

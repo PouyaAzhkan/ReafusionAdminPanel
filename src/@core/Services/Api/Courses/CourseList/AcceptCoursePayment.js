@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from "../../../../../@core/Services/interceptor";
+import toast from "react-hot-toast";
 
 const useAcceptCoursePayment = (paymentId, refetch) => {
   return useMutation({
@@ -14,11 +15,11 @@ const useAcceptCoursePayment = (paymentId, refetch) => {
     },
     onSuccess: () => {
       refetch?.();
-      alert("پرداختی مورد نظر تایید شد");
+      toast.success("پرداختی مورد نظر تایید شد");
     },
     onError: (error) => {
       console.error("Accept Payment Error:", error.response || error.message);
-      alert(`خطا در تایید پرداخت: ${error.response?.ErrorMessage || error.message}`);
+      toast.error(`خطا در تایید پرداخت: ${error.response?.ErrorMessage || error.message}`);
     },
   });
 };

@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from '../../../interceptor'
+import toast from "react-hot-toast";
 
 const EditDepartments = (refetch, toggle) => {
   return useMutation({
@@ -11,13 +12,13 @@ const EditDepartments = (refetch, toggle) => {
      },
      onSuccess: (data) => {
        refetch()
-       alert("بخش با موفقیت ویرایش شد");
+       toast.success("بخش با موفقیت ویرایش شد");
        toggle();
        console.log(data);
      },
      onError: (error) => {
         const errorMessage = error?.response?.data?.ErrorMessage?.[0] || "خطایی رخ داده است.";
-        alert(errorMessage);
+        toast.error(errorMessage);
         console.log(error);
      }
   })

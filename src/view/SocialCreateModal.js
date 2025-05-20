@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Modal, ModalHeader, ModalBody, Spinner } from "reactstrap";
 import { useParams } from "react-router-dom";
 import AddSocialGroupe from "../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageSocialGroupe/AddSocialGroupe";
 import EditSocialGroupe from "../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageSocialGroupe/EditSocialGroupe";
+import toast from "react-hot-toast";
 
 const SocialModal = ({ setShowModal, showModal, refetchGroup, groupId, variant, data }) => {
   console.log(data);
@@ -20,8 +21,8 @@ const SocialModal = ({ setShowModal, showModal, refetchGroup, groupId, variant, 
     edit: ["ویرایش", "ویرایش اطلاعات گروه مجازی"],
   };
 
-  const { mutate: AddSocialGroupes } = AddSocialGroupe();
-  const { mutate: EditSocialGroupes } = EditSocialGroupe();
+  const { mutate: AddSocialGroupes, isPending: addPending } = AddSocialGroupe();
+  const { mutate: EditSocialGroupes, isPending: editPending } = EditSocialGroupe();
 
   // دیباگ برای بررسی props
   console.log("Props data:", data);
@@ -53,13 +54,13 @@ const SocialModal = ({ setShowModal, showModal, refetchGroup, groupId, variant, 
       onSuccess: async () => {
         console.log("گروه مجازی با موفقیت اضافه شد");
         setShowModal(false);
-        alert("گروه مجازی با موفقیت اضافه شد");
+        toast.success("گروه مجازی با موفقیت اضافه شد");
         await refetchGroup();
       },
       onError: (error) => {
         console.error("خطا در افزودن گروه:", error);
         setShowModal(false);
-        alert("خطا در افزودن گروه");
+        toast.error("خطا در افزودن گروه");
       },
     });
   };
@@ -81,14 +82,14 @@ const SocialModal = ({ setShowModal, showModal, refetchGroup, groupId, variant, 
       onSuccess: async (response) => {
         console.log("گروه مجازی با موفقیت ویرایش شد", response);
         setShowModal(false);
-        alert("گروه مجازی با موفقیت ویرایش شد");
-        alert("در صورت زمان بردن ویرایش لطفا شکیبا باشید")
+        toast.success("گروه مجازی با موفقیت ویرایش شد");
+        toast.success("در صورت زمان بردن ویرایش لطفا شکیبا باشید")
         await refetchGroup();
       },
       onError: (error) => {
         console.error("خطا در ویرایش گروه:", error);
         setShowModal(false);
-        alert("خطا در ویرایش گروه");
+        toast.error("خطا در ویرایش گروه");
       },
     });
   };
@@ -123,9 +124,9 @@ const SocialModal = ({ setShowModal, showModal, refetchGroup, groupId, variant, 
             <button
               className="btn btn-primary mt-2"
               type="submit"
-              disabled={isSubmitting}
+              disabled={addPending || editPending}
             >
-              {textVariant[variant]?.[0] || "اقدام"}
+              {textVariant[variant]?.[0] || "اقدام"} {addPending || editPending && <Spinner size="sm" color="light" />}
             </button>
           </form>
         </ModalBody>

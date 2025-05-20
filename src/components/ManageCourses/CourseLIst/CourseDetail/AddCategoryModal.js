@@ -2,17 +2,18 @@ import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import SelectOptions from "../../../../@core/components/select/SelectOptions";
 import { useState } from "react";
 import AddCourseCategory from "../../../../@core/Services/Api/Courses/CourseDetail/AddCourseCategory";
+import toast from "react-hot-toast";
 
 const AddCategoryModal = ({ addTechModal, setAddTechModal, id, toggle, refetch, CreateCourse }) => {
   const [selectedTech, setSelectedTech] = useState([]);
 
-  const { mutate } = AddCourseCategory(id);
+  const { mutate, isPending } = AddCourseCategory(id);
 
   const handleAddCategory = () => {
     console.log("Selected Tech:", selectedTech);
     const techIds = selectedTech.map((tech) => tech.techId);
     if (techIds.length === 0) {
-      alert("لطفاً حداقل یک دسته‌بندی انتخاب کنید.");
+      toast.error("لطفاً حداقل یک دسته‌بندی انتخاب کنید.");
       return;
     }
 
@@ -24,16 +25,16 @@ const AddCategoryModal = ({ addTechModal, setAddTechModal, id, toggle, refetch, 
       onSuccess: (data) => {
         console.log("Success Response:", data);
         if (data.success && data.message) {
-          alert(data.message);
+          toast.success(data.message);
         } else {
-          alert("دسته بندی با موفقیت اضافه شد."); 
+          toast.success("دسته بندی با موفقیت اضافه شد."); 
         }
         toggle();
         refetch();
       },
       onError: (error) => {
         console.error("Error Details:", error.response?.data || error.message);
-        alert("خطا در افزودن دسته بندی");
+        toast.error("خطا در افزودن دسته بندی");
       },
     });
   };
@@ -55,6 +56,7 @@ const AddCategoryModal = ({ addTechModal, setAddTechModal, id, toggle, refetch, 
                 tech={CreateCourse.technologyDtos}
                 setSelectedTech={setSelectedTech}
                 useTech={handleAddCategory}
+                isPending={isPending}
               />
             </div>
           </ModalBody>

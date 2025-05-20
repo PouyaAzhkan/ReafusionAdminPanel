@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from '../../../interceptor'
+import toast from "react-hot-toast";
 
 const EditAsistance = () => {
   return useMutation({
@@ -10,11 +11,11 @@ const EditAsistance = () => {
        return response
      },
      onSuccess: (data) => {
-       alert("تسک با ویرایش اضافه شد");
+       toast.success("تسک با ویرایش اضافه شد");
        console.log(data);
      },
      onError: (error) => {
-       alert("خطا در ویرایش تسک")
+       toast.error("خطا در ویرایش تسک")
        console.log(error);
      }
   })

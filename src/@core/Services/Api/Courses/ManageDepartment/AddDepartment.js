@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from '../../../interceptor'
+import toast from "react-hot-toast";
 
 const AddDepartment = () => {
   return useMutation({
@@ -11,11 +12,11 @@ const AddDepartment = () => {
      },
      onSuccess: (data) => {
        console.log(data);
-       alert("بخش با موفیقت اضافه شد")
+       toast.success("بخش با موفیقت اضافه شد")
      },
      onError: (error) => {
          console.log(error);
-         alert("خطا در افزودن بخش")
+         toast.error("خطا در افزودن بخش")
      }
   })
 }

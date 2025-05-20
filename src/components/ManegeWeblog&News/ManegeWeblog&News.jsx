@@ -9,6 +9,7 @@ import { Badge, Input } from 'reactstrap'
 import WeblogCard from './WeblogCard'
 import ReactPaginate from 'react-paginate'
 import { NavLink } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const ManegeWeblogNews = () => {
   const [currentPage, setCurrentPage] = useState(1)
@@ -81,7 +82,7 @@ const ManegeWeblogNews = () => {
                   onClick={(e) => {
                     if (!item.isActive) {
                       e.preventDefault()
-                      alert("این خبر غیر فعال است و امکان مشاهده جزئیات وجود ندارد.")
+                      toast.error("این خبر غیر فعال است و امکان مشاهده جزئیات وجود ندارد.")
                     }
                   }} >جزئیات</NavLink>
               </td>

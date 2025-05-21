@@ -12,24 +12,34 @@ import {
   CardTitle,
   CardText,
   Badge,
-  CardImg,
+  ListGroupItem,
+  ListGroup,
 } from "reactstrap";
-import Slider from "react-slick"; // اضافه کردن اسلایدر
-import "slick-carousel/slick/slick.css"; // استایل اسلایدر
-import "slick-carousel/slick/slick-theme.css"; // تم اسلایدر
-import { getSessionDetail } from "../../../@core/Services/Api/Sessions/Sessions";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { getSessionDetail, useDeleteSessionFile } from "../../../@core/Services/Api/Sessions/Sessions";
 import { toast } from 'react-hot-toast';
 import AddOrEditSessionModal from "./AddOrEditSessionModal";
-import emptyUserImg from "../../../assets/images/emptyImage/userImage.jpg";
 import AddSessionFileModal from "./AddSessionFileModal";
+import { FileText, X } from "react-feather";
+import moment from 'moment-jalaali';
+import HomeWorksModal from "./HomeWorksModal";
 
 const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openAddFileModal, setOpenAddFileModal] = useState(false);
+  const [openHomeWorksModal, setOpenHomeWorksModal] = useState(false);
 
   const schedualId = schedualData?.id;
 
   const { data, isError, isLoading, refetch } = getSessionDetail(schedualId);
+
+  // هوک حذف فایل
+  const { mutate: deleteSessionFile, isLoading: isUpdatingSessionFile } = useDeleteSessionFile();
+
+  const handleHomeWorksModal = () => {
+    setOpenHomeWorksModal(!openHomeWorksModal);
+  };
 
   const handleAddFileModal = () => {
     setOpenAddFileModal(!openAddFileModal);
@@ -37,6 +47,21 @@ const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
 
   const handleAddModal = () => {
     setOpenAddModal(!openAddModal);
+    console.log("the id is :", schedualId);
+  };
+
+  // تابع حذف فایل
+  const handleDeleteFile = (file) => {
+    console.log("file.id:", file); // بررسی مقدار file.id
+    deleteSessionFile(file, {
+      onSuccess: () => {
+        toast.success("درخواست حذف انجام شد ولی مشکل از سمت سرور!");
+        refetch();
+      },
+      onError: (error) => {
+        toast.error("خطا در حذف فایل: " + error.message);
+      },
+    });
   };
 
   // تعیین وضعیت ویرایش و داده‌های جلسه
@@ -49,24 +74,20 @@ const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
     }
     : null;
 
-  const date = new Date(data?.insertDate);
-  const formattedDate = date.toLocaleDateString("fa-IR");
-  const formattedTime = date.toLocaleTimeString("fa-IR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  // file list
+  const renderFilePreview = (file) => {
+    return <FileText size='28' />;
+  };
 
-  // تنظیمات اسلایدر
-  const sliderSettings = {
-    dots: true, // نمایش دکمه‌های نقطه‌ای
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1, // تعداد اسلایدها در هر نمایش
-    slidesToScroll: 1,
-    autoplay: true, // اسلاید خودکار
-    autoplaySpeed: 3000, // سرعت خودکار (میلی‌ثانیه)
-    arrows: false, // نمایش فلش‌ها
+  // تنظیم moment-jalaali برای استفاده از تقویم شمسی
+  moment.loadPersian({ dialect: 'persian-modern' });
+
+  // تابع برای فرمت تاریخ و ساعت به شمسی
+  const formatJalaaliDateTime = (dateString) => {
+    const date = moment(dateString);
+    const datePart = date.format('jYYYY/jMM/jDD');
+    const timePart = date.format('HH:mm:ss');
+    return `${datePart} ساعت ${timePart}`;
   };
 
   return (
@@ -88,24 +109,6 @@ const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
               <Row>
                 <Col md="12">
                   <Card>
-                    {data?.sessionFileDtos && data.sessionFileDtos.length > 0 ? (
-                      <Slider {...sliderSettings}>
-                        {data.sessionFileDtos.map((file, index) => (
-                          <div key={index} style={{ padding: "10px" }}>
-                            <CardImg
-                              top
-                              src={file.fileAddress || emptyUserImg}
-                              alt={`فایل ${index + 1}`}
-                              style={{ maxHeight: "280px", objectFit: "contain", width: "100%" }}
-                            />
-                          </div>
-                        ))}
-                      </Slider>
-                    ) : (
-                      <div className="d-flex justify-content-center align-items-center border-1 border-secondary rounded-2" style={{ height: "280px" }}>
-                        <p className="text-center my-1 text-secondary">هیچ فایلی موجود نیست!</p>
-                      </div>
-                    )}
                     <CardBody>
                       <CardText>
                         <span className="fw-bolder me-1">وضعیت :</span>
@@ -127,9 +130,47 @@ const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
                       </CardText>
                       <CardText>
                         <span className="fw-bolder me-1">تاریخ شروع :</span>
-                        {`${formattedDate} ساعت ${formattedTime}`}
+                        {formatJalaaliDateTime(data?.insertDate)}
                       </CardText>
+
+                      <p>فایل های جلسه :</p>
+                      {data?.sessionFileDtos && data.sessionFileDtos.length > 0 ? (
+                        <ListGroup numbered className="overflow-scroll" style={{ maxHeight: "240px" }}>
+                          {data?.sessionFileDtos?.map((file, index) => (
+                            <ListGroupItem key={`${file.name}-${index}`} className="d-flex align-items-center justify-content-between">
+                              <div className="file-details d-flex align-items-center w-75">
+                                <div className="file-preview me-1 text-primary">{renderFilePreview(file)}</div>
+                                <div className="w-75">
+                                  <p className="file-name mb-0 text-truncate text-primary fw-bold">{file?.fileName}</p>
+                                  <p className="file-size mb-0" style={{ fontSize: "12px" }}>
+                                    {formatJalaaliDateTime(file?.insertDate)}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                color="danger"
+                                outline
+                                size="sm"
+                                className="btn-icon"
+                                onClick={() => handleDeleteFile(file?.id)}
+                                disabled={isUpdatingSessionFile}
+                              >
+                                <X size={14} />
+                              </Button>
+                            </ListGroupItem>
+                          ))}
+                        </ListGroup>
+                      ) : (
+                        <div
+                          style={{ border: "1px dashed #000", height: "240px" }}
+                          className="d-flex justify-content-center align-items-center rounded-2"
+                        >
+                          <p className="text-center my-1 text-secondary">هیچ فایلی موجود نیست!</p>
+                        </div>
+                      )}
                     </CardBody>
+
+
                   </Card>
                 </Col>
               </Row>
@@ -147,16 +188,16 @@ const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
           >
             {isEdit ? "ویرایش جلسه" : "ایجاد جلسه"}
           </Button>
-          {
-            data ? (<Button onClick={handleAddFileModal} type="button" className="mt-2" color="warning">
+          {data ? (
+            <Button onClick={handleAddFileModal} type="button" className="mt-2" color="warning">
               افزودن فایل
-            </Button>) : ""
-          }
-          {
-            data ? (<Button type="button" className="mt-2" color="success">
-              تکلیف ها
-            </Button>) : ""
-          }
+            </Button>
+          ) : null}
+          {data ? (
+            <Button onClick={handleHomeWorksModal} type="button" className="mt-2" color="success">
+              تکلیف‌ها
+            </Button>
+          ) : null}
           <Button type="button" className="mt-2" color="secondary" outline onClick={handleModal}>
             انصراف
           </Button>
@@ -177,6 +218,12 @@ const SchedualSessionModal = ({ open, handleModal, schedualData }) => {
         handleModal={handleAddFileModal}
         sessionId={schedualId}
         refetch={refetch}
+      />
+
+      <HomeWorksModal
+        open={openHomeWorksModal}
+        handleModal={handleHomeWorksModal}
+        sessionId={schedualId}
       />
     </Fragment>
   );

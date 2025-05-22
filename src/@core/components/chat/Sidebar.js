@@ -1,32 +1,23 @@
+import { useState } from "react";
 import Avatar from "../../../@core/components/avatar";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { Search } from "react-feather";
 import { InputGroup, InputGroupText, Input } from "reactstrap";
 import { useLocation } from "react-router-dom";
 import { useGetItem } from "../../../utility/hooks/useLocalStorage";
-import { handleQuery } from "../../../components/PanelSupports/store";
-import GetUserDetail from "../../Services/Api/chat/GetUserDetail";
 import RenderUserChats from "./RenderUserChats";
-import { useMutation } from "@tanstack/react-query";
 import GetUserImage from "../../Services/Api/chat/GetAdminImage";
 
 const Sidebar = ({ onSelectUser }) => {
-  const params = useSelector((state) => state.SupportSlice || {});
-  const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
   const id = useGetItem("id") && useGetItem("id");
   const location = useLocation();
 
   const { data } = GetUserImage(id);
 
   const handleSearch = (ev) => {
-    const section = location.pathname.toLowerCase() === "/adminsuports";
-    dispatch(
-      handleQuery({
-        query: ev.target.value,
-        section,
-      })
-    );
+    setSearchTerm(ev.target.value.toLowerCase());
   };
 
   return (
@@ -49,8 +40,7 @@ const Sidebar = ({ onSelectUser }) => {
                   <Search className="text-muted" size={14} />
                 </InputGroupText>
                 <Input
-                  value={params.query || ""}
-                  className="round"
+                  className="round text-primary"
                   placeholder="جستجو..."
                   onChange={handleSearch}
                 />
@@ -64,7 +54,7 @@ const Sidebar = ({ onSelectUser }) => {
           >
             <h4 className="chat-list-title">لیست کاربران</h4>
             <div className="chat-users-list chat-list media-list">
-              <RenderUserChats onSelectUser={onSelectUser} />
+              <RenderUserChats onSelectUser={onSelectUser} searchTerm={searchTerm} />
             </div>
           </PerfectScrollbar>
         </div>

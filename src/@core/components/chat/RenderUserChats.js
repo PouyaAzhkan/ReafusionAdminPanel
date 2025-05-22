@@ -8,7 +8,7 @@ import { useLocation } from "react-router-dom";
 import { useGetItem } from "../../../utility/hooks/useLocalStorage";
 import GetUserDetail from "../../Services/Api/chat/GetUserDetail";
 
-const RenderUserChats = ({ onSelectUser }) => {
+const RenderUserChats = ({ onSelectUser, searchTerm = "" }) => {
   const [active, setActive] = useState(null);
   const [chats, setChats] = useState([]);
   const [usersWithChatInfo, setUsersWithChatInfo] = useState([]);
@@ -17,7 +17,6 @@ const RenderUserChats = ({ onSelectUser }) => {
   const isAdminRoute = location.pathname.toLowerCase() === "/adminsuports";
   const isTeacherRoute = location.pathname.toLowerCase() === "/teachersupport";
 
-  // Query for Admin or Teacher chat
   const { data, isSuccess } = useQuery({
     queryKey: [isAdminRoute ? "adminChats" : "teacherChats"],
     queryFn: async () => {
@@ -29,22 +28,19 @@ const RenderUserChats = ({ onSelectUser }) => {
     },
   });
 
-  // Mutation to get user details
   const { mutateAsync: fetchUserDetail } = useMutation({
     mutationKey: ["getUserDetails"],
     mutationFn: GetUserDetail,
   });
 
-  // Load user info from chats
   const loadUserInfo = async () => {
     if (!Array.isArray(data)) return;
 
-    const relevantChats = data.filter((chat) => {
-      if (isTeacherRoute) {
-         return chat.chatRoom?.filter((msg) => String(msg.teacherId) === String(id));
-      }
-      return true; // Admin sees all
-    });
+    const relevantChats = isTeacherRoute
+      ? data.filter((chat) =>
+          chat.chatRoom?.filter((msg) => String(msg.teacherId) === String(id))
+        )
+      : data;
 
     const enrichedUsers = await Promise.all(
       relevantChats.map(async (chat) => {
@@ -89,11 +85,17 @@ const RenderUserChats = ({ onSelectUser }) => {
     onSelectUser?.(user);
   };
 
-  if (!usersWithChatInfo.length) return <div>در حال بارگذاری کاربران...</div>;
+  // ✅ فیلتر بر اساس سرچ
+  const filteredUsers = usersWithChatInfo.filter((user) => {
+    const fullName = `${user.fName} ${user.lName}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  });
+
+  if (!filteredUsers.length) return <h3 className="text-danger text-center py-5">کاربری با این مشخصات یافت نشد.</h3>;
 
   return (
     <Fragment>
-      {usersWithChatInfo.map((user) => (
+      {filteredUsers.map((user) => (
         <li
           key={user.id}
           onClick={() => handleUserClick(user)}

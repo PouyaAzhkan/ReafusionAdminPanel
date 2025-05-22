@@ -4,7 +4,7 @@ import { EditWeblogDetail } from '../../../@core/Services/Api/Weblog&News/EditWe
 import { EditWeblogValidation } from '../../../@core/utils/Validation';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { GetCategoryList } from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
+import GetCategoryList from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
 import  EditCategoryWeblog from '../../../@core/Services/Api/Weblog&News/EditWeblogCategory';
 import toast from 'react-hot-toast';
 

@@ -15,13 +15,23 @@ const SupportSlice = createSlice({
   reducers: {
     handleData: (state, action) => {
       state.Data = action.payload;
+      // Initialize FilteredData if the payload has the required fields
+      if (action.payload && action.payload.length > 0) {
+        state.FilteredData = action.payload.map(chat => ({
+          id: chat.userId,
+          fName: chat.fName || "", // Fallback if fName is missing
+          lName: chat.lName || "", // Fallback if lName is missing
+          currentPictureAddress: chat.currentPictureAddress || "",
+          status: chat.status || "offline",
+        }));
+      }
     },
     handleQuery: (state, action) => {
       state.Query = action.payload.query;
       state.FilteredData = state?.[action.payload.section].filter(
         (item) =>
-          item.lName.toLowerCase().indexOf(state.Query.toLowerCase()) != -1 ||
-          item.fName.toLowerCase().indexOf(state.Query.toLowerCase()) != -1
+          item.lName?.toLowerCase().indexOf(state.Query.toLowerCase()) !== -1 ||
+          item.fName?.toLowerCase().indexOf(state.Query.toLowerCase()) !== -1
       );
     },
     handleAdminUserList: (state, action) => {
@@ -31,9 +41,7 @@ const SupportSlice = createSlice({
       state.FilteredData = state.AdminUserList;
     },
     handleTeacherUserList: (state, action) => {
-      if (
-        !state.TeacherUserList.find((user) => user.id === action.payload.id)
-      ) {
+      if (!state.TeacherUserList.find((user) => user.id === action.payload.id)) {
         state.TeacherUserList.push(action.payload);
       }
       state.FilteredData = state.TeacherUserList;
@@ -46,7 +54,7 @@ const SupportSlice = createSlice({
         (user) => user.userId === action.payload
       );
 
-      if (action.payload != 0) {
+      if (action.payload !== 0) {
         state.SelectUser = {
           fName: userInfo?.fName,
           lName: userInfo?.lName,

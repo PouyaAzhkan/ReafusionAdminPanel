@@ -69,7 +69,6 @@ const EditCategory = ({ isOpen, toggle, category, refetch }) => {
         onSuccess: (response) => {
           console.log("Response from server:", response);
           toast.success("دسته‌بندی با موفقیت ویرایش شد");
-          queryClient.invalidateQueries(["EditCategoryWeblog"]); // کلید کش مناسب
           refetch();
           toggle();
         },

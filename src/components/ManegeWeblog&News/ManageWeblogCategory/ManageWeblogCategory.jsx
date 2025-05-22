@@ -7,7 +7,7 @@ import Select from 'react-select';
 import '../../../assets/scss/PanelStayle/ManageWeblogs.scss';
 import '../../../assets/scss/PanelResponsive/WeblogAndNewsList.scss'
 import CategoryList from '../../../view/tableBasic/CategoryList';
-import { GetCategoryList } from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
+import GetCategoryList  from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
 import CreateCategory from './CreateCategory';
 import { AddCategory } from '../../../@core/Services/Api/Weblog&News/AddCategory';
 import toast from 'react-hot-toast';
@@ -158,4 +158,5 @@ const ManageWeblogCategory = () => {
     </div>
   );
 };
+
 export default ManageWeblogCategory;

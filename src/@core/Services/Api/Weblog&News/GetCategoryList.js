@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import Api from '../../../../@core/Services/interceptor';
 
-export const GetCategoryList = () => {
+const GetCategoryList2 = () => {
   return useQuery({
-      queryKey: ['GetCategoryList'],
+      queryKey: ['GetCategoryList2'],
       queryFn: async () => {
          const response = await Api.get(`/News/GetListNewsCategory`);
 
@@ -11,3 +11,5 @@ export const GetCategoryList = () => {
       }
   })
 }
+
+export default GetCategoryList2

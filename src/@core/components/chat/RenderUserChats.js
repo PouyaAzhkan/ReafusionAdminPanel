@@ -1,137 +1,122 @@
 import { Fragment, useEffect, useState } from "react";
-import {
-  GetUserChatInAdmin,
-  GetUserChatInTeacher,
-  UserDetails,
-} from "../../services/api/get-api";
-import { useQueryWithoutDependencies } from "../../../utility/hooks/useCustomQuery";
-import { useMutation } from "@tanstack/react-query";
-import { useDispatch, useSelector } from "react-redux";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import classNames from "classnames";
-import Avatar from "@components/avatar";
+import Avatar from "../../../@core/components/avatar";
 import { CardText } from "reactstrap";
-import {
-  handleAdminUserList,
-  handleData,
-  handleSelectUser,
-  handleTeacherUserList,
-} from "../../../view/support/store";
 import { useLocation } from "react-router-dom";
 import { useGetItem } from "../../../utility/hooks/useLocalStorage";
+import GetUserDetail from "../../Services/Api/chat/GetUserDetail";
 
-const RenderUserChats = () => {
-  const [active, setActive] = useState(0);
-  const dispatch = useDispatch();
-  const params = useSelector((state) => state.SupportSlice);
+const RenderUserChats = ({ onSelectUser }) => {
+  const [active, setActive] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [usersWithChatInfo, setUsersWithChatInfo] = useState([]);
   const location = useLocation();
-  const id = useGetItem("id") && useGetItem("id");
+  const id = useGetItem("id");
+  const isAdminRoute = location.pathname.toLowerCase() === "/adminsuports";
+  const isTeacherRoute = location.pathname.toLowerCase() === "/teachersupport";
 
-  // Get Admin Chat
-  const { data: adminChats, isSuccess: adminSuccess } =
-    useQueryWithoutDependencies("GET_ADMIN_CHAT", GetUserChatInAdmin);
-
-  // Get Teacher Chat
-  const { data: teacherChats, isSuccess: teacherSuccess } =
-    useQueryWithoutDependencies("GET_TEACHER_CHAT", GetUserChatInTeacher);
-
-  // Get User Details
-  const { mutate } = useMutation({
-    mutationKey: ["GET_USER_DETAILS"],
-    mutationFn: async (id) => {
-      let user = await UserDetails(id);
-      if (location.pathname.toLocaleLowerCase() === "/supportadmin") {
-        dispatch(handleAdminUserList(user));
-      } else {
-        dispatch(handleTeacherUserList(user));
-      }
+  // Query for Admin or Teacher chat
+  const { data, isSuccess } = useQuery({
+    queryKey: [isAdminRoute ? "adminChats" : "teacherChats"],
+    queryFn: async () => {
+      const url = isAdminRoute
+        ? "https://682e27a1746f8ca4a47c199e.mockapi.io/AdminChat/AdminPanel"
+        : "https://682f175b746f8ca4a47fcad8.mockapi.io/TeacherChat/teacherChat";
+      const res = await axios.get(url);
+      return res.data || [];
     },
   });
 
-  // Get User Info That Chat With Admin
-  const GetUserInfoFromAdminChats = () => {
-    for (const ev of adminChats) {
-      mutate(ev.userId);
-    }
-  };
+  // Mutation to get user details
+  const { mutateAsync: fetchUserDetail } = useMutation({
+    mutationKey: ["getUserDetails"],
+    mutationFn: GetUserDetail,
+  });
 
-  // Get User Info That Chat With Teacher
-  const GetUserInfoFromTeacherChats = () => {
-    for (const ev of teacherChats) {
-      let existChatForThisTeacher = ev.chatRoom.find(
-        (chat) => chat.teacherId === id
-      );
-      if (existChatForThisTeacher) {
-        mutate(ev.userId);
+  // Load user info from chats
+  const loadUserInfo = async () => {
+    if (!Array.isArray(data)) return;
+
+    const relevantChats = data.filter((chat) => {
+      if (isTeacherRoute) {
+         return chat.chatRoom?.filter((msg) => String(msg.teacherId) === String(id));
       }
-    }
-  };
+      return true; // Admin sees all
+    });
 
-  // Get User Info That chat with admin
-  const GetUserChatInfo = (id, variant) => {
-    if (location.pathname.toLocaleLowerCase() === "/supportadmin") {
-      const userChatRoom = adminChats?.find((user) => user.userId === id);
+    const enrichedUsers = await Promise.all(
+      relevantChats.map(async (chat) => {
+        try {
+          const user = await fetchUserDetail(chat.userId);
+          return {
+            ...user,
+            id: chat.userId,
+            chatRoom: chat.chatRoom || [],
+          };
+        } catch (err) {
+          return {
+            id: chat.userId,
+            fName: "نامشخص",
+            lName: "",
+            currentPictureAddress:
+              "../../../assets/images/element/UnKnownUser.jpg",
+            status: "offline",
+            chatRoom: chat.chatRoom || [],
+          };
+        }
+      })
+    );
 
-      return userChatRoom?.chatRoom[userChatRoom?.chatRoom?.length - 1]?.[
-        variant
-      ];
-    } else if (location.pathname.toLocaleLowerCase() === "/supportteacher") {
-      const userChatRoom = teacherChats?.find((user) => user.userId === id);
-
-      return userChatRoom?.chatRoom[userChatRoom?.chatRoom?.length - 1]?.[
-        variant
-      ];
-    }
+    setChats(relevantChats);
+    setUsersWithChatInfo(enrichedUsers);
   };
 
   useEffect(() => {
-    if (
-      location.pathname.toLocaleLowerCase() === "/supportadmin" &&
-      adminSuccess
-    ) {
-      dispatch(handleData(adminChats));
-      GetUserInfoFromAdminChats();
-    } else if (
-      location.pathname.toLocaleLowerCase() === "/supportteacher" &&
-      teacherSuccess
-    ) {
-      dispatch(handleData(teacherChats));
-      GetUserInfoFromTeacherChats();
+    if (isSuccess) {
+      loadUserInfo();
     }
-  }, [adminSuccess, teacherSuccess, location]);
+  }, [isSuccess, data]);
 
-  // When Clicking user
-  const handleUserClick = (id) => {
-    dispatch(handleSelectUser(id));
-    setActive(id);
+  const getLastMessage = (id, field) => {
+    const chatData = chats.find((c) => c.userId === id);
+    return chatData?.chatRoom?.at(-1)?.[field] || null;
   };
+
+  const handleUserClick = (user) => {
+    setActive(user.id);
+    onSelectUser?.(user);
+  };
+
+  if (!usersWithChatInfo.length) return <div>در حال بارگذاری کاربران...</div>;
 
   return (
     <Fragment>
-      {params.FilteredData?.map((item, index) => (
+      {usersWithChatInfo.map((user) => (
         <li
-          key={index}
-          onClick={() => handleUserClick(item.id)}
-          className={classNames({
-            active: active === item.id,
-          })}
+          key={user.id}
+          onClick={() => handleUserClick(user)}
+          className={classNames({ active: active === user.id })}
+          style={{ cursor: "pointer" }}
         >
           <Avatar
-            img={item.currentPictureAddress}
+            img={user.currentPictureAddress}
             imgHeight="42"
             imgWidth="42"
-            status={item.status}
+            status={user.status || "online"}
           />
           <div className="chat-info flex-grow-1">
             <h5 className="mb-0">
-              {item.fName} {item.lName}
+              {user.fName} {user.lName}
             </h5>
             <CardText className="text-truncate">
-              {GetUserChatInfo(item.id, "text")}
+              {getLastMessage(user.id, "text") || "چتی وجود ندارد"}
             </CardText>
           </div>
           <div className="chat-meta text-nowrap">
             <small className="float-end mb-25 chat-time ms-25">
-              {GetUserChatInfo(item.id, "messageTime")}
+              {getLastMessage(user.id, "messageTime") || ""}
             </small>
           </div>
         </li>

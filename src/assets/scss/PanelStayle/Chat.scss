@@ -1,0 +1,53 @@
+.chat-message {
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.chat-message-admin {
+  align-items: flex-start;
+}
+
+.chat-bubble {
+  padding: 0.7rem 1rem;
+  max-width: 75%;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  word-wrap: break-word;
+  color: #fff;
+}
+
+.chat-message-admin .chat-bubble {
+  background: linear-gradient(80deg, #5648ed, #8175fe);
+  border-top-right-radius: 0;
+  text-align: right;
+}
+
+.chat-message-teacher {
+  align-items: flex-start;
+}
+
+.chat-message-teacher .chat-bubble {
+  background: linear-gradient(80deg, #7b4eff, #b18aff);
+  border-top-left-radius: 0;
+  text-align: right;
+}
+
+.chat-message-user .chat-bubble {
+  background-color: #fff;
+  color: #333;
+  border-top-left-radius: 0;
+  text-align: left;
+}
+
+.message-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}

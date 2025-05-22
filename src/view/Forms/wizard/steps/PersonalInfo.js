@@ -10,7 +10,7 @@ import Select from 'react-select'
 
 // ** Reactstrap
 import { Form, Label, Input, Row, Col, Button, FormFeedback } from 'reactstrap'
-import { GetCategoryList } from '../../../../@core/Services/Api/Weblog&News/GetCategoryList'
+import  GetCategoryList  from '../../../../@core/Services/Api/Weblog&News/GetCategoryList'
 
 // ** Validation Schema
 const SignupSchema = yup.object().shape({

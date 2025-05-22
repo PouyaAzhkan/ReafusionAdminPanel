@@ -572,8 +572,9 @@ const EditCourse = ({ isOpen, toggle, refetchData, CreateCourse }) => {
         refetchData();
       },
       onError: (error) => {
+        const errorMessage = error?.response?.data?.ErrorMessage?.[0] 
         console.error("Error:", error);
-        toast.error("خطا در ویرایش اطلاعات");
+        toast.error(errorMessage);
       },
     });
   };

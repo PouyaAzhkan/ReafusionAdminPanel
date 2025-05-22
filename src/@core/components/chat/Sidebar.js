@@ -1,47 +1,32 @@
-// ** Custom Components
 import Avatar from "../../../@core/components/avatar";
-// ** Store & Actions
 import { useDispatch, useSelector } from "react-redux";
-// ** Third Party Components
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { Search } from "react-feather";
-// ** Reactstrap Imports
 import { InputGroup, InputGroupText, Input } from "reactstrap";
-// import RenderUserChats from "./RenderUserChats";
-// import { UserDetails } from "../../services/api/get-api";
 import { useLocation } from "react-router-dom";
 import { useGetItem } from "../../../utility/hooks/useLocalStorage";
 import { handleQuery } from "../../../components/PanelSupports/store";
-const Sidebar = () => {
-  const params = useSelector((state) => state.SupportSlice);
+import GetUserDetail from "../../Services/Api/chat/GetUserDetail";
+import RenderUserChats from "./RenderUserChats";
+import { useMutation } from "@tanstack/react-query";
+import GetUserImage from "../../Services/Api/chat/GetAdminImage";
+
+const Sidebar = ({ onSelectUser }) => {
+  const params = useSelector((state) => state.SupportSlice || {});
   const dispatch = useDispatch();
   const id = useGetItem("id") && useGetItem("id");
   const location = useLocation();
 
-  // // Get Supporter Details
-  // const { data: supporter } = useQueryWithDependencies(
-  //   "GET_SUPPORTER_DETAILS",
-  //   UserDetails,
-  //   id,
-  //   id
-  // );
+  const { data } = GetUserImage(id);
 
   const handleSearch = (ev) => {
-    if (location.pathname.toLocaleLowerCase() === "/supportadmin") {
-      dispatch(
-        handleQuery({
-          query: ev.target.value,
-          section: "AdminUserList",
-        })
-      );
-    } else {
-      dispatch(
-        handleQuery({
-          query: ev.target.value,
-          section: "TeacherUserList",
-        })
-      );
-    }
+    const section = location.pathname.toLowerCase() === "/adminsuports";
+    dispatch(
+      handleQuery({
+        query: ev.target.value,
+        section,
+      })
+    );
   };
 
   return (
@@ -53,7 +38,7 @@ const Sidebar = () => {
               <div className="sidebar-profile-toggle">
                 <Avatar
                   className="avatar-border"
-                  // img={supporter?.currentPictureAddress}
+                  img={data?.currentPictureAddress}
                   status="online"
                   imgHeight="42"
                   imgWidth="42"
@@ -64,12 +49,10 @@ const Sidebar = () => {
                   <Search className="text-muted" size={14} />
                 </InputGroupText>
                 <Input
-                  // value={params.Query}
+                  value={params.query || ""}
                   className="round"
                   placeholder="جستجو..."
-                  onChange={(ev) => {
-                    handleSearch(ev);
-                  }}
+                  onChange={handleSearch}
                 />
               </InputGroup>
             </div>
@@ -81,7 +64,7 @@ const Sidebar = () => {
           >
             <h4 className="chat-list-title">لیست کاربران</h4>
             <div className="chat-users-list chat-list media-list">
-              {/* <RenderUserChats /> */}
+              <RenderUserChats onSelectUser={onSelectUser} />
             </div>
           </PerfectScrollbar>
         </div>

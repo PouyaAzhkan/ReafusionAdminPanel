@@ -2,17 +2,14 @@ import classNames from "classnames";
 import React, { Fragment } from "react";
 import Avatar from "../../../@core/components/avatar";
 import { useGetItem } from "../../../utility/hooks/useLocalStorage";
-// import { useQueryWithDependencies } from "../../../utility/hooks/useCustomQuery";
+import GetUserDetail from "../../Services/Api/chat/GetUserDetail";
+import '../../scss/base/pages/app-chat-list.scss'
 
 const RenderChatMessage = ({ chatRoom, userImage }) => {
   const id = useGetItem("id") && useGetItem("id");
 
-  // const { data: supporter } = useQueryWithDependencies(
-  //   "GET_SUPPORTER_DETAILS",
-  //   UserDetails,
-  //   id,
-  //   id
-  // );
+  const { data: supporter, isLoading } = GetUserDetail(id);
+  if (isLoading) return <p>در حال بارگزاری پیام ها</p>
 
   return (
     <Fragment>
@@ -31,6 +28,7 @@ const RenderChatMessage = ({ chatRoom, userImage }) => {
               img={
                 msg.sender !== "user" ? supporter.currentPictureAddress : userImage
               }
+              status={'online'}
             />
           </div>
 

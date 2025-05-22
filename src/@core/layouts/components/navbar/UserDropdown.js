@@ -40,8 +40,6 @@ const UserDropdown = () => {
     userDetailerror,
   } = useUserDetail(userId);
 
-  console.log("user roles is :", userDetail?.roles);
-
   if (isLoading || userDetailisLoading) return <p>در حال بارگذاری</p>;
   if (error || userDetailerror) return <p>خطا در بارگذاری</p>;
 
@@ -81,38 +79,9 @@ const UserDropdown = () => {
           <User size={14} className="me-75" />
           <span className="align-middle">حساب کاربری</span>
         </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <Mail size={14} className="me-75" />
-          <span className="align-middle">صندوق ورودی</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <CheckSquare size={14} className="me-75" />
-          <span className="align-middle">وظایف</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <MessageSquare size={14} className="me-75" />
-          <span className="align-middle">گفتگوها</span>
-        </DropdownItem>
-        <DropdownItem divider />
-        <DropdownItem
-          tag={Link}
-          to="/pages/"
-          onClick={(e) => e.preventDefault()}
-        >
-          <Settings size={14} className="me-75" />
-          <span className="align-middle">تنظیمات</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <CreditCard size={14} className="me-75" />
-          <span className="align-middle">قیمت‌گذاری</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <HelpCircle size={14} className="me-75" />
-          <span className="align-middle">سوالات متداول</span>
-        </DropdownItem>
         <DropdownItem tag={Link} to="/login">
           <Power size={14} className="me-75" />
-          <span className="align-middle">خروج از حساب کاربری</span>
+          <span className="align-middle">خروج</span>
         </DropdownItem>
       </DropdownMenu>
     </UncontrolledDropdown>

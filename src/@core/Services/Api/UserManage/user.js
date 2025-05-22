@@ -112,7 +112,6 @@ export const changeUserActivity = () => {
 };
 
 // edit user info
-
 export const editUserInfo = () => {
   return useMutation({
     mutationFn: async (userData) => {

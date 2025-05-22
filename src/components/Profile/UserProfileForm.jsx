@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import { useForm, Controller } from "react-hook-form";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import {
     Row,
     Col,
@@ -14,9 +14,10 @@ import {
 import { selectThemeColors } from "@utils";
 
 // ** Leaflet Imports
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { editAdminProfileInfo } from "../../@core/Services/Api/AdminInfo/AdminInfo";
 
 // تنظیم آیکون Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -34,31 +35,28 @@ const genderOptions = [
 
 // کامپوننت نقشه
 const MapComponent = ({ position, setPosition, setValue }) => {
-    const MapClickHandler = () => {
-        useMapEvents({
-            click(e) {
-                const { lat, lng } = e.latlng;
-                setPosition([lat, lng]);
-                setValue("latitude", lat.toString());
-                setValue("longitude", lng.toString());
-                handleReverseGeocode(lat, lng, setValue);
-            },
-        });
-        return null;
-    };
+    const map = useMap();
+
+    useEffect(() => {
+        map.flyTo(position, 13);
+    }, [position, map]);
+
+    useMapEvents({
+        click(e) {
+            const { lat, lng } = e.latlng;
+            setPosition([lat, lng]);
+            setValue("latitude", lat.toString());
+            setValue("longitude", lng.toString());
+            handleReverseGeocode(lat, lng, setValue);
+        },
+    });
 
     return (
-        <MapContainer
-            center={position}
-            zoom={13}
-            style={{ height: "100%", width: "100%" }}
-            key={`${position[0]}-${position[1]}`}
-        >
+        <>
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            <MapClickHandler />
             <Marker
                 position={position}
                 draggable={true}
@@ -72,7 +70,7 @@ const MapComponent = ({ position, setPosition, setValue }) => {
                     },
                 }}
             />
-        </MapContainer>
+        </>
     );
 };
 
@@ -94,7 +92,6 @@ const handleReverseGeocode = async (lat, lng, setValue) => {
 };
 
 const UserProfileForm = ({ userData }) => {
-    // تبدیل تاریخ به فرمت YYYY-MM-DD
     const formatDate = (date) => {
         if (!date) return "";
         try {
@@ -107,6 +104,8 @@ const UserProfileForm = ({ userData }) => {
     };
 
     // ** Hooks
+    const { mutate, isLoading } = editAdminProfileInfo();
+
     const {
         control,
         setError,
@@ -125,13 +124,49 @@ const UserProfileForm = ({ userData }) => {
             userAbout: "",
             linkdin: "",
             telegram: "",
-            receiveMessageEvent: false,
+            receiveMessageEvent: false, // مقدار پیش‌فرض معتبر
             address: "",
             nationalCode: "",
-            gender: null,
+            gender: genderOptions[1], // مقدار پیش‌فرض: زن (false)
             birthday: "",
             latitude: "",
             longitude: "",
+        },
+        mode: "onChange",
+        resolver: async (data) => {
+            const errors = {};
+            if (!data.firstName || data.firstName.trim() === "") {
+                errors.firstName = { message: "لطفاً نام را وارد کنید" };
+            }
+            if (!data.lastName || data.lastName.trim() === "") {
+                errors.lastName = { message: "لطفاً نام خانوادگی را وارد کنید" };
+            }
+            if (!data.nationalCode || data.nationalCode.trim() === "") {
+                errors.nationalCode = { message: "لطفاً کدملی را وارد کنید" };
+            }
+            if (!data.address || data.address.trim().length <= 10) {
+                errors.address = { message: "آدرس باید بیشتر از ۱۰ کاراکتر باشد" };
+            }
+            if (data.latitude) {
+                const lat = parseFloat(data.latitude);
+                if (isNaN(lat) || lat < -90 || lat > 90) {
+                    errors.latitude = { message: "عرض جغرافیایی باید بین -90 و 90 باشد" };
+                }
+            }
+            if (data.longitude) {
+                const lon = parseFloat(data.longitude);
+                if (isNaN(lon) || lon < -180 || lon > 180) {
+                    errors.longitude = { message: "طول جغرافیایی باید بین -180 و 180 باشد" };
+                }
+            }
+            if (data.birthday) {
+                const birthDate = new Date(data.birthday);
+                const today = new Date();
+                if (isNaN(birthDate) || birthDate > today) {
+                    errors.birthday = { message: "تاریخ تولد نامعتبر است یا در آینده است" };
+                }
+            }
+            return { values: data, errors };
         },
     });
 
@@ -179,7 +214,7 @@ const UserProfileForm = ({ userData }) => {
 
     // تابع جستجوی آدرس با Nominatim
     const handleAddressSearch = async (address) => {
-        if (!address) return;
+        if (!address || address.trim().length <= 10) return;
 
         try {
             const response = await fetch(
@@ -202,7 +237,7 @@ const UserProfileForm = ({ userData }) => {
         }
     };
 
-    // نظارت بر تغییرات فیلد آدرس
+    // نظارت بر تغییرات فیلد آدرس با debouncing
     useEffect(() => {
         const handler = setTimeout(() => {
             if (homeAddress) {
@@ -215,19 +250,54 @@ const UserProfileForm = ({ userData }) => {
 
     const onSubmit = async (data) => {
         try {
-            // اینجا باید API برای ذخیره داده‌های فرم فراخوانی شود
-            console.log("Form data:", data);
-            toast.success("تغییرات با موفقیت ذخیره شد!");
+            console.log("داده‌های فرم قبل از ارسال:", data);
+
+            const formattedData = {
+                lName: data.lastName.trim(),
+                fName: data.firstName.trim(),
+                userAbout: data.userAbout ? data.userAbout.trim() : "",
+                linkdinProfile: data.linkdin ? data.linkdin.trim() : "",
+                telegramLink: data.telegram ? data.telegram.trim() : "",
+                receiveMessageEvent: data.receiveMessageEvent ?? false,
+                homeAdderess: data.address.trim(),
+                nationalCode: data.nationalCode.trim(),
+                gender: data.gender?.value ?? false,
+                birthDay: data.birthday ? new Date(data.birthday).toISOString().slice(0, 19) : null,
+                latitude: data.latitude || "",
+                longitude: data.longitude || "",
+            };
+
+            console.log("داده‌های فرمت‌شده برای API:", formattedData);
+
+            await mutate(formattedData, {
+                onSuccess: (response) => {
+                    toast.success("تغییرات با موفقیت ذخیره شد!");
+                },
+                onError: (error) => {
+                    console.error("خطای API:", error);
+                    const errorMessages = error.response?.data?.ErrorMessage || [error.message];
+                    const uniqueMessages = [...new Set(errorMessages)];
+                    uniqueMessages.forEach((msg) => toast.error(msg));
+                    if (errorMessages.some((msg) => msg.includes("نام"))) {
+                        setError("firstName", { message: "لطفاً نام را وارد کنید" });
+                    }
+                    if (errorMessages.some((msg) => msg.includes("نام خانوادگی"))) {
+                        setError("lastName", { message: "لطفاً نام خانوادگی را وارد کنید" });
+                    }
+                    if (errorMessages.some((msg) => msg.includes("آدرس"))) {
+                        setError("address", { message: "آدرس باید بیشتر از ۱۰ کاراکتر باشد" });
+                    }
+                },
+            });
         } catch (error) {
+            console.error("خطا در ارسال:", error);
             toast.error("خطا در ذخیره تغییرات: " + error.message);
         }
     };
 
     return (
         <Form className="mt-2 pt-50" onSubmit={handleSubmit(onSubmit)}>
-            <Toaster />
             <Row>
-                {/* first name */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="firstName">
                         نام
@@ -238,17 +308,16 @@ const UserProfileForm = ({ userData }) => {
                         render={({ field }) => (
                             <Input
                                 id="firstName"
-                                placeholder="John"
+                                placeholder="نام"
                                 invalid={errors.firstName && true}
                                 {...field}
                             />
                         )}
                     />
                     {errors.firstName && (
-                        <FormFeedback>لطفاً نام معتبر وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.firstName.message}</FormFeedback>
                     )}
                 </Col>
-                {/* last name */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="lastName">
                         نام خانوادگی
@@ -259,17 +328,16 @@ const UserProfileForm = ({ userData }) => {
                         render={({ field }) => (
                             <Input
                                 id="lastName"
-                                placeholder="Doe"
+                                placeholder="نام خانوادگی"
                                 invalid={errors.lastName && true}
                                 {...field}
                             />
                         )}
                     />
                     {errors.lastName && (
-                        <FormFeedback>لطفاً نام خانوادگی معتبر وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.lastName.message}</FormFeedback>
                     )}
                 </Col>
-                {/* email */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="email">
                         ایمیل
@@ -281,17 +349,16 @@ const UserProfileForm = ({ userData }) => {
                             <Input
                                 type="email"
                                 id="email"
-                                placeholder="Email"
+                                placeholder="ایمیل"
                                 invalid={errors.email && true}
                                 {...field}
                             />
                         )}
                     />
                     {errors.email && (
-                        <FormFeedback>لطفاً ایمیل معتبر وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.email.message}</FormFeedback>
                     )}
                 </Col>
-                {/* phone */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="phoneNumber">
                         شماره تماس
@@ -310,10 +377,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.phoneNumber && (
-                        <FormFeedback>لطفاً شماره تماس معتبر وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.phoneNumber.message}</FormFeedback>
                     )}
                 </Col>
-                {/* about user */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="userAbout">
                         درباره کاربر
@@ -331,10 +397,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.userAbout && (
-                        <FormFeedback>توضیحات را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.userAbout.message}</FormFeedback>
                     )}
                 </Col>
-                {/* gender */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="gender">
                         جنسیت
@@ -356,10 +421,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.gender && (
-                        <FormFeedback>لطفاً جنسیت معتبر انتخاب کنید!</FormFeedback>
+                        <FormFeedback>{errors.gender.message}</FormFeedback>
                     )}
                 </Col>
-                {/* nationalcode */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="nationalCode">
                         کدملی
@@ -377,10 +441,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.nationalCode && (
-                        <FormFeedback>کدملی را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.nationalCode.message}</FormFeedback>
                     )}
                 </Col>
-                {/* linkdin */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="linkdin">
                         لینکدین
@@ -398,10 +461,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.linkdin && (
-                        <FormFeedback>آدرس لینکدین را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.linkdin.message}</FormFeedback>
                     )}
                 </Col>
-                {/* telegram */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="telegram">
                         تلگرام
@@ -419,10 +481,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.telegram && (
-                        <FormFeedback>آدرس تلگرام را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.telegram.message}</FormFeedback>
                     )}
                 </Col>
-                {/* birthday */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="birthday">
                         تاریخ تولد
@@ -440,11 +501,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.birthday && (
-                        <FormFeedback>تاریخ معتبر وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.birthday.message}</FormFeedback>
                     )}
                 </Col>
-
-                {/* address */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="address">
                         آدرس
@@ -455,17 +514,16 @@ const UserProfileForm = ({ userData }) => {
                         render={({ field }) => (
                             <Input
                                 id="address"
-                                placeholder="خیابون فلان"
+                                placeholder="خیابون فلان، کوچه بهمان، پلاک ۱۲"
                                 invalid={errors.address && true}
                                 {...field}
                             />
                         )}
                     />
                     {errors.address && (
-                        <FormFeedback>آدرس را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.address.message}</FormFeedback>
                     )}
                 </Col>
-                {/* latitude */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="latitude">
                         عرض جغرافیایی
@@ -476,7 +534,7 @@ const UserProfileForm = ({ userData }) => {
                         render={({ field }) => (
                             <Input
                                 id="latitude"
-                                placeholder="1"
+                                placeholder="35.6892"
                                 type="number"
                                 step="any"
                                 invalid={errors.latitude && true}
@@ -485,10 +543,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.latitude && (
-                        <FormFeedback>عرض جغرافیایی را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.latitude.message}</FormFeedback>
                     )}
                 </Col>
-                {/* longitude */}
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="longitude">
                         طول جغرافیایی
@@ -499,7 +556,7 @@ const UserProfileForm = ({ userData }) => {
                         render={({ field }) => (
                             <Input
                                 id="longitude"
-                                placeholder="1"
+                                placeholder="51.3890"
                                 type="number"
                                 step="any"
                                 invalid={errors.longitude && true}
@@ -508,10 +565,9 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                     {errors.longitude && (
-                        <FormFeedback>طول جغرافیایی را وارد کنید!</FormFeedback>
+                        <FormFeedback>{errors.longitude.message}</FormFeedback>
                     )}
                 </Col>
-                {/* user id */}
                 <Col sm="4" className="mb-1">
                     <Label className="form-label" for="userId">
                         شناسه کاربری
@@ -524,7 +580,6 @@ const UserProfileForm = ({ userData }) => {
                         )}
                     />
                 </Col>
-                {/* receiveMessageEvent */}
                 <Col sm="2" className="mb-1 pt-2 d-flex justify-content-center align-items-center">
                     <Label className="form-label mx-1" for="receiveMessageEvent">
                         دریافت اعلانات
@@ -546,25 +601,34 @@ const UserProfileForm = ({ userData }) => {
                         <FormFeedback>{errors.receiveMessageEvent.message}</FormFeedback>
                     )}
                 </Col>
-                {/* map */}
                 <Col sm="12" className="mb-1">
                     <Label className="form-label" for="map">
                         انتخاب موقعیت مکانی
                     </Label>
                     <div style={{ height: "300px", width: "100%" }}>
                         {isClient && position && (
-                            <MapComponent
-                                position={position}
-                                setPosition={setPosition}
-                                setValue={setValue}
-                            />
+                            <MapContainer
+                                center={position}
+                                zoom={13}
+                                style={{ height: "100%", width: "100%", zIndex: "1" }}
+                            >
+                                <MapComponent
+                                    position={position}
+                                    setPosition={setPosition}
+                                    setValue={setValue}
+                                />
+                            </MapContainer>
                         )}
                     </div>
                 </Col>
-
                 <Col className="mt-2" sm="12">
-                    <Button type="submit" className="me-1" color="primary">
-                        ویرایش مشخصات
+                    <Button
+                        type="submit"
+                        className="me-1"
+                        color="primary"
+                        disabled={isLoading || Object.keys(errors).length > 0}
+                    >
+                        {isLoading ? "در حال ارسال..." : "ویرایش مشخصات"}
                     </Button>
                 </Col>
             </Row>

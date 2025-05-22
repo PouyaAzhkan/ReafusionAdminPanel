@@ -17,18 +17,6 @@ export const GetUserList = (params) => {
   });
 };
 
-// get dashboard user info
-export const GetDashboardUserInfo = () => {
-  return useQuery({
-    queryKey: ["GetUserInfo"],
-    queryFn: async () => {
-      const response = await api.get(`/SharePanel/GetProfileInfo`);
-
-      return response;
-    },
-  });
-};
-
 // get user detail
 export const useUserDetail = (userId) => {
   return useQuery({

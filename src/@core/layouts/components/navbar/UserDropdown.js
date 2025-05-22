@@ -25,11 +25,9 @@ import {
 
 // ** Default Avatar Image
 import UnKnownUser from "../../../../assets/images/element/UnKnownUser.jpg";
-import {
-  GetDashboardUserInfo,
-  useUserDetail,
-} from "../../../Services/Api/UserManage/user";
 import { roleTranslations } from "../../../../utility/RolesTranslation";
+import { GetDashboardUserInfo } from "../../../Services/Api/AdminInfo/AdminInfo";
+import { useUserDetail } from "../../../Services/Api/UserManage/user";
 
 const UserDropdown = () => {
   const { data, isLoading, error } = GetDashboardUserInfo();

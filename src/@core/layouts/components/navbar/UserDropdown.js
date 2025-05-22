@@ -22,16 +22,28 @@ import {
   DropdownToggle,
   DropdownItem,
 } from "reactstrap";
-import { GetUserInfo } from "../../../Services/Api/GetUserInfo";
 
 // ** Default Avatar Image
-import UnKnownUser from '../../../../assets/images/element/UnKnownUser.jpg'
+import UnKnownUser from "../../../../assets/images/element/UnKnownUser.jpg";
+import {
+  GetDashboardUserInfo,
+  useUserDetail,
+} from "../../../Services/Api/UserManage/user";
+import { roleTranslations } from "../../../../utility/RolesTranslation";
 
 const UserDropdown = () => {
+  const { data, isLoading, error } = GetDashboardUserInfo();
+  const userId = data?.userImage?.[0]?.userProfileId;
+  const {
+    data: userDetail,
+    userDetailisLoading,
+    userDetailerror,
+  } = useUserDetail(userId);
 
-  const { data, isLoading, error } = GetUserInfo();
-  if (isLoading) return <p> در حال بارگزاری </p>
-  if (error) return <p> خطا در بارگزاری </p>
+  console.log("user roles is :", userDetail?.roles);
+
+  if (isLoading || userDetailisLoading) return <p>در حال بارگذاری</p>;
+  if (error || userDetailerror) return <p>خطا در بارگذاری</p>;
 
   return (
     <UncontrolledDropdown tag="li" className="dropdown-user nav-item">
@@ -42,8 +54,20 @@ const UserDropdown = () => {
         onClick={(e) => e.preventDefault()}
       >
         <div className="user-nav d-sm-flex d-none">
-          <span className="user-name fw-bold">{data?.fName || "بدون نام"} {data?.lName || []}</span>
-          <span className="user-status">Admin</span>
+          <span className="user-name fw-bold">
+            {data?.fName || "بدون نام"} {data?.lName || ""}
+          </span>
+          <span className="user-status">
+            {userDetail?.roles
+              ? userDetail?.roles
+                  ?.map(
+                    (role) => roleTranslations[role.roleName] || role.roleName
+                  )
+                  .filter(Boolean)
+
+                  .join("، ")
+              : "بدون نقش"}
+          </span>
         </div>
         <Avatar
           img={data.currentPictureAddress || UnKnownUser}
@@ -53,21 +77,21 @@ const UserDropdown = () => {
         />
       </DropdownToggle>
       <DropdownMenu end>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
+        <DropdownItem tag={Link} to="/profile">
           <User size={14} className="me-75" />
-          <span className="align-middle">Profile</span>
+          <span className="align-middle">حساب کاربری</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
           <Mail size={14} className="me-75" />
-          <span className="align-middle">Inbox</span>
+          <span className="align-middle">صندوق ورودی</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
           <CheckSquare size={14} className="me-75" />
-          <span className="align-middle">Tasks</span>
+          <span className="align-middle">وظایف</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
           <MessageSquare size={14} className="me-75" />
-          <span className="align-middle">Chats</span>
+          <span className="align-middle">گفتگوها</span>
         </DropdownItem>
         <DropdownItem divider />
         <DropdownItem
@@ -76,19 +100,19 @@ const UserDropdown = () => {
           onClick={(e) => e.preventDefault()}
         >
           <Settings size={14} className="me-75" />
-          <span className="align-middle">Settings</span>
+          <span className="align-middle">تنظیمات</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
           <CreditCard size={14} className="me-75" />
-          <span className="align-middle">Pricing</span>
+          <span className="align-middle">قیمت‌گذاری</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
           <HelpCircle size={14} className="me-75" />
-          <span className="align-middle">FAQ</span>
+          <span className="align-middle">سوالات متداول</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/login">
           <Power size={14} className="me-75" />
-          <span className="align-middle">Logout</span>
+          <span className="align-middle">خروج از حساب کاربری</span>
         </DropdownItem>
       </DropdownMenu>
     </UncontrolledDropdown>

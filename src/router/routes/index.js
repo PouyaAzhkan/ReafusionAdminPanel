@@ -72,6 +72,8 @@ const StudentSchedual = lazy(() =>
 );
 // terms
 const Terms = lazy(() => import("../../pages/Terms"));
+// terms
+const Profile = lazy(() => import("../../pages/Profile"));
 
 // ** Merge Routes
 const Routes = [
@@ -218,6 +220,10 @@ const Routes = [
   {
     path: "/terms",
     element: <Terms />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
   },
 ];
 

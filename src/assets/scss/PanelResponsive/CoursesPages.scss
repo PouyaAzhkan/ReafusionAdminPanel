@@ -1,3 +1,9 @@
+ .courseStatus {
+   display: flex;
+}
+.statusCard {
+   width: 25%;
+}
 @media (max-width: 1000px) {
     .courses-container {
         display: flex;         
@@ -8,6 +14,14 @@
        width: 100% !important;
        margin: auto;
     }
+}
+@media (max-width: 870px) {
+     .courseStatus {
+        display: block;
+     }
+     .statusCard {
+         width: 100%;
+     }
 }
 @media (max-width: 600px) {
     .courseCard {

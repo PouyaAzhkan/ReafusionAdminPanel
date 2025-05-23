@@ -6,7 +6,7 @@ import '../../../../assets/scss/PanelResponsive/CoursesPages.scss'
 // ** Reactstrap Imports
 import { Card, CardBody } from "reactstrap";
 
-const StatsHorizontal = ({
+const StatsHorizontal2 = ({
   icon,
   color,
   stats,
@@ -16,7 +16,7 @@ const StatsHorizontal = ({
   statsMargin,
 }) => {
   return (
-    <Card>
+    <Card className="statusCard"> 
       <CardBody className={className}>
         <div className="d-flex justify-content-between align-items-center">
           <div>
@@ -48,10 +48,10 @@ const StatsHorizontal = ({
   );
 };
 
-export default StatsHorizontal;
+export default StatsHorizontal2;
 
 // ** PropTypes
-StatsHorizontal.propTypes = {
+StatsHorizontal2.propTypes = {
   stats: PropTypes.string,
   renderStats: PropTypes.any,
   className: PropTypes.string,

@@ -3,7 +3,7 @@ import Select from 'react-select'
 import '../../assets/scss/PanelStayle/ManageWeblogs.scss'
 import '../../assets/scss/PanelResponsive/WeblogAndNewsList.scss'
 import { Activity, Book, Slash, List, Grid } from 'react-feather'
-import StatsHorizontal from '../../@core/components/statistics-card/StatsHorizontal'
+import StatsHorizontal2 from "../../@core/components/widgets/stats/StatsHorizontal2";
 import { GetCount } from '../../@core/Services/Api/Weblog&News/GetWeblogCount'
 import { Badge, Input } from 'reactstrap'
 import WeblogCard from './WeblogCard'
@@ -95,10 +95,10 @@ const ManegeWeblogNews = () => {
 
   return (
     <div className='weblog gap-2'>
-      <div className='WeblogAndNewsInfo'>
-        <StatsHorizontal icon={<Book size={21} />} color='primary' stats={TotalCount?.totalCount} statTitle='مجموع اخبار و مقالات' />
-        <StatsHorizontal icon={<Activity size={21} />} color='success' stats={ActiveCount?.totalCount} statTitle='اخبار و مقالات فعال' />
-        <StatsHorizontal icon={<Slash size={20} />} color='warning' stats={(TotalCount?.totalCount || 0) - (ActiveCount?.totalCount || 0)} statTitle='اخبار و مقالات غیر فعال' />
+      <div className='WeblogAndNewsInfo gap-2 justify-content-between flex-wrap'>
+        <StatsHorizontal2 icon={<Book size={21} />} color='primary' stats={TotalCount?.totalCount} statTitle='مجموع اخبار و مقالات' />
+        <StatsHorizontal2 icon={<Activity size={21} />} color='success' stats={ActiveCount?.totalCount} statTitle='اخبار و مقالات فعال' />
+        <StatsHorizontal2 icon={<Slash size={20} />} color='warning' stats={(TotalCount?.totalCount || 0) - (ActiveCount?.totalCount || 0)} statTitle='اخبار و مقالات غیر فعال' />
       </div>
 
       <div className='weblogList'>

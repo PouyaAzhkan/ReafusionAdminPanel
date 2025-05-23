@@ -15,6 +15,11 @@ import AccountTabContent from './AccountTabContent'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import '@styles/react/pages/page-account-settings.scss'
 import CoursesTab from './CoursesTab'
+import JobHistoryTab from './JobHistoryTab'
+import ReservedCoursesTab from './ReservedCoursesTab'
+import FavoritesTabs from './FavoritesTabs'
+import MyCommentsTabs from './MyCommentsTabs'
+import SecurityManageTab from './SecurityManageTab'
 
 const ProfileDetail = () => {
 
@@ -38,6 +43,31 @@ const ProfileDetail = () => {
           <TabContent activeTab={activeTab}>
             <TabPane tabId='2'>
               <CoursesTab />
+            </TabPane>
+          </TabContent>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId='3'>
+              <ReservedCoursesTab />
+            </TabPane>
+          </TabContent>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId='4'>
+              <FavoritesTabs />
+            </TabPane>
+          </TabContent>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId='5'>
+              <MyCommentsTabs />
+            </TabPane>
+          </TabContent>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId='6'>
+              <JobHistoryTab />
+            </TabPane>
+          </TabContent>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId='7'>
+              <SecurityManageTab />
             </TabPane>
           </TabContent>
         </Col>

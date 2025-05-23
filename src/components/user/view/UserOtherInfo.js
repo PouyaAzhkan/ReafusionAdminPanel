@@ -7,6 +7,8 @@ import {
   Label,
   Button,
   Badge,
+  Row,
+  Col,
 } from "reactstrap";
 import { Check, X, Link } from "react-feather";
 import telegramIcon from "../../../assets/images/logo/telegram.png";
@@ -88,79 +90,84 @@ const UserOtherInfo = ({ userData }) => {
       <Card>
         <CardBody>
           <CardTitle className="fw-bolder">سایر اطلاعات</CardTitle>
-          <div className="d-flex mt-2">
-            <ul className="list-unstyled me-5">
-              <li className="mb-75">
-                <span className="fw-bolder me-25">شناسه:</span>
-                <span>{userData?.id || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">نام:</span>
-                <span>{userData?.fName || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">نام خانوادگی:</span>
-                <span>{userData?.lName || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">نام کاربری:</span>
-                <span>{userData?.userName || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">ایمیل:</span>
-                <span>{userData?.gmail || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">ایمیل بازیابی:</span>
-                <span>{userData?.recoveryEmail || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">شماره موبایل:</span>
-                <span>{userData?.phoneNumber || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">وضعیت:</span>
-                <Badge color={userData?.active ? "success" : "secondary"}>
-                  {userData?.active ? "فعال" : "غیرفعال"}
-                </Badge>
-              </li>
-            </ul>
-
-            <ul className="list-unstyled ms-5">
-              <li className="mb-75">
-                <span className="fw-bolder me-25">ورود دو مرحله ای:</span>
-                <Badge color={userData?.twoStepAuth ? "success" : "danger"}>
-                  {userData?.twoStepAuth ? "دارد" : "ندارد"}
-                </Badge>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">درباره کاربر:</span>
-                <span>{userData?.userAbout || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">آدرس:</span>
-                <span>{userData?.homeAdderess || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">کدملی:</span>
-                <span>{userData?.nationalCode || "نامشخص"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">جنسیت:</span>
-                <span>{userData?.gender ? "مرد" : "زن"}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">تاریخ تولد:</span>
-                <span>{formatJalaliDate(userData?.birthDay, "birthDay")}</span>
-              </li>
-              <li className="mb-75">
-                <span className="fw-bolder me-25">تاریخ ثبت نام:</span>
-                <span>
-                  {formatJalaliDate(userData?.insertDate, "insertDate")}
-                </span>
-              </li>
-            </ul>
-          </div>
+          <Row className="mt-2">
+            <Col sm={6}>
+              <ul className="list-unstyled">
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">شناسه:</span>
+                  <span>{userData?.id || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">نام:</span>
+                  <span>{userData?.fName || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">نام خانوادگی:</span>
+                  <span>{userData?.lName || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">نام کاربری:</span>
+                  <span>{userData?.userName || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">ایمیل:</span>
+                  <span>{userData?.gmail || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">ایمیل بازیابی:</span>
+                  <span>{userData?.recoveryEmail || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">شماره موبایل:</span>
+                  <span>{userData?.phoneNumber || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">وضعیت:</span>
+                  <Badge color={userData?.active ? "success" : "secondary"}>
+                    {userData?.active ? "فعال" : "غیرفعال"}
+                  </Badge>
+                </li>
+              </ul>
+            </Col>
+            <Col sm={6}>
+              <ul className="list-unstyled">
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">ورود دو مرحله ای:</span>
+                  <Badge color={userData?.twoStepAuth ? "success" : "danger"}>
+                    {userData?.twoStepAuth ? "دارد" : "ندارد"}
+                  </Badge>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">درباره کاربر:</span>
+                  <span>{userData?.userAbout || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">آدرس:</span>
+                  <span>{userData?.homeAdderess || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">کدملی:</span>
+                  <span>{userData?.nationalCode || "نامشخص"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">جنسیت:</span>
+                  <span>{userData?.gender ? "مرد" : "زن"}</span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">تاریخ تولد:</span>
+                  <span>
+                    {formatJalaliDate(userData?.birthDay, "birthDay")}
+                  </span>
+                </li>
+                <li className="mb-75">
+                  <span className="fw-bolder me-25">تاریخ ثبت نام:</span>
+                  <span>
+                    {formatJalaliDate(userData?.insertDate, "insertDate")}
+                  </span>
+                </li>
+              </ul>
+            </Col>
+          </Row>
         </CardBody>
       </Card>
       <Card>

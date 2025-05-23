@@ -10,15 +10,19 @@ import {
   CardBody,
   CardTitle,
   CardHeader,
-  Badge,
   Spinner,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
-import { getAdminCourseList } from "../../@core/Services/Api/AdminInfo/AdminInfo";
-import { ChevronDown } from "react-feather";
-import Avatar from "@components/avatar";
-import emptyImg from "../../assets/images/emptyImage/CourseImage.jpg";
+import { getAdminFavoriteCourseList, useDeleteAdminFavoriteCourse } from "../../@core/Services/Api/AdminInfo/AdminInfo";
+import { ChevronDown, MoreVertical, Trash2 } from "react-feather";
 import ReactPaginate from "react-paginate";
 import { Link } from "react-router-dom";
+import Avatar from '@components/avatar';
+import { toast } from "react-hot-toast";
+import emptyImg from "../../assets/images/emptyImage/CourseImage.jpg";
 
 // ** Table Header
 const CustomHeader = ({
@@ -67,11 +71,11 @@ const CustomHeader = ({
   );
 };
 
-export const columns = [
+export const columns = (handleDeleteCourse, isDeleting) => [
   {
     name: "عنوان دوره",
-    selector: (row) => row.courseTitle || "نام ندارد",
-    width: "200px",
+    selector: (row) => row.courseTitle,
+    width: "250px",
     cell: (row) => (
       <div className="d-flex align-items-center">
         <Link to={`/courses/${row?.courseId}`}>
@@ -94,9 +98,35 @@ export const columns = [
     ),
   },
   {
-    name: "بروزرسانی",
+    name: "استاد",
+    selector: (row) => row?.teacheName,
+    sortField: "teacheName",
+    width: "150px",
+    cell: (row) => <span className="text-truncate">{row?.teacheName || "-"}</span>,
+  },
+  {
+    name: "سطح",
+    selector: (row) => row?.levelName,
+    width: "100px",
+    cell: (row) => <span className="text-truncate">{row?.levelName || "-"}</span>,
+  },
+  {
+    name: "حالت برگزاری",
+    selector: (row) => row?.typeName,
+    width: "130px",
+    cell: (row) => <span className="text-truncate">{row?.typeName || "-"}</span>,
+  },
+  {
+    name: "توضیحات",
+    selector: (row) => row?.describe,
+    sortField: "describe",
+    width: "200px",
+    cell: (row) => <span className="text-truncate">{row?.describe || "-"}</span>,
+  },
+  {
+    name: "آخرین بروزرسانی",
     selector: (row) => row?.lastUpdate,
-    width: "120px",
+    width: "150px",
     cell: (row) => {
       const date = row?.lastUpdate
         ? new Date(row.lastUpdate).toLocaleDateString("fa-IR")
@@ -105,83 +135,93 @@ export const columns = [
     },
   },
   {
-    name: "استاد دوره",
-    selector: (row) => row?.fullName || "-",
-    width: "170px",
-    cell: (row) => <span className="text-truncate">{row?.fullName || "-"}</span>,
-  },
-  {
-    name: "توضیحات",
-    selector: (row) => row?.describe || "-",
-    width: "150px",
-    cell: (row) => <span className="text-truncate">{row?.describe || "-"}</span>,
-  },
-  {
-    name: "حالت برگزاری",
-    selector: (row) => row?.statusName || "-",
-    width: "130px",
-    cell: (row) => <span className="text-truncate">{row?.statusName || "-"}</span>,
-  },
-  {
-    name: "وضعیت",
+    name: "عملیات",
     width: "100px",
-    sortField: "isActive",
-    selector: (row) => row.isActive,
     cell: (row) => (
-      <Badge color={row.isActive ? "light-success" : "light-danger"} pill>
-        {row.isActive ? "فعال" : "غیرفعال"}
-      </Badge>
-    ),
-  },
-  {
-    name: "مبلغ",
-    selector: (row) => row?.cost || 0,
-    width: "150px",
-    cell: (row) => {
-      const formattedPaid = Number(row?.cost || 0).toLocaleString("fa-IR");
-      return <span className="text-truncate">{formattedPaid + " تومان"}</span>;
-    },
-  },
-  {
-    name: "وضعیت پرداخت",
-    width: "150px",
-    sortField: "statusName",
-    selector: (row) => row.statusName,
-    cell: (row) => (
-      <Badge color={row.statusName === "پرداخت شده" ? "light-success" : "light-danger"} pill>
-        {row.statusName === "پرداخت شده" ? "پرداخت شده" : "پرداخت نشده"}
-      </Badge>
+      <div className="column-action">
+        <UncontrolledDropdown className="dropend">
+          <DropdownToggle tag="div" className="btn btn-sm">
+            <MoreVertical size={14} className="cursor-pointer" />
+          </DropdownToggle>
+          <DropdownMenu container="body">
+            <DropdownItem
+              tag="button"
+              className="w-100"
+              onClick={() => handleDeleteCourse(row?.favoriteId)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Spinner size="sm" className="me-50" />
+              ) : (
+                <Trash2 size={14} className="me-50" />
+              )}
+              <span className="align-middle">حذف</span>
+            </DropdownItem>
+          </DropdownMenu>
+        </UncontrolledDropdown>
+      </div>
     ),
   },
 ];
 
-const CoursesTab = () => {
+const FavoritesCoursesTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState("LastUpdate");
-  const [sortDirection, setSortDirection] = useState("DESC");
 
-  const { data, isError, isLoading, refetch } = getAdminCourseList({
-    PageNumber: currentPage,
-    RowsOfPage: rowsPerPage,
-    Query: debouncedSearch,
-    SortColumn: sortColumn,
-    SortDirection: sortDirection,
+  const { data, isError, isLoading, refetch } = getAdminFavoriteCourseList({
+    cacheTime: 0, // غیرفعال کردن کش
   });
+  const { mutate: deleteCourse, isLoading: isDeleting } = useDeleteAdminFavoriteCourse();
 
+  // handle delete course
+  const handleDeleteCourse = (favoriteId) => {
+    if (!favoriteId) {
+      toast.error("شناسه دوره نامعتبر است!");
+      return;
+    }
+    if (window.confirm("آیا مطمئن هستید که می‌خواهید این دوره را از علاقه‌مندی‌ها حذف کنید؟")) {
+      deleteCourse(favoriteId, {
+        onSuccess: (data) => {
+          const responseData = data?.data || data || {};
+          const isSuccess = responseData?.success === true || responseData?.status === 200;
+          const message = responseData?.message || (isSuccess ? "دوره با موفقیت حذف شد!" : "خطایی در پردازش پاسخ رخ داده است!");
+          toast[isSuccess ? "success" : "error"](message);
+          refetch();
+        },
+        onError: (error) => {
+          const message = error.response?.status === 404
+            ? "دوره موردنظر در لیست علاقه‌مندی‌ها یافت نشد!"
+            : error.message || "خطایی در ارتباط با سرور رخ داده است!";
+          toast.error(message);
+        },
+      });
+    }
+  };
+
+  // Debounce برای جستجو
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // صفحه را به ۱ بازنشانی می‌کند
-    }, 500); // کاهش تأخیر به 500 میلی‌ثانیه برای تجربه بهتر
+      setCurrentPage(1); // بازنشانی صفحه به ۱ هنگام جستجو
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
-    refetch();
-  }, [currentPage, rowsPerPage, debouncedSearch, sortColumn, sortDirection]);
+  // فیلتر کردن داده‌ها بر اساس جستجو
+  const filteredData = data?.favoriteCourseDto?.filter((item) =>
+    [
+      item.courseTitle,
+      item.describe,
+    ].some((field) =>
+      field?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    )
+  ) || [];
+
+  // برش داده‌ها برای صفحه‌بندی
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
   const handlePagination = (page) => {
     setCurrentPage(page.selected + 1);
@@ -197,13 +237,15 @@ const CoursesTab = () => {
     setSearchQuery(val);
   };
 
-  const handleSort = (column, sortDirection) => {
-    setSortColumn(column.sortField || column.selector);
-    setSortDirection(sortDirection === "asc" ? "ASC" : "DESC");
+  const handleSort = (column, sortDir) => {
+    // مرتب‌سازی سمت کلاینت (در صورت نیاز به مرتب‌سازی سمت سرور، باید API اصلاح شود)
+    setSortColumn(column.sortField);
+    setSortDirection(sortDir.toUpperCase());
+    setCurrentPage(1);
   };
 
   const CustomPagination = () => {
-    const totalRows = data?.totalCount || 0; // محاسبه تعداد کل از داده‌های دریافتی
+    const totalRows = data?.totalCount;
     const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
     return (
       <ReactPaginate
@@ -231,7 +273,7 @@ const CoursesTab = () => {
     <Fragment>
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle tag="h4">لیست دوره‌ها</CardTitle>
+          <CardTitle tag="h4">دوره‌های مورد علاقه شما</CardTitle>
         </CardHeader>
         <CardBody>
           {isLoading && (
@@ -243,26 +285,27 @@ const CoursesTab = () => {
           {isError && (
             <div className="text-center text-danger">
               <p>خطایی در بارگذاری داده‌ها رخ داد. لطفاً دوباره تلاش کنید.</p>
-              <Button color="primary" onClick={refetch}>
+              <Button color="primary" onClick={() => window.location.reload()}>
                 تلاش مجدد
               </Button>
             </div>
           )}
+
           {!isLoading && !isError && (
             <div className="react-dataTable">
               <DataTable
                 noHeader
                 subHeader
-                sortServer
+                sortServer={false}
                 pagination
                 responsive
-                paginationServer
-                columns={columns}
+                paginationServer={false}
+                columns={columns(handleDeleteCourse, isDeleting)}
                 onSort={handleSort}
                 sortIcon={<ChevronDown />}
                 className="react-dataTable"
                 paginationComponent={CustomPagination}
-                data={data?.listOfMyCourses || []} // استفاده مستقیم از آرایه داده‌ها
+                data={paginatedData}
                 subHeaderComponent={
                   <CustomHeader
                     searchQuery={searchQuery}
@@ -281,4 +324,4 @@ const CoursesTab = () => {
   );
 };
 
-export default CoursesTab;
+export default FavoritesCoursesTab;

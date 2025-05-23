@@ -13,12 +13,10 @@ import {
   Badge,
   Spinner,
 } from "reactstrap";
-import { getAdminCourseList } from "../../@core/Services/Api/AdminInfo/AdminInfo";
+import { getAdminJobHistory } from "../../@core/Services/Api/AdminInfo/AdminInfo";
 import { ChevronDown } from "react-feather";
-import Avatar from "@components/avatar";
-import emptyImg from "../../assets/images/emptyImage/CourseImage.jpg";
 import ReactPaginate from "react-paginate";
-import { Link } from "react-router-dom";
+import moment from "jalali-moment";
 
 // ** Table Header
 const CustomHeader = ({
@@ -69,119 +67,138 @@ const CustomHeader = ({
 
 export const columns = [
   {
-    name: "عنوان دوره",
-    selector: (row) => row.courseTitle || "نام ندارد",
-    width: "200px",
-    cell: (row) => (
-      <div className="d-flex align-items-center">
-        <Link to={`/courses/${row?.courseId}`}>
-          <Avatar
-            className="me-1"
-            img={row?.tumbImageAddress || emptyImg}
-            alt=""
-            imgWidth="32"
-          />
-        </Link>
-        <div className="d-flex flex-column">
-          <Link
-            to={`/courses/${row?.courseId}`}
-            className="fw-bolder text-truncate"
-          >
-            {row?.courseTitle || "نام ندارد"}
-          </Link>
-        </div>
-      </div>
-    ),
+    name: "عنوان شغل",
+    selector: (row) => row?.jobTitle,
+    sortField: "jobTitle",
+    width: "150px",
+    cell: (row) => <span className="text-truncate">{row?.jobTitle || "-"}</span>,
+  },
+  {
+    name: "توضیحات",
+    selector: (row) => row?.aboutJob,
+    sortField: "aboutJob",
+    width: "170px",
+    cell: (row) => <span className="text-truncate">{row?.aboutJob || "-"}</span>,
   },
   {
     name: "بروزرسانی",
     selector: (row) => row?.lastUpdate,
-    width: "120px",
-    cell: (row) => {
-      const date = row?.lastUpdate
-        ? new Date(row.lastUpdate).toLocaleDateString("fa-IR")
-        : "-";
-      return <span>{date}</span>;
-    },
-  },
-  {
-    name: "استاد دوره",
-    selector: (row) => row?.fullName || "-",
-    width: "170px",
-    cell: (row) => <span className="text-truncate">{row?.fullName || "-"}</span>,
-  },
-  {
-    name: "توضیحات",
-    selector: (row) => row?.describe || "-",
-    width: "150px",
-    cell: (row) => <span className="text-truncate">{row?.describe || "-"}</span>,
-  },
-  {
-    name: "حالت برگزاری",
-    selector: (row) => row?.statusName || "-",
-    width: "130px",
-    cell: (row) => <span className="text-truncate">{row?.statusName || "-"}</span>,
-  },
-  {
-    name: "وضعیت",
-    width: "100px",
-    sortField: "isActive",
-    selector: (row) => row.isActive,
+    sortField: "lastUpdate",
+    width: "200px",
     cell: (row) => (
-      <Badge color={row.isActive ? "light-success" : "light-danger"} pill>
-        {row.isActive ? "فعال" : "غیرفعال"}
-      </Badge>
+      <span className="text-truncate">
+        {row.workStartDate && row.workEndDate
+          ? `${moment(row.workStartDate).locale("fa").format("YYYY/MM/DD")} تا ${moment(row.workEndDate).locale("fa").format("YYYY/MM/DD")}`
+          : "—"}
+      </span>
     ),
   },
   {
-    name: "مبلغ",
-    selector: (row) => row?.cost || 0,
+    name: "شرکت",
+    selector: (row) => row?.companyName,
+    sortField: "companyName",
     width: "150px",
-    cell: (row) => {
-      const formattedPaid = Number(row?.cost || 0).toLocaleString("fa-IR");
-      return <span className="text-truncate">{formattedPaid + " تومان"}</span>;
-    },
+    cell: (row) => <span className="text-truncate">{row?.companyName || "-"}</span>,
   },
   {
-    name: "وضعیت پرداخت",
-    width: "150px",
-    sortField: "statusName",
-    selector: (row) => row.statusName,
+    name: "وب سایت شرکت",
+    selector: (row) => row?.companyWebSite,
+    sortField: "companyWebSite",
+    width: "200px",
     cell: (row) => (
-      <Badge color={row.statusName === "پرداخت شده" ? "light-success" : "light-danger"} pill>
-        {row.statusName === "پرداخت شده" ? "پرداخت شده" : "پرداخت نشده"}
+      <a
+        href={row?.companyWebSite}
+        className="text-truncate"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {row?.companyWebSite || "ندارد"}
+      </a>
+    ),
+  },
+  {
+    name: "لینکدین شرکت",
+    selector: (row) => row?.companyLinkdin,
+    sortField: "companyLinkdin",
+    width: "200px",
+    cell: (row) => (
+      <a
+        href={row?.companyLinkdin}
+        className="text-truncate"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {row?.companyLinkdin || "ندارد"}
+      </a>
+    ),
+  },
+  {
+    name: "وضعیت",
+    selector: (row) => row?.inWork,
+    sortField: "inWork",
+    width: "100px",
+    cell: (row) => (
+      <Badge color={row?.inWork ? "light-success" : "light-danger"} pill>
+        {row?.inWork ? "فعال" : "غیرفعال"}
       </Badge>
     ),
   },
 ];
 
-const CoursesTab = () => {
+const JobHistoryTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState("LastUpdate");
-  const [sortDirection, setSortDirection] = useState("DESC");
+  const [sortColumn, setSortColumn] = useState(null); // بدون مرتب‌سازی پیش‌فرض
+  const [sortDirection, setSortDirection] = useState(null); // بدون جهت پیش‌فرض
 
-  const { data, isError, isLoading, refetch } = getAdminCourseList({
-    PageNumber: currentPage,
-    RowsOfPage: rowsPerPage,
-    Query: debouncedSearch,
-    SortColumn: sortColumn,
-    SortDirection: sortDirection,
-  });
+  const { data, isError, isLoading } = getAdminJobHistory();
 
+  // Debounce برای جستجو
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // صفحه را به ۱ بازنشانی می‌کند
-    }, 500); // کاهش تأخیر به 500 میلی‌ثانیه برای تجربه بهتر
+      setCurrentPage(1); // بازنشانی صفحه به ۱ هنگام جستجو
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
-    refetch();
-  }, [currentPage, rowsPerPage, debouncedSearch, sortColumn, sortDirection]);
+  // فیلتر کردن داده‌ها بر اساس جستجو
+  const filteredData = data?.jobLists?.filter((item) =>
+    [
+      item.jobTitle,
+      item.aboutJob,
+      item.companyName,
+      item.companyWebSite,
+      item.companyLinkdin,
+    ].some((field) =>
+      field?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    )
+  ) || [];
+
+  // مرتب‌سازی داده‌ها فقط در صورت وجود sortColumn
+  const sortedData = sortColumn && sortDirection
+    ? [...filteredData].sort((a, b) => {
+      const fieldA = a[sortColumn] || "";
+      const fieldB = b[sortColumn] || "";
+      if (sortColumn === "lastUpdate") {
+        const dateA = new Date(a.workStartDate || a.lastUpdate);
+        const dateB = new Date(b.workStartDate || b.lastUpdate);
+        return sortDirection === "ASC" ? dateA - dateB : dateB - dateA;
+      }
+      if (typeof fieldA === "string" && typeof fieldB === "string") {
+        return sortDirection === "ASC"
+          ? fieldA.localeCompare(fieldB)
+          : fieldB.localeCompare(fieldA);
+      }
+      return sortDirection === "ASC" ? fieldA - fieldB : fieldB - fieldA;
+    })
+    : filteredData; // استفاده از داده‌های فیلترشده بدون مرتب‌سازی
+
+  // برش داده‌ها برای صفحه‌بندی
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = sortedData.slice(startIndex, startIndex + rowsPerPage);
 
   const handlePagination = (page) => {
     setCurrentPage(page.selected + 1);
@@ -197,13 +214,14 @@ const CoursesTab = () => {
     setSearchQuery(val);
   };
 
-  const handleSort = (column, sortDirection) => {
-    setSortColumn(column.sortField || column.selector);
-    setSortDirection(sortDirection === "asc" ? "ASC" : "DESC");
+  const handleSort = (column, sortDir) => {
+    setSortColumn(column.sortField);
+    setSortDirection(sortDir.toUpperCase());
+    setCurrentPage(1);
   };
 
   const CustomPagination = () => {
-    const totalRows = data?.totalCount || 0; // محاسبه تعداد کل از داده‌های دریافتی
+    const totalRows = filteredData.length;
     const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
     return (
       <ReactPaginate
@@ -231,7 +249,7 @@ const CoursesTab = () => {
     <Fragment>
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle tag="h4">لیست دوره‌ها</CardTitle>
+          <CardTitle tag="h4">لیست مشاغل</CardTitle>
         </CardHeader>
         <CardBody>
           {isLoading && (
@@ -243,7 +261,7 @@ const CoursesTab = () => {
           {isError && (
             <div className="text-center text-danger">
               <p>خطایی در بارگذاری داده‌ها رخ داد. لطفاً دوباره تلاش کنید.</p>
-              <Button color="primary" onClick={refetch}>
+              <Button color="primary" onClick={() => window.location.reload()}>
                 تلاش مجدد
               </Button>
             </div>
@@ -253,16 +271,16 @@ const CoursesTab = () => {
               <DataTable
                 noHeader
                 subHeader
-                sortServer
+                sortServer={false}
                 pagination
                 responsive
-                paginationServer
+                paginationServer={false}
                 columns={columns}
                 onSort={handleSort}
                 sortIcon={<ChevronDown />}
                 className="react-dataTable"
                 paginationComponent={CustomPagination}
-                data={data?.listOfMyCourses || []} // استفاده مستقیم از آرایه داده‌ها
+                data={paginatedData}
                 subHeaderComponent={
                   <CustomHeader
                     searchQuery={searchQuery}
@@ -271,7 +289,7 @@ const CoursesTab = () => {
                     handlePerPage={handlePerPage}
                   />
                 }
-                noDataComponent={<div className="text-center">هیچ دوره‌ای یافت نشد.</div>}
+                noDataComponent={<div className="text-center">هیچ شغلی یافت نشد.</div>}
               />
             </div>
           )}
@@ -281,4 +299,4 @@ const CoursesTab = () => {
   );
 };
 
-export default CoursesTab;
+export default JobHistoryTab;

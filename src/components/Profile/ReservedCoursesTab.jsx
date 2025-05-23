@@ -13,12 +13,13 @@ import {
   Badge,
   Spinner,
 } from "reactstrap";
-import { getAdminCourseList } from "../../@core/Services/Api/AdminInfo/AdminInfo";
+import { getAdminReservedCourseList } from "../../@core/Services/Api/AdminInfo/AdminInfo";
 import { ChevronDown } from "react-feather";
-import Avatar from "@components/avatar";
-import emptyImg from "../../assets/images/emptyImage/CourseImage.jpg";
 import ReactPaginate from "react-paginate";
+import moment from "jalali-moment";
+import emptyImg from "../../assets/images/emptyImage/CourseImage.jpg";
 import { Link } from "react-router-dom";
+import Avatar from "@components/avatar";
 
 // ** Table Header
 const CustomHeader = ({
@@ -69,15 +70,16 @@ const CustomHeader = ({
 
 export const columns = [
   {
-    name: "عنوان دوره",
-    selector: (row) => row.courseTitle || "نام ندارد",
-    width: "200px",
+    name: "نام دوره",
+    selector: (row) => row.courseName || "نام ندارد",
+    sortable: true,
+    width: "250px",
     cell: (row) => (
       <div className="d-flex align-items-center">
         <Link to={`/courses/${row?.courseId}`}>
           <Avatar
             className="me-1"
-            img={row?.tumbImageAddress || emptyImg}
+            img={emptyImg}
             alt=""
             imgWidth="32"
           />
@@ -87,101 +89,101 @@ export const columns = [
             to={`/courses/${row?.courseId}`}
             className="fw-bolder text-truncate"
           >
-            {row?.courseTitle || "نام ندارد"}
+            {row?.courseName || "نام ندارد"}
           </Link>
         </div>
       </div>
     ),
   },
   {
-    name: "بروزرسانی",
-    selector: (row) => row?.lastUpdate,
-    width: "120px",
+    name: "دانشجو",
+    selector: (row) => row?.studentName,
+    sortable: true,
+    sortField: "studentName",
+    width: "200px",
+    cell: (row) => <span className="text-truncate">{row?.studentName || "-"}</span>,
+  },
+  {
+    name: "تاریخ رزرو",
+    selector: (row) => row.reserverDate,
+    sortable: true,
+    width: "220px",
     cell: (row) => {
-      const date = row?.lastUpdate
-        ? new Date(row.lastUpdate).toLocaleDateString("fa-IR")
-        : "-";
-      return <span>{date}</span>;
+      const date = new Date(row.reserverDate);
+      const formattedDate = date.toLocaleDateString("fa-IR");
+      const formattedTime = date.toLocaleTimeString("fa-IR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      return <span>{`${formattedDate} ساعت ${formattedTime}`}</span>;
     },
-  },
-  {
-    name: "استاد دوره",
-    selector: (row) => row?.fullName || "-",
-    width: "170px",
-    cell: (row) => <span className="text-truncate">{row?.fullName || "-"}</span>,
-  },
-  {
-    name: "توضیحات",
-    selector: (row) => row?.describe || "-",
-    width: "150px",
-    cell: (row) => <span className="text-truncate">{row?.describe || "-"}</span>,
-  },
-  {
-    name: "حالت برگزاری",
-    selector: (row) => row?.statusName || "-",
-    width: "130px",
-    cell: (row) => <span className="text-truncate">{row?.statusName || "-"}</span>,
   },
   {
     name: "وضعیت",
+    selector: (row) => row?.accept,
+    sortable: true,
+    sortField: "accept",
     width: "100px",
-    sortField: "isActive",
-    selector: (row) => row.isActive,
     cell: (row) => (
-      <Badge color={row.isActive ? "light-success" : "light-danger"} pill>
-        {row.isActive ? "فعال" : "غیرفعال"}
-      </Badge>
-    ),
-  },
-  {
-    name: "مبلغ",
-    selector: (row) => row?.cost || 0,
-    width: "150px",
-    cell: (row) => {
-      const formattedPaid = Number(row?.cost || 0).toLocaleString("fa-IR");
-      return <span className="text-truncate">{formattedPaid + " تومان"}</span>;
-    },
-  },
-  {
-    name: "وضعیت پرداخت",
-    width: "150px",
-    sortField: "statusName",
-    selector: (row) => row.statusName,
-    cell: (row) => (
-      <Badge color={row.statusName === "پرداخت شده" ? "light-success" : "light-danger"} pill>
-        {row.statusName === "پرداخت شده" ? "پرداخت شده" : "پرداخت نشده"}
+      <Badge color={row?.accept ? "light-success" : "light-danger"} pill>
+        {row?.accept ? "فعال" : "غیرفعال"}
       </Badge>
     ),
   },
 ];
 
-const CoursesTab = () => {
+const ReservedCoursesTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState("LastUpdate");
-  const [sortDirection, setSortDirection] = useState("DESC");
+  const [sortColumn, setSortColumn] = useState(null); // بدون مرتب‌سازی پیش‌فرض
+  const [sortDirection, setSortDirection] = useState(null); // بدون جهت پیش‌فرض
 
-  const { data, isError, isLoading, refetch } = getAdminCourseList({
-    PageNumber: currentPage,
-    RowsOfPage: rowsPerPage,
-    Query: debouncedSearch,
-    SortColumn: sortColumn,
-    SortDirection: sortDirection,
-  });
+  const { data, isError, isLoading } = getAdminReservedCourseList();
 
+  // Debounce برای جستجو
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // صفحه را به ۱ بازنشانی می‌کند
-    }, 500); // کاهش تأخیر به 500 میلی‌ثانیه برای تجربه بهتر
+      setCurrentPage(1); // بازنشانی صفحه به ۱ هنگام جستجو
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
-    refetch();
-  }, [currentPage, rowsPerPage, debouncedSearch, sortColumn, sortDirection]);
+  // فیلتر کردن داده‌ها بر اساس جستجو
+  const filteredData = data?.filter((item) =>
+    [
+      item.courseName,
+      item.studentName,
+    ].some((field) =>
+      field?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    )
+  ) || [];
+
+  // مرتب‌سازی داده‌ها فقط در صورت وجود sortColumn
+  const sortedData = sortColumn && sortDirection
+    ? [...filteredData].sort((a, b) => {
+      const fieldA = a[sortColumn] || "";
+      const fieldB = b[sortColumn] || "";
+      if (sortColumn === "lastUpdate") {
+        const dateA = new Date(a.workStartDate || a.lastUpdate);
+        const dateB = new Date(b.workStartDate || b.lastUpdate);
+        return sortDirection === "ASC" ? dateA - dateB : dateB - dateA;
+      }
+      if (typeof fieldA === "string" && typeof fieldB === "string") {
+        return sortDirection === "ASC"
+          ? fieldA.localeCompare(fieldB)
+          : fieldB.localeCompare(fieldA);
+      }
+      return sortDirection === "ASC" ? fieldA - fieldB : fieldB - fieldA;
+    })
+    : filteredData; // استفاده از داده‌های فیلترشده بدون مرتب‌سازی
+
+  // برش داده‌ها برای صفحه‌بندی
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = sortedData.slice(startIndex, startIndex + rowsPerPage);
 
   const handlePagination = (page) => {
     setCurrentPage(page.selected + 1);
@@ -197,13 +199,14 @@ const CoursesTab = () => {
     setSearchQuery(val);
   };
 
-  const handleSort = (column, sortDirection) => {
-    setSortColumn(column.sortField || column.selector);
-    setSortDirection(sortDirection === "asc" ? "ASC" : "DESC");
+  const handleSort = (column, sortDir) => {
+    setSortColumn(column.sortField);
+    setSortDirection(sortDir.toUpperCase());
+    setCurrentPage(1);
   };
 
   const CustomPagination = () => {
-    const totalRows = data?.totalCount || 0; // محاسبه تعداد کل از داده‌های دریافتی
+    const totalRows = filteredData.length;
     const pageCount = Math.max(1, Math.ceil(totalRows / rowsPerPage));
     return (
       <ReactPaginate
@@ -231,7 +234,7 @@ const CoursesTab = () => {
     <Fragment>
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle tag="h4">لیست دوره‌ها</CardTitle>
+          <CardTitle tag="h4">دوره های رزور شده</CardTitle>
         </CardHeader>
         <CardBody>
           {isLoading && (
@@ -243,7 +246,7 @@ const CoursesTab = () => {
           {isError && (
             <div className="text-center text-danger">
               <p>خطایی در بارگذاری داده‌ها رخ داد. لطفاً دوباره تلاش کنید.</p>
-              <Button color="primary" onClick={refetch}>
+              <Button color="primary" onClick={() => window.location.reload()}>
                 تلاش مجدد
               </Button>
             </div>
@@ -253,16 +256,16 @@ const CoursesTab = () => {
               <DataTable
                 noHeader
                 subHeader
-                sortServer
+                sortServer={false}
                 pagination
                 responsive
-                paginationServer
+                paginationServer={false}
                 columns={columns}
                 onSort={handleSort}
                 sortIcon={<ChevronDown />}
                 className="react-dataTable"
                 paginationComponent={CustomPagination}
-                data={data?.listOfMyCourses || []} // استفاده مستقیم از آرایه داده‌ها
+                data={paginatedData}
                 subHeaderComponent={
                   <CustomHeader
                     searchQuery={searchQuery}
@@ -271,7 +274,7 @@ const CoursesTab = () => {
                     handlePerPage={handlePerPage}
                   />
                 }
-                noDataComponent={<div className="text-center">هیچ دوره‌ای یافت نشد.</div>}
+                noDataComponent={<div className="text-center">هیچ شغلی یافت نشد.</div>}
               />
             </div>
           )}
@@ -281,4 +284,4 @@ const CoursesTab = () => {
   );
 };
 
-export default CoursesTab;
+export default ReservedCoursesTab;

@@ -157,9 +157,9 @@ const AccountTabs = () => {
           <CardBody className="py-2 my-25">
             <Row>
               <Col sm="12" className="mb-2">
-                <div className="d-flex gap-1">
+                <Row className="gap-1">
                   {/* main image */}
-                  <div className="d-flex flex-column gap-1 position-relative">
+                  <Col md={3} className="d-flex flex-column justify-content-center align-items-center gap-1 position-relative">
                     <img
                       className="rounded bg-body-secondary"
                       src={avatar}
@@ -171,7 +171,7 @@ const AccountTabs = () => {
                       className="mb-0 p-0 position-absolute top-0 rounded-circle d-flex justify-content-center align-items-center text-secondary"
                       tag={Label}
                       color="light"
-                      style={{ width: "50px", height: "50px", margin: "40%" }}
+                      style={{ width: "50px", height: "50px", margin: "80px" }}
                     >
                       <Camera size={25} />
                       <Input
@@ -183,7 +183,7 @@ const AccountTabs = () => {
                     </Button>
 
                     <Button
-                      className="mb-0"
+                      className="mb-0 w-75"
                       tag={Label}
                       size="sm"
                       color="primary"
@@ -191,15 +191,15 @@ const AccountTabs = () => {
                     >
                       افزودن عکس
                     </Button>
-                  </div>
+                  </Col>
                   {/* main image end */}
                   {/* gallery */}
-                  <div className="d-flex gap-1" style={{ height: "fit-content" }}>
+                  <Col md={8} className="d-flex gap-1" style={{ height: "fit-content" }}>
                     {data?.userImage?.map((img) => (
                       <div
                         key={img?.id}
                         className="position-relative"
-                        style={{ height: "fit-content" }}
+                        style={{ height: "fit-content", width: "fit-content" }}
                       >
                         <img
                           className="rounded"
@@ -219,9 +219,9 @@ const AccountTabs = () => {
                         </span>
                       </div>
                     ))}
-                  </div>
+                  </Col>
                   {/* gallery end */}
-                </div>
+                </Row>
               </Col>
               <Col sm="12">
                 <UserProfileForm userData={data} />

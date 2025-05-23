@@ -17,6 +17,7 @@ const UserInfoCard = ({ selectedUser, refetch }) => {
 
   // به‌روزرسانی userData وقتی selectedUser تغییر کند
   useEffect(() => {
+    console.log("insertDate:", selectedUser?.insertDate); // دیباگ مقدار insertDate
     setUserData(selectedUser);
   }, [selectedUser]);
 
@@ -119,6 +120,19 @@ const UserInfoCard = ({ selectedUser, refetch }) => {
     });
   };
 
+  // تابع برای فرمت تاریخ با اعتبارسنجی
+  const formatJalaliDate = (date) => {
+    if (date && moment(date).isValid()) {
+      try {
+        return moment(date).locale("fa").format("YYYY/MM/DD");
+      } catch (error) {
+        console.error("Error formatting date:", error.message);
+        return "نامعتبر";
+      }
+    }
+    return "نامشخص";
+  };
+
   return (
     <Fragment>
       <Card>
@@ -178,19 +192,15 @@ const UserInfoCard = ({ selectedUser, refetch }) => {
                 </li>
                 <li className="mb-75">
                   <span className="fw-bolder me-25">تاریخ ثبت نام:</span>
-                  <span>
-                    {moment(userData?.insertDate)
-                      .locale("fa")
-                      .format("YYYY/MM/DD")}
-                  </span>
+                  <span>{formatJalaliDate(userData?.insertDate)}</span>
                 </li>
                 <li className="mb-75">
                   <span className="fw-bolder me-25">شماره موبایل:</span>
-                  <span>{userData.phoneNumber}</span>
+                  <span>{userData.phoneNumber || "نامشخص"}</span>
                 </li>
                 <li className="mb-75">
                   <span className="fw-bolder me-25">ایمیل:</span>
-                  <span>{userData.gmail}</span>
+                  <span>{userData.gmail || "نامشخص"}</span>
                 </li>
               </ul>
             ) : null}
@@ -215,7 +225,7 @@ const UserInfoCard = ({ selectedUser, refetch }) => {
         editModal={editModal}
         setEditModal={setEditModal}
         userId={userData?.id}
-        refetch={refetch} // پاس دادن refetch
+        refetch={refetch}
       />
     </Fragment>
   );

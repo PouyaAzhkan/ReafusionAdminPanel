@@ -14,6 +14,7 @@ import AccountTabContent from './AccountTabContent'
 // ** Styles
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import '@styles/react/pages/page-account-settings.scss'
+import CoursesTab from './CoursesTab'
 
 const ProfileDetail = () => {
 
@@ -32,6 +33,11 @@ const ProfileDetail = () => {
           <TabContent activeTab={activeTab}>
             <TabPane tabId='1'>
               <AccountTabContent />
+            </TabPane>
+          </TabContent>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId='2'>
+              <CoursesTab />
             </TabPane>
           </TabContent>
         </Col>

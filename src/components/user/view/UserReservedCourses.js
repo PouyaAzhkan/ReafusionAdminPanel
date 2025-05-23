@@ -16,12 +16,12 @@ export const columns = [
     width: "300px",
     cell: (row) => (
       <div className="d-flex align-items-center">
-        <Link to={`/course-details/${row.courseId}`}>
+        <Link to={`/courses/${row.courseId}`}>
           <Avatar className="me-1" img={emptyImg} alt="" imgWidth="32" />
         </Link>
         <div className="d-flex flex-column">
           <Link
-            to={`/course-details/${row.courseId}`}
+            to={`/courses/${row.courseId}`}
             className="fw-bolder text-truncate text-dark"
           >
             {row.courseName || "نام ندارد"}

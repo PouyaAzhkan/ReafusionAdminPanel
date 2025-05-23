@@ -9,7 +9,7 @@ import { Card, CardBody, CardText } from "reactstrap";
 
 import decorationLeft from "../../../assets/images/element/decore-left.png";
 import decorationRight from "../../../assets/images/element/decore-right.png";
-import { GetDashboardUserInfo } from "../../Services/Api/UserManage/user";
+import { GetDashboardUserInfo } from "../../Services/Api/AdminInfo/AdminInfo";
 
 const CardCongratulations = ({ Api }) => {
   const { data, isLoading, error } = GetDashboardUserInfo();

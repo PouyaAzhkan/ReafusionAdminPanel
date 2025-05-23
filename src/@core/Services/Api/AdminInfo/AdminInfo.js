@@ -13,6 +13,22 @@ export const GetDashboardUserInfo = () => {
   });
 };
 
+// get dashboard user info
+export const getAdminCourseList = (params) => {
+  return useQuery({
+    queryKey: ["GetAdminCourses", params],
+    queryFn: async () => {
+      try {
+        const response = await api.get("/SharePanel/GetMyCourses", { params });
+        return response;
+      } catch (error) {
+        console.error("Error fetching course list:", error);
+        throw new Error("Failed to fetch course list");
+      }
+    },
+  });
+};
+
 // edit admin profile info
 export const editAdminProfileInfo = () => {
   return useMutation({

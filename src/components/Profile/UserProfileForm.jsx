@@ -34,20 +34,23 @@ const genderOptions = [
 ];
 
 // کامپوننت نقشه
-const MapComponent = ({ position, setPosition, setValue }) => {
+const MapComponent = ({ position, setPosition, setValue, onPositionConfirm }) => {
     const map = useMap();
 
     useEffect(() => {
-        map.flyTo(position, 13);
+        if (position[0] && position[1]) {
+            map.flyTo(position, 13);
+            map.invalidateSize();
+        }
     }, [position, map]);
 
     useMapEvents({
         click(e) {
             const { lat, lng } = e.latlng;
             setPosition([lat, lng]);
-            setValue("latitude", lat.toString());
-            setValue("longitude", lng.toString());
-            handleReverseGeocode(lat, lng, setValue);
+            setValue("latitude", lat.toFixed(6));
+            setValue("longitude", lng.toFixed(6));
+            onPositionConfirm(lat, lng);
         },
     });
 
@@ -64,9 +67,9 @@ const MapComponent = ({ position, setPosition, setValue }) => {
                     dragend: (e) => {
                         const { lat, lng } = e.target.getLatLng();
                         setPosition([lat, lng]);
-                        setValue("latitude", lat.toString());
-                        setValue("longitude", lng.toString());
-                        handleReverseGeocode(lat, lng, setValue);
+                        setValue("latitude", lat.toFixed(6));
+                        setValue("longitude", lng.toFixed(6));
+                        onPositionConfirm(lat, lng);
                     },
                 }}
             />
@@ -78,16 +81,66 @@ const MapComponent = ({ position, setPosition, setValue }) => {
 const handleReverseGeocode = async (lat, lng, setValue) => {
     try {
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&countrycodes=IR&accept-language=fa`,
+            {
+                headers: {
+                    "User-Agent": "MyProfileApp/1.0 (contact@myapp.com)",
+                },
+            }
         );
         const data = await response.json();
         if (data && data.display_name) {
-            setValue("address", data.display_name);
+            const maxLength = 100; // محدودیت طول آدرس
+            const trimmedAddress = data.display_name.slice(0, maxLength);
+            setValue("address", trimmedAddress);
         } else {
             toast.error("آدرس برای این مختصات یافت نشد.");
         }
     } catch (error) {
-        toast.error("خطا در دریافت آدرس: " + error.message);
+        toast.error("خطا در دریافت آدرس.");
+    }
+};
+
+// تابع جستجوی آدرس
+const handleAddressSearch = async (address, setPosition, setValue) => {
+    if (!address || address.trim().length < 10) {
+        toast.error("لطفاً آدرس دقیق‌تری وارد کنید (حداقل ۱۰ کاراکتر).");
+        return;
+    }
+
+    try {
+        toast.loading("در حال جستجوی آدرس...", { id: "address-search" });
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                address
+            )}&countrycodes=IR&accept-language=fa`,
+            {
+                headers: {
+                    "User-Agent": "MyProfileApp/1.0 (contact@myapp.com)",
+                },
+            }
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            if (isNaN(lat) || isNaN(lon)) {
+                throw new Error("مختصات دریافت‌شده نامعتبر است.");
+            }
+            const newPosition = [lat, lon];
+            setPosition(newPosition);
+            setValue("latitude", lat.toFixed(6));
+            setValue("longitude", lon.toFixed(6));
+            const maxLength = 100; // محدودیت طول آدرس
+            const trimmedAddress = data[0].display_name.slice(0, maxLength);
+            setValue("address", trimmedAddress);
+            toast.success("آدرس با موفقیت یافت شد!", { id: "address-search" });
+        } else {
+            toast.error("آدرس وارد شده یافت نشد!", { id: "address-search" });
+        }
+    } catch (error) {
+        toast.error("خطا در جستجوی آدرس: " + error.message, { id: "address-search" });
     }
 };
 
@@ -124,10 +177,10 @@ const UserProfileForm = ({ userData }) => {
             userAbout: "",
             linkdin: "",
             telegram: "",
-            receiveMessageEvent: false, // مقدار پیش‌فرض معتبر
+            receiveMessageEvent: false,
             address: "",
             nationalCode: "",
-            gender: genderOptions[1], // مقدار پیش‌فرض: زن (false)
+            gender: genderOptions[1], // زن
             birthday: "",
             latitude: "",
             longitude: "",
@@ -144,8 +197,10 @@ const UserProfileForm = ({ userData }) => {
             if (!data.nationalCode || data.nationalCode.trim() === "") {
                 errors.nationalCode = { message: "لطفاً کدملی را وارد کنید" };
             }
-            if (!data.address || data.address.trim().length <= 10) {
-                errors.address = { message: "آدرس باید بیشتر از ۱۰ کاراکتر باشد" };
+            if (!data.address || data.address.trim().length < 10) {
+                errors.address = { message: "آدرس باید حداقل ۱۰ کاراکتر باشد" };
+            } else if (data.address.trim().length > 100) {
+                errors.address = { message: "آدرس نمی‌تواند بیشتر از ۱۰۰ کاراکتر باشد" };
             }
             if (data.latitude) {
                 const lat = parseFloat(data.latitude);
@@ -171,8 +226,9 @@ const UserProfileForm = ({ userData }) => {
     });
 
     // ** States
-    const [position, setPosition] = useState([35.6892, 51.3890]); // مختصات پیش‌فرض (تهران)
+    const [position, setPosition] = useState([35.6892, 51.3890]); // تهران
     const [isClient, setIsClient] = useState(false);
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
 
     // نظارت بر تغییرات فیلد آدرس
     const homeAddress = watch("address");
@@ -181,8 +237,11 @@ const UserProfileForm = ({ userData }) => {
     useEffect(() => {
         if (userData) {
             const genderData = userData?.gender ? genderOptions[0] : genderOptions[1];
-            const latitude = userData?.latitude ? parseFloat(userData.latitude) : 35.6892;
-            const longitude = userData?.longitude ? parseFloat(userData.longitude) : 51.3890;
+            const latitude = userData?.latitude ? parseFloat(userData.latitude) : null;
+            const longitude = userData?.longitude ? parseFloat(userData.longitude) : null;
+
+            const isValidLat = !isNaN(latitude) && latitude >= -90 && latitude <= 90;
+            const isValidLon = !isNaN(longitude) && longitude >= -180 && longitude <= 180;
 
             reset({
                 userId: userData?.userImage?.[0]?.userProfileId || "",
@@ -194,15 +253,21 @@ const UserProfileForm = ({ userData }) => {
                 linkdin: userData?.linkdinProfile || "",
                 telegram: userData?.telegramLink || "",
                 receiveMessageEvent: userData?.receiveMessageEvent || false,
-                address: userData?.homeAdderess || "",
+                address: userData?.homeAdderess ? userData.homeAdderess.slice(0, 100) : "", // محدود کردن آدرس
                 nationalCode: userData?.nationalCode || "",
                 gender: genderData,
                 birthday: formatDate(userData?.birthDay) || "",
-                latitude: userData?.latitude || "",
-                longitude: userData?.longitude || "",
+                latitude: isValidLat ? latitude.toFixed(6) : "",
+                longitude: isValidLon ? longitude.toFixed(6) : "",
             });
-            if (userData?.latitude && userData?.longitude) {
+
+            if (isValidLat && isValidLon) {
                 setPosition([latitude, longitude]);
+                setIsMapLoaded(true);
+            } else {
+                toast.error("مختصات کاربر نامعتبر است. لطفاً آدرس را بررسی کنید.");
+                setPosition([35.6892, 51.3890]);
+                setIsMapLoaded(true);
             }
         }
     }, [userData, reset]);
@@ -212,46 +277,27 @@ const UserProfileForm = ({ userData }) => {
         setIsClient(true);
     }, []);
 
-    // تابع جستجوی آدرس با Nominatim
-    const handleAddressSearch = async (address) => {
-        if (!address || address.trim().length <= 10) return;
-
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                    address
-                )}`
-            );
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                const { lat, lon } = data[0];
-                setPosition([parseFloat(lat), parseFloat(lon)]);
-                setValue("latitude", lat.toString());
-                setValue("longitude", lon.toString());
-            } else {
-                toast.error("آدرس وارد شده با نقشه مطابقت ندارد!");
-            }
-        } catch (error) {
-            toast.error("خطا در جستجوی آدرس: " + error.message);
-        }
-    };
-
     // نظارت بر تغییرات فیلد آدرس با debouncing
     useEffect(() => {
         const handler = setTimeout(() => {
-            if (homeAddress) {
-                handleAddressSearch(homeAddress);
+            if (homeAddress && homeAddress.trim().length >= 10 && homeAddress.trim().length <= 100) {
+                handleAddressSearch(homeAddress, setPosition, setValue);
             }
         }, 1000);
 
         return () => clearTimeout(handler);
-    }, [homeAddress]);
+    }, [homeAddress, setPosition, setValue]);
+
+    // تابع تأیید موقعیت دستی
+    const handlePositionConfirm = (lat, lng) => {
+        handleReverseGeocode(lat, lng, setValue);
+    };
 
     const onSubmit = async (data) => {
         try {
             console.log("داده‌های فرم قبل از ارسال:", data);
 
+            const maxAddressLength = 100; // محدودیت طول آدرس
             const formattedData = {
                 lName: data.lastName.trim(),
                 fName: data.firstName.trim(),
@@ -259,7 +305,7 @@ const UserProfileForm = ({ userData }) => {
                 linkdinProfile: data.linkdin ? data.linkdin.trim() : "",
                 telegramLink: data.telegram ? data.telegram.trim() : "",
                 receiveMessageEvent: data.receiveMessageEvent ?? false,
-                homeAdderess: data.address.trim(),
+                homeAdderess: data.address.trim().slice(0, maxAddressLength), // کوتاه کردن آدرس
                 nationalCode: data.nationalCode.trim(),
                 gender: data.gender?.value ?? false,
                 birthDay: data.birthday ? new Date(data.birthday).toISOString().slice(0, 19) : null,
@@ -277,7 +323,13 @@ const UserProfileForm = ({ userData }) => {
                     console.error("خطای API:", error);
                     const errorMessages = error.response?.data?.ErrorMessage || [error.message];
                     const uniqueMessages = [...new Set(errorMessages)];
-                    uniqueMessages.forEach((msg) => toast.error(msg));
+                    uniqueMessages.forEach((msg) => {
+                        if (msg.includes("String or binary data would be truncated")) {
+                            toast.error("آدرس واردشده بیش از حد طولانی است. لطفاً آدرس کوتاه‌تری وارد کنید.");
+                        } else {
+                            toast.error(msg);
+                        }
+                    });
                     if (errorMessages.some((msg) => msg.includes("نام"))) {
                         setError("firstName", { message: "لطفاً نام را وارد کنید" });
                     }
@@ -285,13 +337,13 @@ const UserProfileForm = ({ userData }) => {
                         setError("lastName", { message: "لطفاً نام خانوادگی را وارد کنید" });
                     }
                     if (errorMessages.some((msg) => msg.includes("آدرس"))) {
-                        setError("address", { message: "آدرس باید بیشتر از ۱۰ کاراکتر باشد" });
+                        setError("address", { message: "آدرس باید حداقل ۱۰ کاراکتر و حداکثر ۱۰۰ کاراکتر باشد" });
                     }
                 },
             });
         } catch (error) {
             console.error("خطا در ارسال:", error);
-            toast.error("خطا در ذخیره تغییرات: " + error.message);
+            toast.error("خطا در ذخیره تغییرات.");
         }
     };
 
@@ -351,6 +403,7 @@ const UserProfileForm = ({ userData }) => {
                                 id="email"
                                 placeholder="ایمیل"
                                 invalid={errors.email && true}
+                                disabled
                                 {...field}
                             />
                         )}
@@ -514,7 +567,7 @@ const UserProfileForm = ({ userData }) => {
                         render={({ field }) => (
                             <Input
                                 id="address"
-                                placeholder="خیابون فلان، کوچه بهمان، پلاک ۱۲"
+                                placeholder="خیابان فلان، کوچه بهمان، پلاک ۱۲، شهر، استان، ایران"
                                 invalid={errors.address && true}
                                 {...field}
                             />
@@ -523,6 +576,9 @@ const UserProfileForm = ({ userData }) => {
                     {errors.address && (
                         <FormFeedback>{errors.address.message}</FormFeedback>
                     )}
+                    <small className="text-muted">
+                        لطفاً آدرس کامل شامل شهر و استان را وارد کنید (حداقل ۱۰ و حداکثر ۱۰۰ کاراکتر).
+                    </small>
                 </Col>
                 <Col sm="6" className="mb-1">
                     <Label className="form-label" for="latitude">
@@ -606,7 +662,7 @@ const UserProfileForm = ({ userData }) => {
                         انتخاب موقعیت مکانی
                     </Label>
                     <div style={{ height: "300px", width: "100%" }}>
-                        {isClient && position && (
+                        {isClient && isMapLoaded && position && (
                             <MapContainer
                                 center={position}
                                 zoom={13}
@@ -616,6 +672,7 @@ const UserProfileForm = ({ userData }) => {
                                     position={position}
                                     setPosition={setPosition}
                                     setValue={setValue}
+                                    onPositionConfirm={handlePositionConfirm}
                                 />
                             </MapContainer>
                         )}

@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useMemo } from "react";
 import { Card, CardBody, CardTitle, Input, Label, Button } from "reactstrap";
-import { Check, X, Link } from "react-feather";
+import { Check, X } from "react-feather";
 import telegramIcon from "../../../assets/images/logo/telegram.png";
 import linkdinIcon from "../../../assets/images/logo/linkdin.png";
 import { toast } from "react-hot-toast";
@@ -57,6 +57,28 @@ const UserRoleAccess = ({ userData }) => {
   // استفاده از useMutation برای فراخوانی addUserRole
   const { mutate, isLoading, isError, error } = addUserRole();
 
+  // مدیریت toast برای وضعیت‌های مختلف
+  useEffect(() => {
+    if (isAllRoleLoading) {
+      toast.loading("در حال بارگذاری نقش‌ها", { id: "role-loading" });
+    } else {
+      toast.dismiss("role-loading");
+    }
+
+    if (isAllRoleError) {
+      toast.error("خطا در بارگذاری نقش‌ها", { id: "role-error" });
+    }
+
+    if (!isAllRoleLoading && !isAllRoleError && userRoles.length === 0) {
+      toast.error("هیچ نقشی یافت نشد", { id: "no-roles" });
+    }
+
+    if (isError) {
+      const errorMessage = error?.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در تنظیم دسترسی";
+      toast.error(errorMessage, { id: "mutation-error" });
+    }
+  }, [isAllRoleLoading, isAllRoleError, userRoles.length, isError, error]);
+
   // تابع برای مدیریت تغییر سوئیچ
   const handleSwitchChange = (index, roleId, roleTitle) => {
     const newStates = [...accountStates];
@@ -71,17 +93,17 @@ const UserRoleAccess = ({ userData }) => {
         Enable: newStates[index], // true برای اضافه کردن، false برای حذف
       },
       {
-        onSuccess: (data) => {
-          console.log(
-            `نقش ${roleTitle} با موفقیت برای کاربر ${userData.id} ${
+        onSuccess: () => {
+          toast.success(
+            `نقش ${roleTitle} با موفقیت برای کاربر ${
               newStates[index] ? "اضافه" : "حذف"
-            } شد:`,
-            data
+            } شد`
           );
         },
         onError: (err) => {
-          console.error(`خطا در تنظیم نقش ${roleTitle}:`, err);
-          // در صورت خطا، وضعیت سوئیچ را به حالت قبلی برگردانید
+          const errorMessage = err?.response?.data?.ErrorMessage?.[0] || `خطا در تنظیم نقش ${roleTitle}`;
+          toast.error(errorMessage);
+          // در صورت خطا، وضعیت سوئیچ را به حالت قبلی برگردان
           const rollbackStates = [...newStates];
           rollbackStates[index] = !rollbackStates[index];
           setAccountStates(rollbackStates);
@@ -112,56 +134,51 @@ const UserRoleAccess = ({ userData }) => {
     <Fragment>
       <Card>
         <CardBody>
-          <CardTitle className="mb-75 fw-bolder">دسترسی نقش ها</CardTitle>
+          <CardTitle className="mb-75 fw-bolder">دسترسی نقش‌ها</CardTitle>
           <p>
-            در این بخش می‌تونید دسترسی‌های نقش ها را به{" "}
+            در این بخش می‌توانید دسترسی‌های نقش‌ها را به{" "}
             <span className="text-primary">
-              {userData.fName && userData.lName != null
-                ? userData?.fName + " " + userData?.lName
+              {userData?.fName && userData?.lName
+                ? `${userData.fName} ${userData.lName}`
                 : "بدون نام و نام خانوادگی"}
             </span>{" "}
             بدهید.
           </p>
-          {isAllRoleLoading
-            ? toast("در حال بارگذاری نقش‌ها")
-            : isAllRoleError
-            ? toast.error("!خطا در بارگذاری نقش‌ها")
-            : userRoles.length === 0
-            ? toast.error("!هیچ نقشی یافت نشد")
-            : userRoles.map((item, index) => (
-                <div key={index} className="d-flex mt-2">
-                  <div className="d-flex align-items-center justify-content-between flex-grow-1">
-                    <div className="me-1">
-                      <p className="mb-0">{item.title}</p>
-                    </div>
-                    <div className="mt-50 mt-sm-0">
-                      <div className="form-switch">
-                        <Input
-                          type="switch"
-                          checked={accountStates[index] || false}
-                          id={`account-${item.title}`}
-                          onChange={() =>
-                            handleSwitchChange(index, item.id, item.title)
-                          }
-                          disabled={isLoading}
-                        />
-                        <Label
-                          className="form-check-label"
-                          htmlFor={`account-${item.title}`}
-                        >
-                          <span className="switch-icon-left">
-                            <Check size={14} />
-                          </span>
-                          <span className="switch-icon-right">
-                            <X size={14} />
-                          </span>
-                        </Label>
-                      </div>
+          {userRoles.length > 0 ? (
+            userRoles.map((item, index) => (
+              <div key={index} className="d-flex mt-2">
+                <div className="d-flex align-items-center justify-content-between flex-grow-1">
+                  <div className="me-1">
+                    <p className="mb-0">{item.title}</p>
+                  </div>
+                  <div className="mt-50 mt-sm-0">
+                    <div className="form-switch">
+                      <Input
+                        type="switch"
+                        checked={accountStates[index] || false}
+                        id={`account-${item.id}`}
+                        onChange={() =>
+                          handleSwitchChange(index, item.id, item.title)
+                        }
+                        disabled={isLoading}
+                      />
+                      <Label
+                        className="form-check-label"
+                        htmlFor={`account-${item.id}`}
+                      >
+                        <span className="switch-icon-left">
+                          <Check size={14} />
+                        </span>
+                        <span className="switch-icon-right">
+                          <X size={14} />
+                        </span>
+                      </Label>
                     </div>
                   </div>
                 </div>
-              ))}
-          {isError && toast.error("خطا در تنظیم دسترسی")}
+              </div>
+            ))
+          ) : null}
         </CardBody>
       </Card>
     </Fragment>

@@ -168,7 +168,7 @@ const AccountTabs = () => {
                       width="200"
                     />
                     <Button
-                      className="mb-0 p-0 position-absolute top-0 rounded-circle d-flex justify-content-center align-items-center"
+                      className="mb-0 p-0 position-absolute top-0 rounded-circle d-flex justify-content-center align-items-center text-secondary"
                       tag={Label}
                       color="light"
                       style={{ width: "50px", height: "50px", margin: "40%" }}

@@ -140,6 +140,16 @@ const AddSchedualModal = ({ open, handleModal }) => {
     event.preventDefault();
     if (!data.courseId) {
       setError("courseId", { type: "manual", message: "لطفا دوره معتبر انتخاب کنید" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!courseDetail?.teacherId) {
+      setError("submit", {
+        type: "manual",
+        message: "شناسه استاد یافت نشد. لطفاً دوره را دوباره انتخاب کنید.",
+      });
+      setIsSubmitting(false);
       return;
     }
 
@@ -154,7 +164,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
       rowEffect: Number(data.rowEffect),
       forming: data.forming,
       lockToRaise: data.lockToRaise,
-      teacherId: Number(teacherId),
+      teacherId: Number(courseDetail.teacherId), // استفاده از courseDetail.teacherId
     };
 
     const payload = scheduleType === "auto"
@@ -235,7 +245,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
           }
         }
 
-        queryClient.invalidateQueries(["schedules", courseId]);
+        queryClient.invalidateQueries(["schedules", data.courseId]);
 
         setIsSubmitting(false);
         setScheduleId(
@@ -301,7 +311,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
         console.log("API response from editFroming:", response);
         toast.success("وضعیت برگزاری با موفقیت به‌روزرسانی شد!");
         setValue("forming", isChecked, { shouldValidate: true });
-        queryClient.invalidateQueries(["schedules", courseId]);
+        queryClient.invalidateQueries(["schedules", selectedCourseId]);
       },
       onError: (error) => {
         console.log("API error from editFroming:", error);
@@ -325,7 +335,7 @@ const AddSchedualModal = ({ open, handleModal }) => {
         console.log("API response from editLockToRiase:", response);
         toast.success("وضعیت حضور و غیاب با موفقیت به‌روزرسانی شد!");
         setValue("lockToRaise", isChecked, { shouldValidate: true });
-        queryClient.invalidateQueries(["schedules", courseId]);
+        queryClient.invalidateQueries(["schedules", selectedCourseId]);
       },
       onError: (error) => {
         console.log("API error from editLockToRiase:", error);

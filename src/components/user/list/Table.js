@@ -130,7 +130,8 @@ const UsersList = () => {
         },
         onError: (error) => {
           const errorMessage =
-            error.response?.data?.ErrorMessage?.[0] || "خطای ناشناخته در حذف کاربر";
+            error.response?.data?.ErrorMessage?.[0] ||
+            "خطای ناشناخته در حذف کاربر";
           toast.error(errorMessage);
           setDeleteModal(false);
           setUserToDelete(null);

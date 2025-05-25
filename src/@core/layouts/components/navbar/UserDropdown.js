@@ -22,16 +22,24 @@ import {
   DropdownToggle,
   DropdownItem,
 } from "reactstrap";
-import { GetUserInfo } from "../../../Services/Api/GetUserInfo";
 
 // ** Default Avatar Image
-import UnKnownUser from '../../../../assets/images/element/UnKnownUser.jpg'
+import UnKnownUser from "../../../../assets/images/element/UnKnownUser.jpg";
+import { roleTranslations } from "../../../../utility/RolesTranslation";
+import { GetDashboardUserInfo } from "../../../Services/Api/AdminInfo/AdminInfo";
+import { useUserDetail } from "../../../Services/Api/UserManage/user";
 
 const UserDropdown = () => {
+  const { data, isLoading, error } = GetDashboardUserInfo();
+  const userId = data?.userImage?.[0]?.userProfileId;
+  const {
+    data: userDetail,
+    userDetailisLoading,
+    userDetailerror,
+  } = useUserDetail(userId);
 
-  const { data, isLoading, error } = GetUserInfo();
-  if (isLoading) return <p> در حال بارگزاری </p>
-  if (error) return <p> خطا در بارگزاری </p>
+  if (isLoading || userDetailisLoading) return <p>در حال بارگذاری</p>;
+  if (error || userDetailerror) return <p>خطا در بارگذاری</p>;
 
   return (
     <UncontrolledDropdown tag="li" className="dropdown-user nav-item">
@@ -42,8 +50,20 @@ const UserDropdown = () => {
         onClick={(e) => e.preventDefault()}
       >
         <div className="user-nav d-sm-flex d-none">
-          <span className="user-name fw-bold">{data?.fName || "بدون نام"} {data?.lName || []}</span>
-          <span className="user-status">Admin</span>
+          <span className="user-name fw-bold">
+            {data?.fName || "بدون نام"} {data?.lName || ""}
+          </span>
+          <span className="user-status">
+            {userDetail?.roles
+              ? userDetail?.roles
+                  ?.map(
+                    (role) => roleTranslations[role.roleName] || role.roleName
+                  )
+                  .filter(Boolean)
+
+                  .join("، ")
+              : "بدون نقش"}
+          </span>
         </div>
         <Avatar
           img={data.currentPictureAddress || UnKnownUser}
@@ -53,42 +73,13 @@ const UserDropdown = () => {
         />
       </DropdownToggle>
       <DropdownMenu end>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
+        <DropdownItem tag={Link} to="/profile">
           <User size={14} className="me-75" />
-          <span className="align-middle">Profile</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <Mail size={14} className="me-75" />
-          <span className="align-middle">Inbox</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <CheckSquare size={14} className="me-75" />
-          <span className="align-middle">Tasks</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <MessageSquare size={14} className="me-75" />
-          <span className="align-middle">Chats</span>
-        </DropdownItem>
-        <DropdownItem divider />
-        <DropdownItem
-          tag={Link}
-          to="/pages/"
-          onClick={(e) => e.preventDefault()}
-        >
-          <Settings size={14} className="me-75" />
-          <span className="align-middle">Settings</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <CreditCard size={14} className="me-75" />
-          <span className="align-middle">Pricing</span>
-        </DropdownItem>
-        <DropdownItem tag={Link} to="/" onClick={(e) => e.preventDefault()}>
-          <HelpCircle size={14} className="me-75" />
-          <span className="align-middle">FAQ</span>
+          <span className="align-middle">حساب کاربری</span>
         </DropdownItem>
         <DropdownItem tag={Link} to="/login">
           <Power size={14} className="me-75" />
-          <span className="align-middle">Logout</span>
+          <span className="align-middle">خروج</span>
         </DropdownItem>
       </DropdownMenu>
     </UncontrolledDropdown>

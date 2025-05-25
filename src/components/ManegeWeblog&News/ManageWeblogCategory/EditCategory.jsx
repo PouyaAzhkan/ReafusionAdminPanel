@@ -10,11 +10,14 @@ import {
   Label,
   Col,
   FormFeedback,
+  Spinner,
 } from "reactstrap";
 import { Camera } from "react-feather";
-import { EditCategoryWeblog } from "../../../@core/Services/Api/Weblog&News/EditWeblogCategory";
+import EditCategoryWeblog from "../../../@core/Services/Api/Weblog&News/EditWeblogCategory";
+import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
-const EditCategory = ({ isOpen, toggle, category }) => {
+const EditCategory = ({ isOpen, toggle, category, refetch }) => {
   const {
     control,
     handleSubmit,
@@ -31,9 +34,11 @@ const EditCategory = ({ isOpen, toggle, category }) => {
 
   const [imageSrc, setImageSrc] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const queryClient = useQueryClient();
 
-  // تنظیم مقادیر فرم بعد از دریافت category از API
+  // تنظیم مقادیر اولیه فرم
   useEffect(() => {
+    console.log("Category received:", category);
     if (category) {
       reset({
         title: category.categoryName || "",
@@ -44,29 +49,39 @@ const EditCategory = ({ isOpen, toggle, category }) => {
     }
   }, [category, reset]);
 
-  const { mutate } = EditCategoryWeblog();
+  const { mutate, isPending } = EditCategoryWeblog();
 
   const onSubmit = (data) => {
-    const formData = new FormData();
-    formData.append('Id', category.id)
-    formData.append("CategoryName", data.title);
-    formData.append("GoogleTitle", data.googleTitle);
-    formData.append("GoogleDescribe", data.googleDescribe);
-    if (Image) formData.append("Image", Image);
+    try {
+      const formData = new FormData();
+      formData.append("Id", category.id);
+      formData.append("CategoryName", data.title);
+      formData.append("GoogleTitle", data.googleTitle);
+      formData.append("GoogleDescribe", data.googleDescribe);
+      if (imageFile) formData.append("Image", imageFile);
 
-    mutate(formData, {
-      onSuccess: (data) => {
-         console.log(formData); 
-         console.log(data);
-         alert("دسته بنید با موفقیت ویرایش شد")
-         toggle();       
-      },
-      onError: (error) => {
-         alert("خطا در ویرایش");
-         console.log(error);
-         toggle();       
+      // دیباگ FormData
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
       }
-    })
+
+      mutate(formData, {
+        onSuccess: (response) => {
+          console.log("Response from server:", response);
+          toast.success("دسته‌بندی با موفقیت ویرایش شد");
+          refetch();
+          toggle();
+        },
+        onError: (error) => {
+          console.error("Mutation Error:", error);
+          toast.error(`خطا در ویرایش: ${error.message || "خطای ناشناخته"}`);
+          toggle();
+        },
+      });
+    } catch (error) {
+      console.error("Submit Error:", error);
+      toast.error("خطا در ارسال داده‌ها");
+    }
   };
 
   return (
@@ -79,7 +94,7 @@ const EditCategory = ({ isOpen, toggle, category }) => {
         <ModalHeader toggle={toggle}>ویرایش دسته‌بندی</ModalHeader>
         <ModalBody className="d-flex gap-2">
           <div className="w-50">
-            <form className="w-100">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-100">
               {/* عنوان دسته‌بندی */}
               <Col md="12" className="mb-1">
                 <Label>عنوان دسته‌بندی</Label>
@@ -178,6 +193,7 @@ const EditCategory = ({ isOpen, toggle, category }) => {
               <img
                 className="w-100 h-100 rounded-4"
                 src={imageSrc || ""}
+                alt="Category Image"
               />
               <Label
                 for="Image"
@@ -214,8 +230,21 @@ const EditCategory = ({ isOpen, toggle, category }) => {
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={handleSubmit(onSubmit)}>
+          <Button
+            color="primary"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
             ویرایش دسته‌بندی
+            {isPending && <Spinner size="sm" color="light" />}
+          </Button>
+          <Button
+            color="secondary"
+            onClick={toggle}
+            outline
+            disabled={isPending}
+          >
+            لغو
           </Button>
         </ModalFooter>
       </Modal>

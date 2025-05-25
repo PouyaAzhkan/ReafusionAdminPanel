@@ -9,6 +9,7 @@ import {
   ModalBody,
   ModalHeader,
   Row,
+  Spinner,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { GetUserList, useUserDetail } from "../../@core/Services/Api/UserManage/user";
@@ -19,6 +20,7 @@ import CourseTableItems from "./CourseTableItems";
 import AddAssistance from "../../@core/Services/Api/Courses/CourseDetail/tabsApi/CourseAssistance/AddAssistance";
 import EditAssistance from "../../@core/Services/Api/Courses/CourseDetail/tabsApi/CourseAssistance/EditAssistance";
 import GetCourses from "../../@core/Services/Api/Courses/CourseList/GetCourses";
+import toast from "react-hot-toast";
 
 // تعریف فیلدهای ویرایش دستیار
 const EditAssistanceFields = (data) => ({
@@ -30,7 +32,8 @@ const EditAssistanceFields = (data) => ({
 const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) => {
   const [initialValues, setInitialValues] = useState({});
   const [userid, setUserId] = useState(initialValues?.userId);
-  const [courseid, setCourseId] = useState(courseId); // پیش‌فرض آیدی دوره
+  const [courseid, setCourseId] = useState(courseId);
+  const [selectedCourseTitle, setSelectedCourseTitle] = useState(""); // New state for course title
   const [chooseUserModal, setChooseUserModal] = useState(false);
   const [chooseCourseModal, setChooseCourseModal] = useState(false);
 
@@ -58,8 +61,8 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
   const { data: courses, isLoading: coursesLoading, error: coursesError } = GetCourses(courseParams);
 
   // هوک‌ها برای جهش‌های API
-  const { mutate: AddAssistances } = AddAssistance();
-  const { mutate: EditAssistances } = EditAssistance();
+  const { mutate: AddAssistances, isPending: AddAssistancesPending } = AddAssistance();
+  const { mutate: EditAssistances, isPending: EditAssistancesPending } = EditAssistance();
 
   // دیباگ داده‌های API
   useEffect(() => {
@@ -74,12 +77,13 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
   useEffect(() => {
     const values = EditAssistanceFields(data);
     setInitialValues(values);
-    reset({ ...values, courseId: courseId }); // پیش‌فرض آیدی دوره
-    setCourseId(courseId); // تنظیم آیدی دوره به‌صورت پیش‌فرض
+    reset({ ...values, courseId: courseId });
+    setCourseId(courseId);
+    setSelectedCourseTitle(""); // Reset title on initial load
     console.log("مقادیر اولیه تنظیم شدند:", { ...values, courseId });
   }, [data, courseId, reset]);
 
-  // به‌روزرسانی مقادیر فرم
+  // به‌روزرسانی مقادیر فرم و عنوان دوره
   useEffect(() => {
     if (userid !== undefined) {
       setValue("userId", userid);
@@ -88,19 +92,23 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
     if (courseid !== undefined) {
       setValue("courseId", courseid);
       console.log("آیدی دوره به‌روزرسانی شد:", courseid);
+      // Update course title when course data is fetched
+      if (course?.title) {
+        setSelectedCourseTitle(course.title);
+      }
     }
-  }, [userid, courseid, setValue]);
+  }, [userid, courseid, course, setValue]);
 
   // ارسال فرم
   const onSubmit = (values) => {
     const dataToSend = {
-      courseId: courseid || courseId, // استفاده از courseid در صورت تغییر، در غیر این صورت courseId
-      userId: userid, // آیدی کاربر انتخاب‌شده
+      courseId: courseid || courseId,
+      userId: userid,
     };
     const datatoSend2 = {
-      courseId: courseid || courseId, // استفاده از courseid در صورت تغییر، در غیر این صورت courseId
+      courseId: courseid || courseId,
       userId: userid,
-      id: initialValues?.id, // اطمینان از وجود آیدی برای ویرایش
+      id: initialValues?.id,
     };
 
     console.log("داده‌های ارسالی به API:", section === "create" ? dataToSend : datatoSend2);
@@ -108,28 +116,28 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
     if (section === "create") {
       AddAssistances(dataToSend, {
         onSuccess: (data) => {
-          alert("منتور با موفقیت اضافه شد");
+          toast.success("منتور با موفقیت اضافه شد");
           console.log("پاسخ API:", data);
           refetch?.();
           if (typeof toggle === "function") toggle();
         },
         onError: (error) => {
-          alert("خطا در افزودن منتور");
+          toast.error("خطا در افزودن منتور");
           console.error("خطای API:", error);
         },
       });
     } else if (section === "update") {
-      console.log("ارسال داده‌های ویرایش:", datatoSend2); // دیباگ داده‌ها
+      console.log("ارسال داده‌های ویرایش:", datatoSend2);
       EditAssistances(datatoSend2, {
         onSuccess: (data) => {
           console.log("داده‌های ارسالی برای ویرایش:", datatoSend2);
           console.log("پاسخ ویرایش:", data);
-          alert("منتور با موفقیت ویرایش شد");
+          toast.success("منتور با موفقیت ویرایش شد");
           refetch?.();
           if (typeof toggle === "function") toggle();
         },
         onError: (error) => {
-          alert("خطا در ویرایش منتور");
+          toast.error("خطا در ویرایش منتور");
           console.error("خطای ویرایش:", error);
         },
       });
@@ -239,7 +247,7 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
                         console.log("کلیک روی ورودی دوره");
                         toggleChooseCourseModal();
                       }}
-                      value={course?.title || ""}
+                      value={selectedCourseTitle || course?.title || ""}
                       invalid={!!errors.courseId}
                       readOnly
                       className="form-control text-primary cursor-pointer"
@@ -249,8 +257,8 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
                 <FormFeedback>{errors.courseId?.message}</FormFeedback>
               </Col>
               <Col xs={12} className="text-center mt-2 pt-50">
-                <Button type="submit" className="me-1" color="primary">
-                  {section === "create" ? "ایجاد" : "ویرایش"}
+                <Button type="submit" className="me-1" color="primary" disabled={AddAssistancesPending || EditAssistancesPending}>
+                  {section === "create" ? "ایجاد" : "ویرایش"} {AddAssistancesPending || EditAssistancesPending && <Spinner size="sm" color="light" />}
                 </Button>
                 <Button type="reset" color="secondary" outline onClick={toggle}>
                   لغو
@@ -304,7 +312,12 @@ const ModalAssistance = ({ toggle, isOpen, data, refetch, courseId, section }) =
           courses.courseDtos.map((item, index) => (
             <CourseTableItems
               item={item}
-              toggle={toggleChooseCourseModal}
+              toggle={() => {
+                console.log("Course selected:", item.title, "ID:", item.courseId || item.id);
+                setCourseId(item.courseId || item.id);
+                setSelectedCourseTitle(item.title || ""); // Set title immediately
+                toggleChooseCourseModal();
+              }}
               key={index}
               setId={setCourseId}
             />

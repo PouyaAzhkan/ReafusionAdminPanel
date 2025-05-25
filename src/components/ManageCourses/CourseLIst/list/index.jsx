@@ -12,6 +12,7 @@ import PaymentOfCourses from "./tabs/PaymentOfCourses";
 import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
 import GetCourses from "../../../../@core/Services/Api/Courses/CourseList/GetCourses";
 import GetTeacherCourses from "../../../../@core/Services/Api/Courses/CourseList/GetTeacherCourses";
+import StatsHorizontal2 from "../../../../@core/components/widgets/stats/StatsHorizontal2";
 
 const Courses = () => {
   const [activeTab, setActiveTab] = useState("1");
@@ -156,14 +157,14 @@ const Courses = () => {
   );
 
   return (
-    <div className="courses-container d-flex gap-2">
-      <div className="courseStatus w-25">
-        <StatsHorizontal icon={<Book size={21} />} color="primary" stats={totalCount} statTitle="مجموع تمام دوره‌ها" />
-        <StatsHorizontal icon={<Activity size={21} />} color="success" stats={activeCount} statTitle="دوره‌های فعال" />
-        <StatsHorizontal icon={<Clock size={20} />} color="warning" stats={expiredData} statTitle="دوره‌های غیرفعال" />
-        <StatsHorizontal icon={<X size={20} />} color="danger" stats={expiredCount} statTitle="دوره‌های حذف‌شده" />
+    <div className="courses-container ">
+      <div className="courseStatus gap-2">
+        <StatsHorizontal2 icon={<Book size={21} />} color="primary" stats={totalCount} statTitle="مجموع تمام دوره‌ها" />
+        <StatsHorizontal2 icon={<Activity size={21} />} color="success" stats={activeCount} statTitle="دوره‌های فعال" />
+        <StatsHorizontal2 icon={<Clock size={20} />} color="warning" stats={expiredData} statTitle="دوره‌های غیرفعال" />
+        <StatsHorizontal2 icon={<X size={20} />} color="danger" stats={expiredCount} statTitle="دوره‌های حذف‌شده" />
       </div>
-      <div className="courseList w-75">
+      <div className="courseList w-100">
         <Tabs className="mb-2" activeTab={activeTab} toggleTab={toggleTab} />
         <TabContent activeTab={activeTab}>
           <TabPane tabId="1">

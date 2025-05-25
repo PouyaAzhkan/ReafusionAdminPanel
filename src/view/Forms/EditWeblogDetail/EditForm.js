@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardBody, Row, Col, Input, Form, Button, Label, FormFeedback } from 'reactstrap';
+import { Card, CardHeader, CardTitle, CardBody, Row, Col, Input, Form, Button, Label, FormFeedback, Spinner } from 'reactstrap';
 import { EditWeblogDetail } from '../../../@core/Services/Api/Weblog&News/EditWeblogDetail';
 import { EditWeblogValidation } from '../../../@core/utils/Validation';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { GetCategoryList } from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
-import { EditCategoryWeblog } from '../../../@core/Services/Api/Weblog&News/EditWeblogCategory';
+import GetCategoryList from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
+import  EditCategoryWeblog from '../../../@core/Services/Api/Weblog&News/EditWeblogCategory';
+import toast from 'react-hot-toast';
 
 const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) => {
   const {
@@ -41,8 +42,8 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
     }
   };
 
-  const { mutate: EditWeblog, isLoading: EditWeblogLoading } = EditWeblogDetail();
-  const { mutate: EditCategory, isLoading: EditCategoryLoading } = EditCategoryWeblog();
+  const { mutate: EditWeblog, isLoading: EditWeblogLoading, isPending: EditWeblogPendeng } = EditWeblogDetail();
+  const { mutate: EditCategory, isLoading: EditCategoryLoading, isPending: EditCategoryPending } = EditCategoryWeblog();
   const { data: getCategory, isLoading: getCategoryLoading } = GetCategoryList();
 
   useEffect(() => {
@@ -78,7 +79,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
 
     EditWeblog(formData, {
       onSuccess: () => {
-        alert('خبر با موفقیت ویرایش شد');
+        toast.success('خبر با موفقیت ویرایش شد');
         // ارسال تمام داده‌های ویرایش‌شده به InfoCard
         onWeblogChange({
           title: data.title,
@@ -96,7 +97,7 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
         onCloseModal(); // بستن مودال پس از موفقیت
       },
       onError: (error) => {
-        alert('خطا در ویرایش خبر');
+        toast.error('خطا در ویرایش خبر');
         console.log(error);
         onCloseModal(); // بستن مودال پس از موفقیت
       },
@@ -250,8 +251,9 @@ const EditForm = ({ Api1, id, onWeblogChange, onWeblogUpdate, onCloseModal }) =>
             </Col>
 
             <Col sm="12" className="text-center py-1">
-              <Button type="submit" color="primary" className="me-1">
+              <Button type="submit" color="primary" className="me-1" disabled={EditWeblogPendeng || EditCategoryPending}>
                 ویرایش
+                {EditWeblogPendeng || EditCategoryPending && <Spinner size="sm" color="light" />}
               </Button>
               <Button type="reset" outline color="danger">
                 لغو

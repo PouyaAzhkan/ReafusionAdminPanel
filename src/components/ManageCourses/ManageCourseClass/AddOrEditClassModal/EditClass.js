@@ -9,12 +9,14 @@ import {
   ModalBody,
   ModalHeader,
   Row,
+  Spinner,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import GetClassDetail from "../../../../@core/Services/Api/Courses/ManageClass/GetClassRoomDetail";
 import EditClassRoom from "../../../../@core/Services/Api/Courses/ManageClass/EditClass";
 import GetBuildingList from "../../../../@core/Services/Api/Courses/ManageClass/GetBuildingList";
 import { EditClassFields } from "../../../../@core/constants/class-manage/EditClassFields";
+import toast from "react-hot-toast";
 
 const EditClass = ({ id, isOpen, toggle, refetch }) => {
   // واکشی اطلاعات کلاس فقط وقتی id معتبر و مودال باز است
@@ -30,7 +32,7 @@ const EditClass = ({ id, isOpen, toggle, refetch }) => {
   const { data: buildings, isSuccess: buildingSuccess } = GetBuildingList();
 
   // تابع ویرایش کلاس
-  const { mutate } = EditClassRoom();
+  const { mutate, isPending } = EditClassRoom();
 
   const {
     control,
@@ -65,12 +67,12 @@ const EditClass = ({ id, isOpen, toggle, refetch }) => {
   const onSubmit = (values) => {
     mutate(values, {
       onSuccess: () => {
-        alert("ویرایش با موفقیت انجام شد");
+        toast.success("ویرایش با موفقیت انجام شد");
         refetch?.();
         toggle();
       },
       onError: () => {
-        alert("خطا در ویرایش کلاس");
+        toast.error("خطا در ویرایش کلاس");
       },
     });
   };
@@ -164,8 +166,8 @@ const EditClass = ({ id, isOpen, toggle, refetch }) => {
             </Col>
 
             <Col sm="12" className="d-flex justify-content-center gap-1 mt-2">
-              <Button color="primary" type="submit" disabled={isFetching}>
-                ذخیره تغییرات
+              <Button color="primary" type="submit" disabled={isPending}>
+                ذخیره تغییرات {isPending && <Spinner size="sm" color="light" />}
               </Button>
               <Button
                 type="button"

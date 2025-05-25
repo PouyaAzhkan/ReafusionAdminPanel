@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from "../../../../../interceptor";
+import toast from "react-hot-toast";
 
 const AcceptComment = () => {
   return useMutation({
@@ -10,11 +11,11 @@ const AcceptComment = () => {
        return response
      },
      onSuccess: (data) => {
-       alert("کامنت تایید شد")
+       toast.success("کامنت تایید شد")
        console.log(data);
      },
      onError: (error) => {
-       alert("خطا در تایید کامنت")
+       toast.error("خطا در تایید کامنت")
        console.log(error);
      }
   })

@@ -1,9 +1,9 @@
 .weblog,
 .Detailcontainer {
-   display: flex;
+   display: blog;
 }
 .weblogList {
-  width: 857px;
+  width: 100%;
 }
 .DetailImage {
   width: 300px;
@@ -12,7 +12,8 @@
   width: 492px;
 }
 .WeblogAndNewsInfo {
-  width: 310px;
+   display: flex;
+   width: 100%;
 }
 @media (max-width: 1050px) {
   .categorycontaner {

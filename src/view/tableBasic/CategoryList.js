@@ -13,7 +13,7 @@ import {
 import CategoryDetail from '../../components/ManegeWeblog&News/ManageWeblogCategory/CategoryDetail';
 import EditCategory from '../../components/ManegeWeblog&News/ManageWeblogCategory/EditCategory';
 
-const CategoryList = ({ data, rowsPerPage, isLoading }) => {
+const CategoryList = ({ data, rowsPerPage, isLoading, refetch }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const { t } = useTranslation();
 
@@ -168,6 +168,7 @@ const CategoryList = ({ data, rowsPerPage, isLoading }) => {
         isOpen={editModalOpen}
         toggle={toggleEditModal}
         category={editCategory}
+        refetch={refetch}
       />
     </div>
   );

@@ -5,9 +5,9 @@ import { Fragment } from 'react'
 import { ArrowLeft } from 'react-feather'
 
 // ** Reactstrap Imports
-import { Col, Button } from 'reactstrap'
+import { Col, Button, Spinner } from 'reactstrap'
 
-const SocialLinks = ({ stepper, formData, onSubmitFinal }) => {
+const SocialLinks = ({ stepper, formData, onSubmitFinal, isPending }) => {
   return (
     <Fragment>
       <Col xs={12}>
@@ -41,8 +41,9 @@ const SocialLinks = ({ stepper, formData, onSubmitFinal }) => {
           <ArrowLeft size={14} className='align-middle me-sm-25 me-0' />
           <span className='align-middle d-sm-inline-block d-none'>قبلی</span>
         </Button>
-        <Button color='primary' className='btn-submit' onClick={onSubmitFinal}>
+        <Button color='primary' className='btn-submit' onClick={onSubmitFinal} disabled={isPending}>
           ساخت خبر
+          {isPending && <Spinner size="sm" color="light" />}
         </Button>
       </div>
     </Fragment>

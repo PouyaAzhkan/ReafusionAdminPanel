@@ -8,12 +8,13 @@ import AddImage from './steps/AddImage'
 import Address from './steps/Address'
 import SocialLinks from './steps/SocialLinks'
 import { AddWeblog } from '../../../@core/Services/Api/Weblog&News/AddWeblog'
+import toast from 'react-hot-toast'
 
 const WizardHorizontal = () => {
   const ref = useRef(null)
   const [stepper, setStepper] = useState(null)
   const [formData, setFormData] = useState({})
-  const { mutate: AddWeblogs } = AddWeblog()
+  const { mutate: AddWeblogs, isPending } = AddWeblog()
 
   const handleFinalSubmit = () => {
     const formPayload = new FormData()
@@ -34,11 +35,11 @@ const WizardHorizontal = () => {
     AddWeblogs(formPayload, {
       onSuccess: (data) => {
         console.log('پاسخ سرور:', data)
-        alert('خبر با موفقیت ساخته شد!')
+        toast.success('خبر با موفقیت ساخته شد!')
       },
       onError: (error) => {
         console.log('خطا:', error)
-        alert('خطا در ارسال خبر: ' + error.message)
+        toast.error('خطا در ارسال خبر: ' + error.message)
       }
     })
   }
@@ -71,6 +72,7 @@ const WizardHorizontal = () => {
           stepper={stepper}
           formData={formData}
           onSubmitFinal={handleFinalSubmit}
+          isPending={isPending}
         />
       )
     }

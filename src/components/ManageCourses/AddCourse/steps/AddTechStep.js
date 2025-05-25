@@ -6,7 +6,7 @@ import AddCategory from "../../../../@core/Services/Api/Courses/AddCourse/AddCat
 
 const AddTechnologiesStep = ({ courseTechnologies, courseId, stepper }) => {
   const [selectedTech, setSelectedTech] = useState([]);
-  const { mutate } = AddCategory(courseId, selectedTech);
+  const { mutate, isPending } = AddCategory(courseId, selectedTech);
 
   const AddTech = () => {
     if (selectedTech.length === 0) {
@@ -37,6 +37,7 @@ const AddTechnologiesStep = ({ courseTechnologies, courseId, stepper }) => {
             tech={courseTechnologies && courseTechnologies}
             setSelectedTech={setSelectedTech}
             useTech={AddTech}
+            isPending={isPending}
           />
         </div>
       </div>

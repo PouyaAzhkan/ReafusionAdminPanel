@@ -2,17 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import StatsHorizontal from '../../../@core/components/statistics-card/StatsHorizontal';
 import { Book, Camera } from 'react-feather';
-import { Button, Input, Modal, ModalHeader, ModalBody, ModalFooter, Label, Col } from 'reactstrap';
+import { Button, Input, Modal, ModalHeader, ModalBody, ModalFooter, Label, Col, Spinner } from 'reactstrap';
 import Select from 'react-select';
 import '../../../assets/scss/PanelStayle/ManageWeblogs.scss';
 import '../../../assets/scss/PanelResponsive/WeblogAndNewsList.scss'
 import CategoryList from '../../../view/tableBasic/CategoryList';
-import { GetCategoryList } from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
+import GetCategoryList  from '../../../@core/Services/Api/Weblog&News/GetCategoryList';
 import CreateCategory from './CreateCategory';
 import { AddCategory } from '../../../@core/Services/Api/Weblog&News/AddCategory';
+import toast from 'react-hot-toast';
 
 const ManageWeblogCategory = () => {
-  const { data, isLoading, error } = GetCategoryList();
+  const { data, isLoading, error, refetch } = GetCategoryList();
 
   const [searchValue, setSearchValue] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(24);
@@ -21,7 +22,7 @@ const ManageWeblogCategory = () => {
   const [imageSrc, setImageSrc] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [categoryData, setCategoryData] = useState({});
-  const { mutate } = AddCategory();
+  const { mutate, isPending } = AddCategory();
 
   useEffect(() => {
     if (data) {
@@ -49,11 +50,16 @@ const ManageWeblogCategory = () => {
 
     mutate(formData, {
       onSuccess: (data) => {
-        alert("دسته بندی با موفقیت اضافه شد")
+        toast.success("دسته بندی با موفقیت اضافه شد")
+        refetch()
         console.log(data);
         console.log('اطلاعات دسته بندی:', formData);
         toggleModal();
       },
+      onError: (error) => {
+         toast.error("خطا در افزودن دسته بندی")
+         console.log(error);
+      }
     });
   };
 
@@ -97,7 +103,7 @@ const ManageWeblogCategory = () => {
           />
         </div>
         <div className="mt-1">
-          <CategoryList data={filteredData} rowsPerPage={rowsPerPage} isLoading={isLoading} />
+          <CategoryList refetch={refetch} data={filteredData} rowsPerPage={rowsPerPage} isLoading={isLoading} />
         </div>
       </div>
       <Modal isOpen={modalOpen} toggle={toggleModal} className="modal-dialog-centered modal-lg">
@@ -144,7 +150,9 @@ const ManageWeblogCategory = () => {
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={handleSubmit}>ثبت دسته‌بندی</Button>
+          <Button color="primary" onClick={handleSubmit} disabled={isPending}>ثبت دسته‌بندی
+                {isPending && <Spinner size="sm" color="light" />}
+          </Button>
         </ModalFooter>
       </Modal>
     </div>

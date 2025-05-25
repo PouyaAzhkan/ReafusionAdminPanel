@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AddCourseLevel from "../../../../@core/Services/Api/Courses/ManageLevel/AddCourseLevel";
 import EditCourseLevel from "../../../../@core/Services/Api/Courses/ManageLevel/EditCourseLevel";
+import toast from "react-hot-toast";
 
 const AddLevelModal = ({
   showModal,
@@ -19,20 +20,20 @@ const AddLevelModal = ({
     update: "ویرایش سطح",
   };
 
-  const { mutate: AddLevel } = AddCourseLevel();
-  const { mutate: UpdateLevel } = EditCourseLevel();
+  const { mutate: AddLevel, isPending: Addpending } = AddCourseLevel();
+  const { mutate: UpdateLevel, isPending: EditPending } = EditCourseLevel();
 
   const handleAddLevel = (data) => {
     AddLevel(data, {
       onSuccess: () => {
-        alert("سطح با موفقیت اضافه شد");
+        toast.success("سطح با موفقیت اضافه شد");
         console.log("Added level:", data);
         refetch();
         setShowModal(false);
       },
       onError: (error) => {
         const errorMessage = error.response?.data?.message || error.message || "خطا در افزودن سطح";
-        alert(`خطا: ${errorMessage}`);
+        toast.error(`خطا: ${errorMessage}`);
         console.error("Error adding level:", error);
       },
     });
@@ -41,14 +42,14 @@ const AddLevelModal = ({
   const handleUpdateLevel = (data) => {
     UpdateLevel(data, {
       onSuccess: () => {
-        alert("سطح با موفقیت ویرایش شد");
+        toast.success("سطح با موفقیت ویرایش شد");
         console.log("Updated level:", data);
         refetch();
         setShowModal(false);
       },
       onError: (error) => {
         const errorMessage = error.response?.data?.message || error.message || "خطا در ویرایش سطح";
-        alert(`خطا: ${errorMessage}`);
+        toast.error(`خطا: ${errorMessage}`);
         console.error("Error updating level:", error);
       },
     });
@@ -135,9 +136,9 @@ const AddLevelModal = ({
                     className="me-1"
                     color="primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={Addpending || EditPending}
                   >
-                    {isSubmitting ? "در حال ثبت..." : "ثبت"}
+                    {Addpending || EditPending ? "در حال ثبت..." : "ثبت"}
                   </Button>
                   <Button
                     outline

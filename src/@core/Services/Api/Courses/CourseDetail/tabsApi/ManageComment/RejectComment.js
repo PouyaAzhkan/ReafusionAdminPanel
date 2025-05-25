@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from "../../../../../interceptor";
+import toast from "react-hot-toast";
 
 const RejectComment = () => {
   return useMutation({
@@ -9,11 +10,11 @@ const RejectComment = () => {
       return response;
     },
     onSuccess: (data) => {
-      alert("کامنت ریجک شد");
+      toast.success("کامنت ریجک شد");
       console.log(data);
     },
     onError: (error) => {
-      alert("خطا در ریجک کامنت");
+      toast.error("خطا در ریجک کامنت");
       console.log(error);
     }
   });

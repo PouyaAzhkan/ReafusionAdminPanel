@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Button, Modal, ModalHeader, ModalBody, Spinner } from "reactstrap";
 
 const ModalBasic = ({
   centeredModal,
@@ -7,6 +7,7 @@ const ModalBasic = ({
   groupData,
   changeReserve,
   toggleTab,
+  isPending,
 }) => {
   const { register, handleSubmit } = useForm();
 
@@ -43,8 +44,8 @@ const ModalBasic = ({
                     </option>
                   ))}
                 </select>
-                <button className="btn btn-success" type="submit">
-                  ثبت
+                <button className="btn btn-success" type="submit" disabled={isPending}>
+                  ثبت {isPending && <Spinner size="sm" color="light" />}
                 </button>
               </form>
             </ModalBody>

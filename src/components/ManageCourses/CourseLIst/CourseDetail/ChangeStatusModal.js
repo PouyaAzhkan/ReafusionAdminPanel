@@ -2,7 +2,7 @@
 import { Fragment, useState } from "react";
 
 // ** Reactstrap Imports
-import { Modal, ModalHeader, ModalBody, Button } from "reactstrap";
+import { Modal, ModalHeader, ModalBody, Button, Spinner } from "reactstrap";
 
 // ** Third Party Components
 import Select from "react-select";
@@ -11,6 +11,7 @@ import Select from "react-select";
 import { selectThemeColors } from "@utils";
 
 import ChangeStatus from "../../../../@core/Services/Api/Courses/CourseDetail/ChangeStatus";
+import toast from "react-hot-toast";
 
 const ChangeStatusModal = ({ changeStatusModal, id, toggle, refetch, CreateCourse }) => {
   // مقدار اولیه statusId را به اولین گزینه تنظیم می‌کنیم
@@ -20,11 +21,11 @@ const ChangeStatusModal = ({ changeStatusModal, id, toggle, refetch, CreateCours
   }));
   const [statusId, setStatusId] = useState(newStatus?.[0]?.value || null);
 
-  const { mutate } = ChangeStatus();
+  const { mutate, isPending } = ChangeStatus();
 
   const handleChangeStatus = () => {
     if (!statusId) {
-      alert("لطفاً یک وضعیت انتخاب کنید.");
+      toast.error("لطفاً یک وضعیت انتخاب کنید.");
       return;
     }
 
@@ -40,13 +41,13 @@ const ChangeStatusModal = ({ changeStatusModal, id, toggle, refetch, CreateCours
     mutate(formData, {
       onSuccess: (response) => {
         console.log("Success Response:", response);
-        alert("وضعیت با موفقیت تغییر کرد");
+        toast.success("وضعیت با موفقیت تغییر کرد");
         toggle();
         refetch();
       },
       onError: (error) => {
         console.error("Error Details:", error.response?.data || error.message);
-        alert("خطا در تغییر وضعیت");
+        toast.error("خطا در تغییر وضعیت");
       },
     });
   };
@@ -83,8 +84,9 @@ const ChangeStatusModal = ({ changeStatusModal, id, toggle, refetch, CreateCours
                 style={{ width: "100%" }}
                 className="mt-3 mx-auto"
                 color="primary"
+                disabled={isPending}
               >
-                ثبت نهایی
+                ثبت نهایی {isPending && <Spinner size="sm" color="light" />}
               </Button>
             </div>
           </ModalBody>

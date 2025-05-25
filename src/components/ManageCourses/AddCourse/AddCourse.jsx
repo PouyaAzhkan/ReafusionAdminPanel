@@ -9,6 +9,7 @@ import PictureCourse from "./steps/PictureCourse";
 import GetCreateCourse from "../../../@core/Services/Api/Courses/CourseDetail/GetCreateCourse";
 import GetCategorys from "../../../@core/Services/Api/Courses/AddCourse/GetCategorys";
 import AddCourses from "../../../@core/Services/Api/Courses/AddCourse/AddCourse";
+import toast from "react-hot-toast";
 
 const AddCourse = () => {
   const ref = useRef(null);
@@ -58,11 +59,11 @@ const AddCourse = () => {
       onSuccess: (data) => {
         console.log("API response:", data);
         setCourseId(data.id);
-        alert("دوره با موفقیت اضافه شد");
+        toast.success("دوره با موفقیت اضافه شد");
       },
       onError: (error) => {
         console.error("Error adding course:", error.response?.data || error.message);
-        alert(`خطا در افزودن دوره: ${error.response?.data?.message || error.message}`);
+        toast.error(`خطا در افزودن دوره: ${error.response?.data?.message || error.message}`);
       },
     });
   } else {
@@ -150,6 +151,7 @@ const AddCourse = () => {
           setImage={setImage}
           setCreateBtn={setCreateBtn}
           type="wizard-vertical"
+          isPending={isPending}
         />
       ),
     },

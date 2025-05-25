@@ -1,6 +1,7 @@
 // ** Third Party Components
 import PropTypes from "prop-types";
 import classnames from "classnames";
+import '../../../../assets/scss/PanelResponsive/CoursesPages.scss'
 
 // ** Reactstrap Imports
 import { Card, CardBody } from "reactstrap";

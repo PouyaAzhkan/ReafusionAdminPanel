@@ -81,7 +81,7 @@ const RevenueReport = ({ title, apiData, valueKey , labelKey, color, hasMore = f
             <CardTitle className='mb-50 mb-sm-0 p-1 text-dark'>{title}</CardTitle>
             <div className='d-flex align-items-center gap-1'>
               {hasMore && (   
-                    <NavLink to="/d" className="btn btn-sm"
+                    <NavLink to="/manageCourseClassRoom" className="btn btn-sm"
                     style={{ border: '1px solid #32bce4', backgroundColor: 'transparent', borderRadius: '6px',
                       fontWeight: 'bold', padding: '5px 12px', transition: 'all 0.3s ease'}}
                     onMouseOver={e => {

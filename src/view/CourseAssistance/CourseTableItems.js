@@ -36,19 +36,18 @@ const CourseTableItems = ({ item, setId, toggle }) => {
           {item.isActive ? "فعال" : "غیرفعال"}
         </Badge>
       </td>
-      <td style={{ padding: "0.5rem" }}>
+      <td >
         <Button
           className="p-0 py-1 text-center bg-black"
           style={{ width: "120px", float: "left" }}
           color="primary"
           onClick={() => {
-            toggle();
             setId(item.courseId);
-            setId(item.courseId || item.id); // سازگار با هر دو فرمت داده
+            setId(item.courseId || item.id); 
             toggle(); // بستن مودال
           }}
         >
-          <span className="mx-auto">انتخاب</span>
+           انتخاب
         </Button>
       </td>
     </tr>

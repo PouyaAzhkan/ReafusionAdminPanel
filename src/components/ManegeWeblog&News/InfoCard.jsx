@@ -6,6 +6,7 @@ import EditForm from '../../view/Forms/EditWeblogDetail/EditForm';
 import '@styles/react/libs/react-select/_react-select.scss';
 import { EditWeblogDetail } from '../../@core/Services/Api/Weblog&News/EditWeblogDetail';
 import { ActiveOrDectiveNews } from '../../@core/Services/Api/Weblog&News/Active&DectiveNews';
+import toast from 'react-hot-toast';
 
 const InfoCard = ({ Api1, id }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -50,11 +51,11 @@ const InfoCard = ({ Api1, id }) => {
     formData.append('Id', id || '');
     mutate(formData, {
        onSuccess: (data) => {
-         alert("عملیات انجام شد");
+         toast.success("عملیات انجام شد");
          console.log(data);
        },
        onError: (error) => {
-          alert("خطا در انجام عملیات")
+          toast.error("خطا در انجام عملیات")
           console.log(error);
        }
     })

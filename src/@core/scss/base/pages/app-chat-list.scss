@@ -50,24 +50,24 @@ $chat-widget-height: 390px;
   // Chat area css
   .chats {
     .chat-avatar {
-      float: right;
+      float: right !important;
     }
     .chat-body {
-      display: block;
-      margin: 10px 30px 0 0;
-      overflow: hidden;
+      display: block !important;
+      margin: 10px 30px 0 0 !important;
+      overflow: hidden !important;
       .chat-content {
-        float: right;
-        padding: 0.7rem 1rem;
-        margin: 0 1rem 10px 0;
-        clear: both;
-        color: $white;
-        @include gradient-directional(map-get($primary-color, 'base'), map-get($primary-color, 'lighten-2'), 80deg);
-        border-radius: $border-radius;
-        box-shadow: 0 4px 8px 0 rgba($black, 0.12);
-        max-width: 75%;
+        float: right !important;
+        padding: 0.7rem 1rem !important;
+        margin: 0 1rem 10px 0 !important;
+        clear: both !important;
+        color: $white !important;
+        background: linear-gradient(80deg, #7367f0, #9e95f9);
+        border-radius: $border-radius !important;
+        box-shadow: 0 4px 8px 0 rgba($black, 0.12) !important;
+        max-width: 75% !important;
         p {
-          margin: 0;
+          margin: 0 !important;
         }
       }
     }

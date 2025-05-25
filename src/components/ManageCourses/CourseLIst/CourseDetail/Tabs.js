@@ -12,7 +12,6 @@ import {
   TabPane,
 } from "reactstrap";
 
-import StatsHorizontal from "../../../../@core/components/widgets/stats/StatsHorizontal";
 import { ThemeColors } from "../../../../utility/context/ThemeColors";
 import { DetailsOfCourses, navItems } from "../../../../@core/constants/courses";
 import HandleIdentityEditorJs from "../../../../utility/create-editorjs-blocks/IdentityEditorJs";
@@ -23,6 +22,8 @@ import CoursesGroups from "./tabs/GroupsCourses";
 import Payments from "./tabs/payments";
 import SocialGroups from "./tabs/SocialGroups";
 import CourseAssistance from "./tabs/CourseAssistance";
+import StatsHorizontal2 from "../../../../@core/components/widgets/stats/StatsHorizontal2";
+import StatsHorizontal from "../../../../@core/components/widgets/stats/StatsHorizontal";
 
 const UserTabs = ({
   active,

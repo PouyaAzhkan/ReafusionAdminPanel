@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import Api from '../../../../@core/Services/interceptor';
 
-export const EditCategoryWeblog = () => {
+const EditCategoryWeblog = () => {
   return useMutation({
       mutationKey: ['EditCategoryWeblog'],
       mutationFn: async (formData) => {
@@ -11,3 +11,5 @@ export const EditCategoryWeblog = () => {
       }
   })
 }
+
+export default EditCategoryWeblog

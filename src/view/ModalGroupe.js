@@ -1,9 +1,10 @@
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Modal, ModalHeader, ModalBody, Spinner } from "reactstrap";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import AddGroupe from "../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageGroupe/AddGroupe";
 import EditGroupe from "../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageGroupe/EditGroupe";
+import toast from "react-hot-toast";
 
 const ModalGroup = ({
   setShowModal,
@@ -14,8 +15,8 @@ const ModalGroup = ({
   groupData,
 }) => {
   const { id } = useParams();
-  const { mutate: AddGroupes } = AddGroupe();
-  const { mutate: EditGroupes } = EditGroupe(); 
+  const { mutate: AddGroupes, isPending: addPending } = AddGroupe();
+  const { mutate: EditGroupes, isPending: editPending } = EditGroupe(); 
 
   const {
     register,
@@ -60,15 +61,15 @@ const ModalGroup = ({
         );
 
         if (data && data.courseGroupDtos && newGroupAdded) {
-          alert("گروه با موفقیت اضافه شد");
+          toast.success("گروه با موفقیت اضافه شد");
 
           // 🟡 صبر کن تا refetchGroup تموم بشه
           await refetchGroup();
 
           setShowModal(false);
         } else {
-          alert("گروه با موفقیت اضافه شد");
-          alert("در صورت طول کشیدن اضافه شدن گروه شکیبا باشید");
+          toast.success("گروه با موفقیت اضافه شد");
+          toast.success("در صورت طول کشیدن اضافه شدن گروه شکیبا باشید");
           console.log("Group not found in response:", data);
 
           await refetchGroup(); // حتی در صورت else هم refetch کن
@@ -77,7 +78,7 @@ const ModalGroup = ({
       },
       onError: (error) => {
         console.error("Error submitting form:", error);
-        alert("خطا در ثبت گروه: " + (error.message || "مشکل ناشناخته"));
+        toast.error("خطا در ثبت گروه: " + (error.message || "مشکل ناشناخته"));
       },
     });
   };
@@ -100,15 +101,15 @@ const ModalGroup = ({
         );
 
         if (data && data.courseGroupDtos && newGroupAdded) {
-          alert("گروه با موفقیت ویرایش شد");
+          toast.success("گروه با موفقیت ویرایش شد");
 
           // 🟡 صبر کن تا refetchGroup تموم بشه
           await refetchGroup();
 
           setShowModal(false);
         } else {
-          alert("گروه با موفقیت ویرایش شد");
-          alert("در صورت طول کشیدن ویرایش گروه لطفا شکیبا باشید");
+          toast.success("گروه با موفقیت ویرایش شد");
+          toast.success("در صورت طول کشیدن ویرایش گروه لطفا شکیبا باشید");
           console.log("Group not found in response:", data);
 
           await refetchGroup(); 
@@ -118,7 +119,7 @@ const ModalGroup = ({
       onError: (error) => {
         console.error("Error submitting form:", error);
         const errorMessage = error?.response?.data?.ErrorMessage?.[0] || "خطا در حذف کامنت";
-        alert(errorMessage); 
+        toast.error(errorMessage); 
       },
     });
   };
@@ -169,9 +170,9 @@ const ModalGroup = ({
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={isSubmitting}
+              disabled={addPending || editPending}
             >
-              {textVariant?.[variant]?.[0]}
+              {textVariant?.[variant]?.[0]} {addPending || editPending && <Spinner size="sm" color="light" />}
             </button>
           </form>
         </ModalBody>

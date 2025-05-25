@@ -19,6 +19,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AddTecnology from "../../../../@core/Services/Api/Courses/ManageCategory/AddTecnology";
 import EditTecnology from "../../../../@core/Services/Api/Courses/ManageCategory/EditTecnology";
+import toast from "react-hot-toast";
 
 const AddTechnologyModal = ({
   showModal,
@@ -36,32 +37,32 @@ const AddTechnologyModal = ({
   };
 
   // Mutation برای ایجاد تکنولوژی
-  const { mutate: AddTechnology } = AddTecnology();
-  const { mutate: EditTecnologys } = EditTecnology();
+  const { mutate: AddTechnology, isPending: addPending } = AddTecnology();
+  const { mutate: EditTecnologys, isPending: EditPending } = EditTecnology();
 
   const handleAddtecnology = (data) => {
       AddTechnology(data, {
          onSuccess: () => {
-          alert('تکنولوژی با موفیت اضافه شد');
+          toast.success('تکنولوژی با موفیت اضافه شد');
           console.log(data);
           refetch();
           setShowModal(false);
          },
          onError: () => {
-          alert('خطا در افزودن تکنولوژی')
+          toast.error('خطا در افزودن تکنولوژی')
          }
       })
   }
    const handleEdittecnology = (data) => {
       EditTecnologys(data, {
          onSuccess: () => {
-          alert('تکنولوژی با موفیت ویرایش شد');
+          toast.success('تکنولوژی با موفیت ویرایش شد');
           console.log(data);
           refetch();
           setShowModal(false);
          },
          onError: () => {
-          alert('خطا در ویرایش تکنولوژی')
+          toast.error('خطا در ویرایش تکنولوژی')
          }
       })
   }
@@ -230,9 +231,9 @@ const AddTechnologyModal = ({
                     className="me-1"
                     color="primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={addPending || EditPending}
                   >
-                    {isSubmitting ? "در حال ثبت..." : "ثبت"}
+                    {addPending || EditPending ? "در حال ثبت..." : "ثبت"}
                   </Button>
                   <Button
                     outline

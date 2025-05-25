@@ -82,7 +82,10 @@ const Routes = [
   {
     path: "/",
     index: true,
-    element: <Navigate replace to={DefaultRoute} />,
+    element: <Login />,
+    meta: {
+      layout: "blank",
+    },
   },
   {
     path: "/home",

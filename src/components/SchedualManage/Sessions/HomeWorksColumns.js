@@ -4,7 +4,7 @@ import {
   DropdownToggle,
   UncontrolledDropdown,
 } from "reactstrap";
-import { Edit, MoreVertical } from "react-feather";
+import { MoreVertical, UserCheck } from "react-feather";
 import moment from "moment-jalaali";
 
 // تنظیم moment-jalaali برای استفاده از تقویم شمسی
@@ -20,7 +20,7 @@ const formatJalaaliDateTime = (dateString) => {
   return `${datePart} ساعت ${timePart}`;
 };
 
-export const columns = () => [
+export const columns = (setOpenAddStudentHomeWork) => [
   {
     name: "عنوان تکلیف",
     width: "200px",
@@ -43,9 +43,7 @@ export const columns = () => [
     sortable: true,
     sortField: "insertDate",
     selector: (row) => row.insertDate,
-    cell: (row) => (
-      <span>{formatJalaaliDateTime(row?.insertDate)}</span>
-    ),
+    cell: (row) => <span>{formatJalaaliDateTime(row?.insertDate)}</span>,
   },
   {
     name: "عملیات",
@@ -57,9 +55,15 @@ export const columns = () => [
             <MoreVertical size={14} className="cursor-pointer" />
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem className="w-100">
-              <Edit size={14} className="me-50" />
-              <span className="align-middle">الکیه نزن روش</span>
+            <DropdownItem
+              className="w-100"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenAddStudentHomeWork(true);
+              }}
+            >
+              <UserCheck size={14} className="me-50" />
+              <span className="align-middle">تعیین برای دانشجو</span>
             </DropdownItem>
           </DropdownMenu>
         </UncontrolledDropdown>

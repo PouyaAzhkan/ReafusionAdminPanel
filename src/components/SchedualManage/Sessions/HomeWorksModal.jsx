@@ -14,12 +14,14 @@ import { columns } from "./HomeWorksColumns";
 import ReactPaginate from "react-paginate";
 import { getSessionHomeWorks } from "../../../@core/Services/Api/HomeWorks/HomeWorks";
 import AddHomeWorkModal from "./AddHomeWorkModal";
+import AddStudentHomeWorkModal from "../HomeWorkStudents/AddStudentHomeWorkModal";
 
 const CustomHeader = () => null;
 
 const HomeWorksModal = ({ open, handleModal, sessionId }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [openAddHomeWorkModal, setOpenAddHomeWorkModal] = useState(false);
+    const [openAddStudentHomeWork, setOpenAddStudentHomeWork] = useState(false);
     const rowsPerPage = 6;
     const { data, isLoading, isError, refetch } = getSessionHomeWorks(sessionId);
 
@@ -29,6 +31,10 @@ const HomeWorksModal = ({ open, handleModal, sessionId }) => {
 
     const handleAddHomeWorkModal = () => {
         setOpenAddHomeWorkModal(!openAddHomeWorkModal);
+    };
+
+    const handleAddStudentHomeWorkModal = () => {
+        setOpenAddStudentHomeWork(!openAddStudentHomeWork);
     };
 
     // handle close modal
@@ -87,7 +93,7 @@ const HomeWorksModal = ({ open, handleModal, sessionId }) => {
                                 pagination
                                 responsive
                                 paginationServer
-                                columns={columns()}
+                                columns={columns(setOpenAddStudentHomeWork)}
                                 onSort={() => { }}
                                 sortIcon={<ChevronDown />}
                                 className="react-dataTable overflow-visible"
@@ -120,6 +126,11 @@ const HomeWorksModal = ({ open, handleModal, sessionId }) => {
                 handleModal={handleAddHomeWorkModal}
                 sessionId={sessionId}
                 refetchHomeWorks={refetch}
+            />
+
+            <AddStudentHomeWorkModal
+                open={openAddStudentHomeWork}
+                handleModal={handleAddStudentHomeWorkModal}
             />
         </Fragment>
     );

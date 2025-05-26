@@ -73,7 +73,7 @@ const TeacherCourseListModal = ({ isOpen, toggle, onSelectCourse, selectedCourse
                         ) : !Array.isArray(courses?.teacherCourseDtos) || courses?.teacherCourseDtos.length === 0 ? (
                             <tr>
                                 <td colSpan="4" className="text-center py-2">
-                                    هیچ دوره‌ای یافت نشد. <Link to="/courses/new">ایجاد دوره جدید</Link>
+                                    هیچ دوره‌ای یافت نشد.
                                 </td>
                             </tr>
                         ) : (

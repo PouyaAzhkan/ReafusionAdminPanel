@@ -4,15 +4,11 @@ import ModalApiItemList from "./../../../@core/components/modal/ModalApiItemList
 import GetTeacherCourses from "../../../@core/Services/Api/Courses/CourseList/GetTeacherCourses";
 import TeacherCourseTableItems from "./TeacherCourseTableItems";
 import { debounce } from "lodash";
-import { Link } from "react-router-dom";
 
 const TeacherCourseListModal = ({ isOpen, toggle, onSelectCourse, selectedCourseId }) => {
     const [courseParams, setCourseParams] = useState({
         PageNumber: 1,
-        RowsOfPage: 10,
-        Query: "",
-        SortingCol: "",
-        SortType: "",
+        RowsOfPage: 6,
     });
 
     const { data: courses, isLoading: coursesLoading, error: coursesError, refetch } = GetTeacherCourses(courseParams);

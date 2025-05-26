@@ -15,26 +15,25 @@ const UserTableItems = ({ item, onSelect, toggle, isSelected }) => {
 
   return (
     <tr className="text-center" style={{ whiteSpace: "nowrap" }}>
-      <td style={{ width: "280px", padding: "0.5rem" }}>
+      <td style={{ width: "150px", padding: "0.5rem" }}>
         <Link
-          to={`/users/view/${item.courseUserId}`}
+          to={`/users/view/${item.studentId}`}
           className="user_name text-truncate text-body"
         >
-          <span className="fw-bolder">
-            {(item.fname && item.lname
-              ? `${item.fname} ${item.lname}`
-              : "بدون عنوان") || "بدون عنوان"}
-          </span>
+          <span className="fw-bolder">{item?.studentName || "بدون نام"}</span>
         </Link>
       </td>
       <td style={{ width: "100px", padding: "0.5rem" }}>
-        <Badge color={item.active ? "light-success" : "light-danger"} pill>
-          {item.active ? "فعال" : "غیرفعال"}
+        <Badge color={item.peymentDone ? "light-success" : "light-danger"} pill>
+          {item.peymentDone ? "پرداخت شده" : "پرداخت نشده"}
         </Badge>
       </td>
       <td style={{ width: "100px", padding: "0.5rem" }}>
-        <Badge color={item.isStudent ? "light-success" : "light-danger"} pill>
-          {item.isStudent ? "هست" : "نیست"}
+        <Badge
+          color={item.notification ? "light-success" : "light-danger"}
+          pill
+        >
+          {item.notification ? "فعال" : "غیرفعال"}
         </Badge>
       </td>
       <td style={{ width: "100px", padding: "0.5rem" }}>
@@ -42,13 +41,7 @@ const UserTableItems = ({ item, onSelect, toggle, isSelected }) => {
           className="p-0 py-1 text-center"
           style={{ width: "120px", float: "left" }}
           color="primary"
-          onClick={() => {
-            if (typeof onSelect === "function") {
-              onSelect();
-            } else {
-              console.warn("onSelect is not a function");
-            }
-          }}
+          onClick={onSelect}
           disabled={isSelected}
         >
           <span className="mx-auto">

@@ -59,7 +59,7 @@ export const columns = (setOpenAddStudentHomeWork) => [
               className="w-100"
               onClick={(e) => {
                 e.preventDefault();
-                setOpenAddStudentHomeWork(true);
+                setOpenAddStudentHomeWork({ open: true, hwid: row.id }); // ارسال hwid
               }}
             >
               <UserCheck size={14} className="me-50" />

@@ -1,4 +1,10 @@
-import { Archive, CheckSquare, Edit, MoreVertical, XSquare } from "react-feather";
+import {
+  Archive,
+  CheckSquare,
+  Edit,
+  MoreVertical,
+  XSquare,
+} from "react-feather";
 import { Link } from "react-router-dom";
 import {
   Badge,

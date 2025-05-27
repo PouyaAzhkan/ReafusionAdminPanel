@@ -9,7 +9,9 @@ const GetCourseUserList = (params) => {
     queryFn: async () => {
       console.log("در حال دریافت لیست کاربران با پارامترها:", params);
       try {
-        const response = await Api.get("/CourseUser/GetCourseUserList", { params });
+        const response = await Api.get("/CourseUser/GetCourseUserList", {
+          params,
+        });
         console.log("پاسخ GetCourseUserList:", response);
         return response; // فرض: { totalCount: number, users: array }
       } catch (error) {

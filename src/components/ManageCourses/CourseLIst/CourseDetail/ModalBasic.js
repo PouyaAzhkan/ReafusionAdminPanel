@@ -25,7 +25,7 @@ const ModalBasic = ({
       >
         {groupData?.length > 0 ? (
           <>
-            <ModalHeader toggle={() => setCenteredModal(!centeredModal)}>
+            <ModalHeader className="text-ptimary" toggle={() => setCenteredModal(!centeredModal)}>
               لطفا گروه را انتخاب نمایید
             </ModalHeader>
             <ModalBody>
@@ -35,7 +35,7 @@ const ModalBasic = ({
               >
                 <select
                   {...register("CourseId", { required: true })}
-                  className="relative border-b w-[100%] h-25 pr-12 shadow-md focus:outline-none focus:ring focus:ring-textCol3"
+                  className="relative border-b w-[100%] pr-12 p-1 text-primary shadow-md focus:outline-none focus:ring focus:ring-textCol3"
                 >
                   <option value="">انتخاب گروه</option>
                   {groupData.map((item, index) => (
@@ -44,8 +44,8 @@ const ModalBasic = ({
                     </option>
                   ))}
                 </select>
-                <button className="btn btn-success" type="submit" disabled={isPending}>
-                  ثبت {isPending && <Spinner size="sm" color="light" />}
+                <button className="btn btn-primary" type="submit" disabled={isPending}>
+                  ثبت گروه {isPending && <Spinner size="sm" color="light" />}
                 </button>
               </form>
             </ModalBody>

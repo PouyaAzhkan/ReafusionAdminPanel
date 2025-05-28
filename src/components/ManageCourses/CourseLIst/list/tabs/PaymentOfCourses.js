@@ -1,5 +1,5 @@
-import { Badge, Button, Table, Tooltip } from "reactstrap";
-import { useEffect, useState } from "react";
+import { Badge, Button, Input, Table, Tooltip } from "reactstrap";
+import { useEffect, useState, useRef, useMemo } from "react";
 import IMG from "../../../../../assets/images/element/UnKnownUser.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye } from "react-feather";
@@ -23,6 +23,8 @@ const PaymentOfCourses = ({ courseId }) => {
   const [paymentId, setPaymentId] = useState(null);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // State برای جستجو
+  const searchRef = useRef();
 
   // Get data from API
   const { data: getAllPayment, isLoading, error, refetch } = GetAllCoursePayment(courseId);
@@ -33,8 +35,30 @@ const PaymentOfCourses = ({ courseId }) => {
     }
   }, [getAllPayment]);
 
+  // فیلتر کردن داده‌ها بر اساس عبارت جستجو
+  const filteredPayments = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return paymentsData; // اگر عبارت جستجو خالی باشد، همه داده‌ها را برگردان
+    return paymentsData.filter(
+      (payment) =>
+        payment.studentName?.toLowerCase().includes(query) ||
+        payment.title?.toLowerCase().includes(query)
+    );
+  }, [paymentsData, searchQuery]);
+
+  // مدیریت جستجو با تأخیر (debounce)
+  const handleDebounceSearch = (e) => {
+    const value = e.target.value;
+    clearTimeout(searchRef.current);
+    searchRef.current = setTimeout(() => {
+      setSearchQuery(value);
+      setItemOffset(0); // ریست صفحه‌بندی به صفحه اول
+      setPageNumber(1);
+    }, 1000);
+  };
+
   const handlePagination = (page) => {
-    const newOffset = (page.selected * rowsOfPage) % paymentsData.length;
+    const newOffset = (page.selected * rowsOfPage) % filteredPayments.length;
     setItemOffset(newOffset);
     setPageNumber(page.selected + 1);
   };
@@ -54,11 +78,17 @@ const PaymentOfCourses = ({ courseId }) => {
 
   return (
     <div style={{ overflowX: "auto" }}>
+      <Input
+        type="text"
+        placeholder="جستجو در پرداختی‌های دوره ..."
+        className="mb-1 text-primary"
+        onChange={handleDebounceSearch}
+      />
       <Table hover className="rounded" style={{ overflow: "hidden" }}>
         <HeaderTable titles={PaymentCoursesTableTitles} />
         <tbody>
-          {paymentsData.length > 0 ? (
-            paymentsData.slice(itemOffset, itemOffset + rowsOfPage).map((item, index) => (
+          {filteredPayments.length > 0 ? (
+            filteredPayments.slice(itemOffset, itemOffset + rowsOfPage).map((item, index) => (
               <tr key={index} className="text-right">
                 <td
                   onClick={() => navigate(`/users/view/${item.studentId}`)}
@@ -127,12 +157,14 @@ const PaymentOfCourses = ({ courseId }) => {
         refetch={refetch}
       />
 
-      <CustomPagination
-        total={paymentsData?.length || 0}
-        current={pageNumber - 1}
-        rowsPerPage={rowsOfPage}
-        handleClickFunc={handlePagination}
-      />
+      {filteredPayments.length > 0 && (
+        <CustomPagination
+          total={filteredPayments.length}
+          current={pageNumber - 1}
+          rowsPerPage={rowsOfPage}
+          handleClickFunc={handlePagination}
+        />
+      )}
     </div>
   );
 };

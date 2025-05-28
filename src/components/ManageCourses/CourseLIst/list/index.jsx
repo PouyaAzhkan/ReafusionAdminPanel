@@ -11,35 +11,37 @@ import CourseReserve from "./tabs/CourseReserve";
 import PaymentOfCourses from "./tabs/PaymentOfCourses";
 import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
 import GetCourses from "../../../../@core/Services/Api/Courses/CourseList/GetCourses";
-import GetTeacherCourses from "../../../../@core/Services/Api/Courses/CourseList/GetTeacherCourses";
 import StatsHorizontal2 from "../../../../@core/components/widgets/stats/StatsHorizontal2";
+import { getItem } from "../../../../@core/Services/common/storage.services";
+import GetUserImage from "../../../../@core/Services/Api/chat/GetAdminImage";
 
 const Courses = () => {
   const [activeTab, setActiveTab] = useState("1");
   const ref1 = useRef();
   const ref4 = useRef();
+  const id = getItem('userId');
 
   // State for tab 1
   const [paramsTab1, setParamsTab1] = useState({ PageNumber: 1, RowsOfPage: 12, SortingCol: "DESC", SortType: "Expire", Query: "" });
   const [sortTypeTab1, setSortTypeTab1] = useState("");
   const [priceSortTab1, setPriceSortTab1] = useState("");
-  const [activeViewTab1, setActiveViewTab1] = useState("flex"); // Changed from "grid" to "flex"
+  const [activeViewTab1, setActiveViewTab1] = useState("flex");
 
   // State for tab 4
   const [paramsTab4, setParamsTab4] = useState({ PageNumber: 1, RowsOfPage: 12, SortingCol: "DESC", SortType: "Expire", Query: "" });
   const [sortTypeTab4, setSortTypeTab4] = useState("");
   const [priceSortTab4, setPriceSortTab4] = useState("");
-  const [activeViewTab4, setActiveViewTab4] = useState("flex"); // Changed from "grid" to "flex"
+  const [activeViewTab4, setActiveViewTab4] = useState("flex");
 
   const { data: GetCourse, isLoading: loading1, error: error1, refetch: refetchTab1 } = GetCourses(paramsTab1);
-  const { data: GetTeacherCourse, isLoading: loading4, error: error4, refetch: refetchTab4 } = GetTeacherCourses(paramsTab4);
+  const { data: userDetail, isLoading: loadingUser, error: errorUser } = GetUserImage(id);
 
   const toggleTab = tab => setActiveTab(tab);
 
   const handleSearch = (query, tab) => {
     const updateParams = prev => ({ ...prev, Query: query, PageNumber: 1 });
     tab === 1 ? setParamsTab1(updateParams) : setParamsTab4(updateParams);
-    tab === 1 ? refetchTab1() : refetchTab4();
+    tab === 1 ? refetchTab1() : refetchTab1();
   };
 
   const handleDebounceSearch = (e, tab) => {
@@ -51,13 +53,13 @@ const Courses = () => {
   const handleRowsChange = (rows, tab) => {
     const updateParams = prev => ({ ...prev, RowsOfPage: Number(rows), PageNumber: 1 });
     tab === 1 ? setParamsTab1(updateParams) : setParamsTab4(updateParams);
-    tab === 1 ? refetchTab1() : refetchTab4();
+    tab === 1 ? refetchTab1() : refetchTab1();
   };
 
   const handlePagination = (page, tab) => {
     const updateParams = prev => ({ ...prev, PageNumber: page.selected + 1 });
     tab === 1 ? setParamsTab1(updateParams) : setParamsTab4(updateParams);
-    tab === 1 ? refetchTab1() : refetchTab4();
+    tab === 1 ? refetchTab1() : refetchTab1();
   };
 
   const activeOrDeActive = async (boolean, id) => {
@@ -79,16 +81,32 @@ const Courses = () => {
   }, [GetCourse?.courseDtos, sortTypeTab1, priceSortTab1]);
 
   const sortedCoursesTab4 = useMemo(() => {
-    let data = [...(GetTeacherCourse?.teacherCourseDtos || [])];
+    let data = [...(GetCourse?.courseDtos || [])];
+    // نرمال‌سازی نام کامل برای مقایسه
+    const fullName = userDetail ? `${userDetail.fName} ${userDetail.lName}`.trim().replace(/-/g, ' ') : "";
+    const query = paramsTab4.Query ? paramsTab4.Query.trim().toLowerCase() : "";
+    
+    data = data.filter(course => {
+      // حذف خط تیره و نرمال‌سازی نام کامل مدرس
+      const teacherFullName = course.fullName ? course.fullName.trim().replace(/-/g, ' ') : "";
+      // بررسی تطابق نام کامل مدرس
+      const matchesFullName = teacherFullName.toLowerCase() === fullName.toLowerCase();
+      // بررسی تطابق عبارت جستجو با نام دوره
+      const matchesQuery = query ? course.title?.toLowerCase().includes(query) : true;
+      return matchesFullName && matchesQuery;
+    });
+    
+    // اعمال مرتب‌سازی
     if (sortTypeTab4 === "reserveCount") data.sort((a, b) => b.reserveCount - a.reserveCount);
     else if (sortTypeTab4 === "nearest") data.sort((a, b) => new Date(b.lastUpdate) - new Date(a.lastUpdate));
     if (priceSortTab4 === "highestPrice") data.sort((a, b) => b.cost - a.cost);
     else if (priceSortTab4 === "lowestPrice") data.sort((a, b) => a.cost - b.cost);
+    
     return data;
-  }, [GetTeacherCourse?.teacherCourseDtos, sortTypeTab4, priceSortTab4]);
+  }, [GetCourse?.courseDtos, sortTypeTab4, priceSortTab4, userDetail, paramsTab4.Query]);
 
-  if (loading1 || loading4) return <div className="text-center">در حال بارگذاری...</div>;
-  if (error1 || error4) return <div className="text-center text-danger">خطا در بارگذاری داده‌ها</div>;
+  if (loading1 || loadingUser) return <div className="text-center">در حال بارگذاری...</div>;
+  if (error1 || errorUser) return <div className="text-center text-danger">خطا در بارگذاری داده‌ها</div>;
 
   const totalCount = GetCourse?.totalCount || 0;
   const expiredCount = (GetCourse?.courseDtos || []).filter(course => course.isdelete).length;
@@ -103,7 +121,7 @@ const Courses = () => {
           outline={tab === 1 ? activeViewTab1 !== "flex" : activeViewTab4 !== "flex"}
           onClick={() => (tab === 1 ? setActiveViewTab1("flex") : setActiveViewTab4("flex"))}
         >
-           <Grid size={15}/>
+          <Grid size={15}/>
         </Button>
         <Button
           color="primary"
@@ -137,7 +155,7 @@ const Courses = () => {
           onChange={e => {
             tab === 1 ? setSortTypeTab1(e.value) : setSortTypeTab4(e.value);
             tab === 1 ? setParamsTab1(p => ({ ...p, PageNumber: 1 })) : setParamsTab4(p => ({ ...p, PageNumber: 1 }));
-            tab === 1 ? refetchTab1() : refetchTab4();
+            tab === 1 ? refetchTab1() : refetchTab1();
           }}
           options={[{ value: "", label: "همه" }, { value: "reserveCount", label: "بیشترین رزروشده" }, { value: "nearest", label: "جدیدترین" }]}
         />
@@ -148,18 +166,17 @@ const Courses = () => {
           onChange={e => {
             tab === 1 ? setPriceSortTab1(e.value) : setPriceSortTab4(e.value);
             tab === 1 ? setParamsTab1(p => ({ ...p, PageNumber: 1 })) : setParamsTab4(p => ({ ...p, PageNumber: 1 }));
-            tab === 1 ? refetchTab1() : refetchTab4();
+            tab === 1 ? refetchTab1() : refetchTab1();
           }}
           options={[{ value: "", label: "همه" }, { value: "highestPrice", label: "گران‌ترین" }, { value: "lowestPrice", label: "ارزان‌ترین" }]}
         />
-        {renderViewToggle(1)}
+        {renderViewToggle(tab)}
       </div>
     </Col>
   );
 
-
   return (
-    <div className="courses-container ">
+    <div className="courses-container">
       <div className="courseStatus gap-2">
         <StatsHorizontal2 icon={<Book size={21} />} color="primary" stats={totalCount} statTitle="مجموع تمام دوره‌ها" />
         <StatsHorizontal2 icon={<Activity size={21} />} color="success" stats={activeCount} statTitle="دوره‌های فعال" />
@@ -183,10 +200,9 @@ const Courses = () => {
           </TabPane>
           <TabPane tabId="4">
             {renderFilters(4)}
-            {renderViewToggle(4)}
             <Input type="text" onChange={e => handleDebounceSearch(e, 4)} placeholder="جستجو در دوره‌ها" className="mt-2" />
             <CourseCard activeView={activeViewTab4} item={sortedCoursesTab4} handleActiveOrDetective={activeOrDeActive} />
-            <CustomPagination2 total={GetTeacherCourse?.totalCount || 0} rowsPerPage={paramsTab4.RowsOfPage} current={paramsTab4.PageNumber} handleClickFunc={page => handlePagination(page, 4)} />
+            <CustomPagination2 total={sortedCoursesTab4.length} rowsPerPage={paramsTab4.RowsOfPage} current={paramsTab4.PageNumber} handleClickFunc={page => handlePagination(page, 4)} />
           </TabPane>
         </TabContent>
       </div>

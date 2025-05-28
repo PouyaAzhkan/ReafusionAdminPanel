@@ -30,13 +30,14 @@ const EditCourseStep1 = ({ stepper, setStep1Data, defaultData }) => {
   const { control, handleSubmit, formState: { errors } } = useForm({
     mode: "onChange",
     defaultValues: {
-      Title: defaultData?.title || "",
+      Title: getItem("Title") || defaultData?.title || "",
       Capacity: getItem("Capacity") || "",
       SessionNumber: getItem("SessionNumber") || "",
-    },
+    }
   });
 
   const onSubmit = (data) => {
+    console.log("Step 1 Data:", data);
     setStep1Data(data);
     stepper.next();
   };
@@ -46,19 +47,25 @@ const EditCourseStep1 = ({ stepper, setStep1Data, defaultData }) => {
       <Row className="gy-1">
         <Col md="12">
           <Label for="Title">عنوان دوره</Label>
-          <Controller
+         <Controller
             control={control}
             name="Title"
             rules={{
               required: "این فیلد اجباری است",
-              maxLength: { value: 32, message: "متن بیش از حد مجاز!" },
+              minLength: { value: 5, message: "متن باید بیشتر از 5 کاراکتر باشد" },
+              maxLength: { value: 30, message: "متن بیش از حد مجاز!" },
             }}
             render={({ field }) => (
               <Input
                 {...field}
                 className="text-primary"
                 id="Title"
+                name="Title"
                 invalid={!!errors.Title}
+                onChange={(e) => {
+                  field.onChange(e);
+                  setItem("Title", e.target.value);
+                }}
               />
             )}
           />
@@ -140,6 +147,7 @@ const EditCourseStep2 = ({ stepper, setStep2Data, courseOptions, defaultData }) 
   });
 
   const onSubmit = (data) => {
+    console.log("Step 2 Data:", data);
     setStep2Data(data);
     stepper.next();
   };
@@ -270,6 +278,7 @@ const EditCourseStep3 = ({ stepper, setStep3Data, defaultData }) => {
   };
 
   const onSubmit = (data) => {
+    console.log("Step 3 Data:", data);
     setStep3Data(data);
     stepper.next();
   };
@@ -369,6 +378,7 @@ const EditCourseStep4 = ({ stepper, setStep4Data, defaultData }) => {
   });
 
   const onSubmit = (data) => {
+    console.log("Step 4 Data:", data);
     setStep4Data(data);
     stepper.next();
   };
@@ -436,11 +446,12 @@ const EditCourseStep5 = ({ stepper, setStep5Data, setFile, toggle, handleSubmit,
   const { control, handleSubmit: formSubmit, formState: { errors } } = useForm({
     mode: "onChange",
     defaultValues: {
-      UniqeUrlString: defaultData?.uniqeUrlString || "",
+      UniqeUrlString: defaultData?.id || "",
     },
   });
 
   const onSubmit = (data) => {
+    console.log("Step 5 Data:", data);
     setStep5Data(data);
     handleSubmit();
   };
@@ -469,7 +480,8 @@ const EditCourseStep5 = ({ stepper, setStep5Data, setFile, toggle, handleSubmit,
             name="UniqeUrlString"
             rules={{
               required: "این فیلد اجباری است",
-              maxLength: { value: 50, message: "شناسه یکتا نمی‌تواند بیش از 50 کاراکتر باشد" },
+              min: { value: 5, message: "شناسه یکتا باید بیشتر از 5 کاراکتر باشد" },
+              maxLength: { value: 30, message: "شناسه یکتا نمی‌تواند بیش از 30 کاراکتر باشد" },
             }}
             render={({ field }) => (
               <Input
@@ -483,8 +495,9 @@ const EditCourseStep5 = ({ stepper, setStep5Data, setFile, toggle, handleSubmit,
           {errors.UniqeUrlString && <FormFeedback className="text-danger">{errors.UniqeUrlString.message}</FormFeedback>}
         </Col>
         <Col xs={12} className="text-center mt-5">
-          <Button type="submit" color="primary" disabled={isPending}>ویرایش
-            {isPending && <Spinner size="sm" color="light" />} 
+          <Button type="submit" color="primary" disabled={isPending}>
+            ویرایش
+            {isPending && <Spinner size="sm" color="light" />}
           </Button>
           <Button type="button" color="danger" outline className="ms-1" onClick={toggle}>
             لغو
@@ -510,12 +523,17 @@ const EditCourse = ({ isOpen, toggle, refetchData, CreateCourse }) => {
   const { data, isLoading, error } = useGetCourseDetailInfo(id);
   const { mutate, isPending } = EditCourses();
 
-  // Set initial form values
+  // Set initial form values with validation
   useEffect(() => {
     if (data) {
+      console.log("Raw data.title:", data.Title); // لاگ برای دیباگ
       const oneYearLater = new DateObject().add(1, "year").format("YYYY-MM-DD HH:mm:ss");
+      const title = data.Title && data.Title.length >= 5 && data.Title.length <= 32 ? data.Title : "";
+      if (!title) {
+        console.warn("Warning: data.title is invalid or too short/long", data.Title);
+      }
       setStep1Data({
-        Title: data.title || "",
+        Title: title,
         Capacity: getItem("Capacity") || data.capacity || "",
         SessionNumber: getItem("SessionNumber") || data.sessionNumber || "",
       });
@@ -534,7 +552,7 @@ const EditCourse = ({ isOpen, toggle, refetchData, CreateCourse }) => {
         Describe: data.describe || "",
       });
       setStep5Data({
-        UniqeUrlString: data.uniqeUrlString || "",
+        UniqeUrlString: data.courseId || "",
       });
     }
   }, [data]);
@@ -543,6 +561,12 @@ const EditCourse = ({ isOpen, toggle, refetchData, CreateCourse }) => {
   if (error) return <p>خطا در بارگذاری اطلاعات</p>;
 
   const handleSubmit = () => {
+    // اعتبارسنجی دستی برای Title
+    if (!step1Data.Title || step1Data.Title.length < 5 || step1Data.Title.length > 32) {
+      toast.error("عنوان دوره باید بین 5 تا 32 کاراکتر باشد");
+      return;
+    }
+
     const combinedData = {
       Id: id,
       ...step1Data,
@@ -554,15 +578,26 @@ const EditCourse = ({ isOpen, toggle, refetchData, CreateCourse }) => {
       Cost: data?.cost,
     };
 
+    console.log("Submitting Data:", combinedData); // لاگ برای دیباگ
+
     const formData = new FormData();
     Object.entries(combinedData).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
-        formData.append(key, value);
+        if (["Capacity", "SessionNumber"].includes(key)) {
+          formData.append(key, Number(value));
+        } else {
+          formData.append(key, String(value));
+        }
       }
     });
 
     if (file) {
       formData.append("Image", file);
+    }
+
+    // لاگ FormData برای دیباگ
+    for (let [key, value] of formData.entries()) {
+      console.log(`FormData ${key}: ${value}`);
     }
 
     mutate(formData, {
@@ -572,8 +607,8 @@ const EditCourse = ({ isOpen, toggle, refetchData, CreateCourse }) => {
         refetchData();
       },
       onError: (error) => {
-        const errorMessage = error?.response?.data?.ErrorMessage?.[0] 
-        console.error("Error:", error);
+        console.error("Full Error Response:", error.response?.data); // لاگ کامل خطا
+        const errorMessage = error?.response?.data?.ErrorMessage?.[0] || "خطا در ویرایش دوره";
         toast.error(errorMessage);
       },
     });

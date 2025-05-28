@@ -1,6 +1,7 @@
-import { Table, Badge } from "reactstrap";
+import { Table, Badge, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
 import { Fragment, useState } from "react";
 import { Card } from "reactstrap";
+import { MoreVertical } from "react-feather";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 import { useParams } from "react-router-dom";
@@ -12,17 +13,30 @@ const Payments = () => {
 
   const { data, isLoading, error } = GetPaymentList(id);
 
-  // Pagination
-  const [PageNumber, setPageNumber] = useState(0);
+  const [PageNumber, setPageNumber] = useState(1);
   const [RowsOfPage, setRowsOfPage] = useState(8);
   const [itemOffset, setItemOffset] = useState(0);
 
+  const [dropdownOpen, setDropdownOpen] = useState({});
+
+  // ترکیب donePays و notDonePays
   const donePays = data?.donePays || [];
+  const notDonePays = data?.notDonePays || [];
+  const allPays = [...donePays, ...notDonePays]; 
   const endOffset = itemOffset + RowsOfPage;
-  const currentItems = donePays.slice(itemOffset, endOffset);
+  const currentItems = allPays.slice(itemOffset, endOffset);
+
+  // تابع برای تغییر وضعیت باز/بسته شدن منو
+  const toggleDropdown = (index) => {
+    setDropdownOpen((prevState) => ({
+      ...prevState,
+      [index]: !prevState[index],
+    }));
+  };
+
 
   const handleWithOutDispatch = (page) => {
-    const newOffset = (page.selected * RowsOfPage) % donePays.length;
+    const newOffset = (page.selected * RowsOfPage) % allPays.length;
     setItemOffset(newOffset);
     setPageNumber(page.selected + 1);
   };
@@ -65,7 +79,7 @@ const Payments = () => {
             ) : (
               <tbody>
                 <tr>
-                  <td colSpan={3} className="text-center">
+                  <td colSpan={4} className="text-center py-4 text-primary">
                     هنوز پرداختی برای این گروه انجام نشده است.
                   </td>
                 </tr>
@@ -75,10 +89,10 @@ const Payments = () => {
         </div>
       </Card>
 
-      {donePays.length > 0 && (
+      {allPays.length > 0 && (
         <CustomPagination
-          total={donePays.length}
-          current={PageNumber}
+          total={allPays.length}
+          current={PageNumber - 1}
           rowsPerPage={RowsOfPage}
           handleClickFunc={handleWithOutDispatch}
         />
@@ -86,6 +100,5 @@ const Payments = () => {
     </Fragment>
   );
 };
-
 
 export default Payments;

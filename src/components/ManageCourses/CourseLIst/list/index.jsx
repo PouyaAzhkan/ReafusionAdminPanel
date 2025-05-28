@@ -95,6 +95,27 @@ const Courses = () => {
   const activeCount = (GetCourse?.courseDtos || []).filter(course => course.isActive).length;
   const expiredData = (GetCourse?.courseDtos || []).filter(course => course.isExpire).length;
 
+  const renderViewToggle = (tab) => (
+    <div className="d-flex justify-content-start">
+      <ButtonGroup>
+        <Button
+          color="primary"
+          outline={tab === 1 ? activeViewTab1 !== "flex" : activeViewTab4 !== "flex"}
+          onClick={() => (tab === 1 ? setActiveViewTab1("flex") : setActiveViewTab4("flex"))}
+        >
+           <Grid size={15}/>
+        </Button>
+        <Button
+          color="primary"
+          outline={tab === 1 ? activeViewTab1 !== "table" : activeViewTab4 !== "table"}
+          onClick={() => (tab === 1 ? setActiveViewTab1("table") : setActiveViewTab4("table"))}
+        >
+          <Menu size={15}/>
+        </Button>
+      </ButtonGroup>
+    </div>
+  );
+
   const renderFilters = (tab) => (
     <Col className="w-100 d-flex justify-content-between flex-wrap align-items-center">
       <div className="d-flex gap-1 align-items-center">
@@ -131,30 +152,11 @@ const Courses = () => {
           }}
           options={[{ value: "", label: "همه" }, { value: "highestPrice", label: "گران‌ترین" }, { value: "lowestPrice", label: "ارزان‌ترین" }]}
         />
+        {renderViewToggle(1)}
       </div>
     </Col>
   );
 
-  const renderViewToggle = (tab) => (
-    <div className="d-flex justify-content-start mb-2">
-      <ButtonGroup>
-        <Button
-          color="primary"
-          outline={tab === 1 ? activeViewTab1 !== "flex" : activeViewTab4 !== "flex"}
-          onClick={() => (tab === 1 ? setActiveViewTab1("flex") : setActiveViewTab4("flex"))}
-        >
-           <Grid size={15}/>
-        </Button>
-        <Button
-          color="primary"
-          outline={tab === 1 ? activeViewTab1 !== "table" : activeViewTab4 !== "table"}
-          onClick={() => (tab === 1 ? setActiveViewTab1("table") : setActiveViewTab4("table"))}
-        >
-          <Menu size={15}/>
-        </Button>
-      </ButtonGroup>
-    </div>
-  );
 
   return (
     <div className="courses-container ">
@@ -168,7 +170,6 @@ const Courses = () => {
         <Tabs className="mb-2" activeTab={activeTab} toggleTab={toggleTab} />
         <TabContent activeTab={activeTab}>
           <TabPane tabId="1">
-            {renderViewToggle(1)}
             {renderFilters(1)}
             <Input type="text" onChange={e => handleDebounceSearch(e, 1)} placeholder="جستجو در دوره‌ها" className="mt-2" />
             <CourseCard activeView={activeViewTab1} item={sortedCoursesTab1} handleActiveOrDetective={activeOrDeActive} />

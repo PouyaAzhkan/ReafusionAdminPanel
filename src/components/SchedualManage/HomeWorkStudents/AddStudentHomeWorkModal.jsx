@@ -190,7 +190,7 @@ const AddStudentHomeWorkModal = ({ open, handleModal, hwid }) => {
             disabled={isAdding}
             onClick={handleSubmit(onSubmit)}
           >
-            {isAdding ? 'در حال ثبت...' : 'ایجاد جلسه'}
+            {isAdding ? 'در حال ثبت...' : 'ایجاد تکلیف'}
           </Button>
           <Button
             type="button"

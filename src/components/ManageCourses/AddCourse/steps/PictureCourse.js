@@ -33,12 +33,6 @@ const PictureCourse = ({ courseId, stepper, setImage, setCreateBtn, isPending })
     defaultValues: { Image: "" },
   });
 
-  const onSearchSubmit = async (values) => {
-    console.log("Search image with text:", values.Text);
-    // فرضاً تابع sendPic اینجا پیاده‌سازی شده
-    // sendPic(values.Text);
-  };
-
   const onImageSubmit = async (values) => {
     console.log("Image values:", values);
     if (aiImgStatus && src) {
@@ -53,43 +47,6 @@ const PictureCourse = ({ courseId, stepper, setImage, setCreateBtn, isPending })
 
   return (
     <>
-      <form onSubmit={handleSearchSubmit(onSearchSubmit)}>
-        <Label htmlFor="Text" className="mb-1">
-          با AI می‌توانید عکس مورد نظر خود را بسازید!!
-        </Label>
-        <div className="d-flex gap-2 mb-1">
-          <div className="form-group w-75">
-            <Controller
-              name="Text"
-              control={searchControl}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  id="Text"
-                  name="Text"
-                  className="text-primary"
-                  placeholder="جستجوی تصویر ...."
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  invalid={!!searchErrors.Text}
-                />
-              )}
-            />
-            {searchErrors.Text && (
-              <div className="text-danger">{searchErrors.Text.message}</div>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ height: "38px" }}
-            disabled={isSearchSubmitting}
-          >
-            جستجو تصویر
-          </button>
-        </div>
-      </form>
-
       <form onSubmit={handleImageSubmit(onImageSubmit)}>
         <div
           md="6"

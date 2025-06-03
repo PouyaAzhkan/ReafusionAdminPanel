@@ -18,12 +18,13 @@ import {
 } from "reactstrap";
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
-
 import AddTermModal from "./AddTermModal";
 import AddTermTimeModal from "./AddTermTimeModal";
 import EditTermInfo from "./EditTermInfo";
 import EditTermTimeInfo from "./EditTermTimeInfo";
 import { getAllTerms } from "../../@core/Services/Api/Terms/Terms";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const statusOptions = [
   { value: "", label: "انتخاب" },
@@ -106,7 +107,7 @@ const TermsList = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditTermTimeModal, setShowEditTermTimeModal] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState(null);
-  const [selectedTermTime, setSelectedTermTime] = useState(null); // متغیر جدید برای زمان بسته شدن
+  const [selectedTermTime, setSelectedTermTime] = useState(null);
   const [currentStatus, setCurrentStatus] = useState({
     value: "",
     label: "انتخاب",
@@ -122,6 +123,77 @@ const TermsList = () => {
   }, [searchQuery]);
 
   const { data, isError, isLoading, refetch } = getAllTerms();
+
+  // نمایش اسکلتون در حالت لودینگ
+  if (isLoading) {
+    return (
+      <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+        <Fragment>
+          {/* اسکلتون برای کارت فیلترها */}
+          <Card>
+            <CardHeader>
+              <Skeleton width={100} height={24} borderRadius={4} />
+            </CardHeader>
+            <CardBody>
+              <Row>
+                <Col md="4">
+                  <Skeleton width={60} height={20} borderRadius={4} className="mb-1" />
+                  <Skeleton width="100%" height={38} borderRadius={6} className="react-select" />
+                </Col>
+              </Row>
+            </CardBody>
+          </Card>
+
+          {/* اسکلتون برای کارت جدول */}
+          <Card className="overflow-hidden">
+            <div className="react-dataTable">
+              {/* اسکلتون برای هدر جدول */}
+              <div className="invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75">
+                <Row>
+                  <Col xl="6" className="d-flex align-items-center p-0">
+                    <Skeleton width={100} height={20} borderRadius={4} className="me-1" />
+                    <Skeleton width={80} height={38} borderRadius={6} />
+                  </Col>
+                  <Col xl="6" className="d-flex align-items-sm-center justify-content-xl-end">
+                    <Skeleton width={200} height={38} borderRadius={6} className="me-1" />
+                    <Skeleton width={100} height={38} borderRadius={6} className="me-1" />
+                    <Skeleton width={100} height={38} borderRadius={6} />
+                  </Col>
+                </Row>
+              </div>
+              {/* اسکلتون برای جدول */}
+              <table className="react-dataTable">
+                <thead>
+                  <tr>
+                    {[...Array(5)].map((_, index) => (
+                      <th key={index}>
+                        <Skeleton width="80%" height={20} borderRadius={4} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...Array(5)].map((_, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {[...Array(5)].map((_, colIndex) => (
+                        <td key={colIndex}>
+                          <Skeleton width="90%" height={20} borderRadius={4} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </Fragment>
+      </SkeletonTheme>
+    );
+  }
+
+  if (isError) {
+    return <div>خطا در بارگذاری داده‌ها: {isError.message}</div>;
+  }
 
   const filteredData =
     data?.filter((item) => {
@@ -195,9 +267,6 @@ const TermsList = () => {
     );
   };
 
-  if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (isError) return <div>خطا در بارگذاری داده‌ها.</div>;
-
   return (
     <Fragment>
       <Card>
@@ -236,7 +305,7 @@ const TermsList = () => {
               setShowEditModal,
               setShowEditTermTimeModal,
               setSelectedTerm,
-              setSelectedTermTime, // اضافه کردن به پراپ‌ها
+              setSelectedTermTime,
             })}
             onSort={() => {}}
             sortIcon={<ChevronDown />}
@@ -275,7 +344,7 @@ const TermsList = () => {
       <EditTermTimeInfo
         showEditModal={showEditTermTimeModal}
         setShowEditModal={setShowEditTermTimeModal}
-        selectedTermTime={selectedTermTime} // استفاده از selectedTermTime
+        selectedTermTime={selectedTermTime}
         onBuildingUpdated={handleTermTimeUpdated}
       />
     </Fragment>

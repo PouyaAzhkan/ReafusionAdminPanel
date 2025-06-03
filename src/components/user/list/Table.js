@@ -26,6 +26,8 @@ import {
 } from "../../../@core/Services/Api/UserManage/user";
 import { toast } from "react-hot-toast";
 import EditUserModal from "./EditUserModal";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 // ** Table Header
 const CustomHeader = ({
@@ -208,7 +210,53 @@ const UsersList = () => {
     { value: false, label: "غیرفعال" },
   ];
 
-  if (isLoading) return <div>در حال بارگذاری...</div>;
+  // نمایش اسکلتون در حالت لودینگ
+  if (isLoading) {
+    return (
+      <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+        <Fragment>
+          <Card>
+            <CardHeader>
+              <CardTitle tag="h4">فیلترها</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <Row>
+                <Col md="4">
+                  <Skeleton height={40} />
+                </Col>
+                <Col md="4">
+                  <Skeleton height={40} />
+                </Col>
+              </Row>
+            </CardBody>
+          </Card>
+          <Card className="overflow-hidden">
+            <div className="invoice-list-table-header w-100 me-1 ms-50 mt-2 mb-75">
+              <Row>
+                <Col xl="6" className="d-flex align-items-center p-0">
+                  <Skeleton width={200} height={40} />
+                </Col>
+                <Col
+                  xl="6"
+                  className="d-flex align-items-sm-center justify-content-xl-end justify-content-start flex-xl-nowrap flex-wrap flex-sm-row flex-column pe-xl-1 p-0 mt-xl-0 mt-1"
+                >
+                  <Skeleton width={100} height={40} style={{ marginRight: "10px" }} />
+                  <Skeleton width={120} height={40} />
+                </Col>
+              </Row>
+            </div>
+            <div className="react-dataTable">
+              <Skeleton height={40} count={rowsPerPage} style={{ marginBottom: "10px" }} />
+            </div>
+            <div className="pagination react-paginate justify-content-end my-2 pe-1">
+              <Skeleton width={300} height={40} />
+            </div>
+          </Card>
+        </Fragment>
+      </SkeletonTheme>
+    );
+  }
+
   if (isError) return <div>خطا در بارگذاری کاربران.</div>;
 
   return (
@@ -295,7 +343,7 @@ const UsersList = () => {
         editModal={editModal}
         setEditModal={setEditModal}
         userId={selectedUser?.id}
-        refetch={refetch} // پاس دادن refetch به EditUserModal
+        refetch={refetch}
       />
     </Fragment>
   );

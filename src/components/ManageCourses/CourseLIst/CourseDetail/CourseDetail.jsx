@@ -13,6 +13,8 @@ import GetCourseGroup from "../../../../@core/Services/Api/Courses/CourseDetail/
 import ChangeUserReserve from "../../../../@core/Services/Api/Courses/CourseDetail/tabsApi/ManageUser/ChangeUserReserve";
 import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
 import toast from "react-hot-toast";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -22,13 +24,14 @@ const CourseDetail = () => {
   const [userSel, setUserSel] = useState([]);
   const [teacherId, setTeacherId] = useState(null);
   const [active, setActive] = useState("1");
-  
-  // the api cals
+
+  // the api calls
   const { data: GetCourseInfo, isLoading: GetCourseInfoLoading, error: GetCourseInfoError, refetch } = useGetCourseDetailInfo(id);
   const { data: GetCreateCourses, isLoading: GetCreateCourseLoading, error: GetCreateCourseError } = GetCreateCourse();
-  const { data: GetCourseGroupe, isLoading: GetCourseGroupeLoading, error: GetCourseGroupeErorr, refetch: refetchGroup } = GetCourseGroup(id, teacherId);
+  const { data: GetCourseGroupe, isLoading: GetCourseGroupeLoading, error: GetCourseGroupeError, refetch: refetchGroup } = GetCourseGroup(id, teacherId);
   const { mutate, isPending, refetch: ResereveRefetch } = ChangeUserReserve();
-  // the api cals end 
+  // the api calls end
+
   // get teacherId from api and used them
   useEffect(() => {
     if (GetCourseInfo && GetCourseInfo.teacherId) {
@@ -50,13 +53,48 @@ const CourseDetail = () => {
     console.log("GetCourseInfo:", GetCourseInfo);
   }, [GetCourseGroupe, teacherId, id, GetCourseInfo]);
 
+  // نمایش اسکلتون در حالت لودینگ
   if (GetCourseInfoLoading || GetCreateCourseLoading || GetCourseGroupeLoading) {
-    return <p>در حال بارگزاری اطلاعات</p>;
+    return (
+      <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+        <div className="app-user-view">
+          <Row>
+            <Col xl="4" lg="5" xs={{ order: 0 }} md={{ order: 0, size: 5 }}>
+              {/* اسکلتون برای InfoCard */}
+              <Skeleton
+                height={700}
+                width="100%"
+                borderRadius={8}
+                className="shadow-sm"
+                style={{ marginBottom: "16px" }}
+              />
+            </Col>
+            <Col xl="8" lg="7" xs={{ order: 1 }} md={{ order: 1, size: 7 }}>
+              {/* اسکلتون برای UserTabs */}
+              <Skeleton
+                height={50}
+                width="100%"
+                borderRadius={8}
+                className="shadow-sm"
+                style={{ marginBottom: "16px" }}
+              />
+              <Skeleton
+                height={500}
+                width="100%"
+                borderRadius={8}
+                className="shadow-sm"
+              />
+            </Col>
+          </Row>
+        </div>
+      </SkeletonTheme>
+    );
   }
-  if (GetCourseInfoError || GetCreateCourseError || GetCourseGroupeErorr) {
-    return <p>خطا در بارگزاری اطلاعات</p>;
+
+  if (GetCourseInfoError || GetCreateCourseError || GetCourseGroupeError) {
+    return <p>خطا در بارگذاری اطلاعات: {GetCourseInfoError?.message || GetCreateCourseError?.message || GetCourseGroupeError?.message}</p>;
   }
-  
+
   // for open and close modal
   const toggle = () => setEditModal(!editModal);
 
@@ -66,7 +104,8 @@ const CourseDetail = () => {
     }
   };
   // for open and close modal end
-  // Active and Dective Courses
+
+  // Active and Deactive Courses
   const activeOrDeActive = async () => {
     try {
       const data = {
@@ -78,8 +117,9 @@ const CourseDetail = () => {
       throw new Error("ERROR: ", error);
     }
   };
-  // Active and Dective Courses finish
-  // Change Reserve Course 
+  // Active and Deactive Courses finish
+
+  // Change Reserve Course
   const handleChangeReserve = () => {
     const courseGroupId = (Array.isArray(GetCourseGroupe) && GetCourseGroupe.length > 0 ? GetCourseGroupe[0]?.groupId : undefined) || GetCourseInfo?.groupId;
     if (!courseGroupId) {
@@ -97,21 +137,21 @@ const CourseDetail = () => {
     };
     console.log("Reserve Data:", data);
     mutate(data, {
-       onSuccess: (data) => {
-         toast.success("این دانش آموز به گروه با موفقیت اضافه شد")
-         ResereveRefetch()
-         refetchGroup()
-         refetch();
-         console.log(data);
-       },
-       onError: (error) => {
-        const errorMessage = error?.response?.data?.ErrorMessage?.[0] 
+      onSuccess: (data) => {
+        toast.success("این دانش آموز به گروه با موفقیت اضافه شد");
+        ResereveRefetch();
+        refetchGroup();
+        refetch();
+        console.log(data);
+      },
+      onError: (error) => {
+        const errorMessage = error?.response?.data?.ErrorMessage?.[0];
         console.log(error);
         toast.error(errorMessage);
-       }
+      },
     });
   };
-  // Change Reserve Course end 
+  // Change Reserve Course end
 
   const groupId = Array.isArray(GetCourseGroupe) && GetCourseGroupe.length > 0 ? GetCourseGroupe[0]?.groupId : GetCourseInfo?.groupId;
 

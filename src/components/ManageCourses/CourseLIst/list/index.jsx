@@ -5,15 +5,16 @@ import Select from "react-select";
 import { Row, Col, Input, TabContent, TabPane, Button, ButtonGroup } from "reactstrap";
 import CourseCard from "./CourseCard";
 import CustomPagination2 from "../../../../@core/components/pagination/index2";
-import StatsHorizontal from "../../../../@core/components/widgets/stats/StatsHorizontal";
+import StatsHorizontal2 from "../../../../@core/components/widgets/stats/StatsHorizontal2";
 import { Activity, Book, Clock, Grid, Menu, X } from "react-feather";
 import CourseReserve from "./tabs/CourseReserve";
 import PaymentOfCourses from "./tabs/PaymentOfCourses";
 import ActiveOrDeActive from "../../../../@core/Services/Api/Courses/CourseList/ActiveDectiveCourses";
 import GetCourses from "../../../../@core/Services/Api/Courses/CourseList/GetCourses";
-import StatsHorizontal2 from "../../../../@core/components/widgets/stats/StatsHorizontal2";
 import { getItem } from "../../../../@core/Services/common/storage.services";
 import GetUserImage from "../../../../@core/Services/Api/chat/GetAdminImage";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Courses = () => {
   const [activeTab, setActiveTab] = useState("1");
@@ -22,13 +23,13 @@ const Courses = () => {
   const id = getItem('userId');
 
   // State for tab 1
-  const [paramsTab1, setParamsTab1] = useState({ PageNumber: 1, RowsOfPage: 12, SortingCol: "DESC", SortType: "Expire", Query: "" });
+  const [paramsTab1, setParamsTab1] = useState({ PageNumber: 1, RowsOfPage: 12, SortingCol: "DESC", SortType: "expire", Query: "" });
   const [sortTypeTab1, setSortTypeTab1] = useState("");
   const [priceSortTab1, setPriceSortTab1] = useState("");
   const [activeViewTab1, setActiveViewTab1] = useState("flex");
 
   // State for tab 4
-  const [paramsTab4, setParamsTab4] = useState({ PageNumber: 1, RowsOfPage: 12, SortingCol: "DESC", SortType: "Expire", Query: "" });
+  const [paramsTab4, setParamsTab4] = useState({ PageNumber: 1, RowsOfPage: 12, SortingCol: "DESC", SortType: "expire", Query: "" });
   const [sortTypeTab4, setSortTypeTab4] = useState("");
   const [priceSortTab4, setPriceSortTab4] = useState("");
   const [activeViewTab4, setActiveViewTab4] = useState("flex");
@@ -105,7 +106,57 @@ const Courses = () => {
     return data;
   }, [GetCourse?.courseDtos, sortTypeTab4, priceSortTab4, userDetail, paramsTab4.Query]);
 
-  if (loading1 || loadingUser) return <div className="text-center">در حال بارگذاری...</div>;
+  // نمایش اسکلتون در حالت لودینگ
+  if (loading1 || loadingUser) {
+    return (
+      <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+        <div className="courses-container">
+          <div className="courseStatus gap-2">
+            {/* اسکلتون برای کارت‌های آماری */}
+            <Skeleton height={100} width={300} borderRadius={8} className="shadow-sm" />
+            <Skeleton height={100} width={300} borderRadius={8} className="shadow-sm" />
+            <Skeleton height={100} width={300} borderRadius={8} className="shadow-sm" />
+            <Skeleton height={100} width={300} borderRadius={8} className="shadow-sm" />
+          </div>
+          <div className="courseList w-100 mt-2">
+            {/* اسکلتون برای تب‌ها */}
+            <Skeleton height={50} width="40%" borderRadius={8} className="mb-2 shadow-sm" />
+            <div className="tab-content">
+              {/* اسکلتون برای فیلترها */}
+              <Col className="w-100 d-flex justify-content-between flex-wrap align-items-center mb-2">
+                <div className="d-flex gap-1 align-items-center">
+                  <Skeleton width={60} height={38} borderRadius={6} />
+                  <Skeleton width={100} height={38} borderRadius={6} className="react-select" />
+                </div>
+                <div className="d-flex gap-1 align-items-center">
+                  <Skeleton width={60} height={38} borderRadius={6} />
+                  <Skeleton width={120} height={38} borderRadius={6} className="react-select" />
+                  <Skeleton width={120} height={38} borderRadius={6} className="react-select" />
+                  <Skeleton width={80} height={38} borderRadius={6} />
+                </div>
+              </Col>
+              {/* اسکلتون برای ورودی جستجو */}
+              <Skeleton height={38} width="100%" borderRadius={6} className="mt-2" />
+              {/* اسکلتون برای کارت‌های دوره */}
+              <div className="mt-2 d-flex justify-content-around flex-wrap gap-2">
+                {[...Array(9)].map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    height={350}
+                    width={350}
+                    borderRadius={8}
+                    className="shadow-sm"
+                    style={{ marginBottom: "16px" }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </SkeletonTheme>
+    );
+  }
+
   if (error1 || errorUser) return <div className="text-center text-danger">خطا در بارگذاری داده‌ها</div>;
 
   const totalCount = GetCourse?.totalCount || 0;

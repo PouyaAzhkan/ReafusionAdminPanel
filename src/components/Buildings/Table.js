@@ -16,12 +16,18 @@ import {
   CardTitle,
   CardHeader,
 } from "reactstrap";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
 import "@styles/react/libs/react-select/_react-select.scss";
 import "@styles/react/libs/tables/react-dataTable-component.scss";
 
 import AddBuildingModal from "./AddBuildingModal";
-import EditBuildingInfo from "./EditBuildingInfo"; // ایمپورت کامپوننت جدید
-import { getAllBuildings, useChangeBuildingStatus } from './../../@core/Services/Api/Buildings/Buildings';
+import EditBuildingInfo from "./EditBuildingInfo";
+import {
+  getAllBuildings,
+  useChangeBuildingStatus,
+} from "../../@core/Services/Api/Buildings/Buildings";
 
 const statusOptions = [
   { value: "", label: "انتخاب" },
@@ -30,7 +36,6 @@ const statusOptions = [
 ];
 
 const CustomHeader = ({
-  data,
   handleModal,
   handlePerPage,
   rowsPerPage,
@@ -72,11 +77,7 @@ const CustomHeader = ({
             />
           </div>
           <div className="d-flex align-items-center table-header-actions">
-            <Button
-              className="add-new-user"
-              color="primary"
-              onClick={handleModal}
-            >
+            <Button className="add-new-user" color="primary" onClick={handleModal}>
               افزودن ساختمان
             </Button>
           </div>
@@ -93,7 +94,7 @@ const UsersList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedBuilding, setSelectedBuilding] = useState(null); // اضافه کردن state برای ساختمان انتخاب‌شده
+  const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [currentStatus, setCurrentStatus] = useState({
     value: "",
     label: "انتخاب",
@@ -104,7 +105,6 @@ const UsersList = () => {
       setDebouncedSearch(searchQuery);
       setCurrentPage(1);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -115,9 +115,7 @@ const UsersList = () => {
     data?.filter((item) => {
       const matchesSearch = debouncedSearch
         ? item.buildingName &&
-          item.buildingName
-            .toLowerCase()
-            .includes(debouncedSearch.toLowerCase())
+          item.buildingName.toLowerCase().includes(debouncedSearch.toLowerCase())
         : true;
       const matchesStatus =
         currentStatus.value !== "" ? item.active === currentStatus.value : true;
@@ -131,54 +129,62 @@ const UsersList = () => {
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
   const handleModal = () => setSidebarOpen(!sidebarOpen);
-
-  const handlePagination = (page) => {
-    setCurrentPage(page.selected + 1);
-  };
-
+  const handlePagination = (page) => setCurrentPage(page.selected + 1);
   const handlePerPage = (e) => {
-    const newRowsPerPage = parseInt(e.target.value);
-    setRowsPerPage(newRowsPerPage);
+    setRowsPerPage(parseInt(e.target.value));
     setCurrentPage(1);
   };
-
-  const handleSearch = (val) => {
-    setSearchQuery(val);
-  };
-
+  const handleSearch = (val) => setSearchQuery(val);
   const handleStatusChange = (option) => {
     setCurrentStatus(option);
     setCurrentPage(1);
   };
+  const handleBuildingUpdated = () => refetch();
 
-  const handleBuildingUpdated = (updatedBuilding) => {
-    refetch(); // به‌روزرسانی داده‌ها پس از ویرایش
-  };
+  const CustomPagination = () => (
+    <ReactPaginate
+      previousLabel={"قبلی"}
+      nextLabel={"بعدی"}
+      activeClassName="active"
+      forcePage={currentPage - 1}
+      onPageChange={handlePagination}
+      pageCount={pageCount}
+      pageClassName={"page-item"}
+      nextLinkClassName={"page-link"}
+      nextClassName={"page-item next"}
+      previousClassName={"page-item prev"}
+      previousLinkClassName={"page-link"}
+      pageLinkClassName={"page-link"}
+      containerClassName={"pagination react-paginate justify-content-end my-2 pe-1"}
+      disabledClassName={"disabled"}
+    />
+  );
 
-  const CustomPagination = () => {
+  if (isLoading) {
     return (
-      <ReactPaginate
-        previousLabel={"قبلی"}
-        nextLabel={"بعدی"}
-        activeClassName="active"
-        forcePage={currentPage - 1}
-        onPageChange={handlePagination}
-        pageCount={pageCount}
-        pageClassName={"page-item"}
-        nextLinkClassName={"page-link"}
-        nextClassName={"page-item next"}
-        previousClassName={"page-item prev"}
-        previousLinkClassName={"page-link"}
-        pageLinkClassName={"page-link"}
-        containerClassName={
-          "pagination react-paginate justify-content-end my-2 pe-1"
-        }
-        disabledClassName={"disabled"}
-      />
-    );
-  };
+      <Fragment>
+        <Card>
+          <CardHeader>
+            <CardTitle tag="h4">فیلترها</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <Row>
+              <Col md="4">
+                <Skeleton height={40} />
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
 
-  if (isLoading) return <div>در حال بارگذاری...</div>;
+        <Card className="overflow-hidden">
+          <div className="react-dataTable">
+            <Skeleton count={8} height={50} style={{ marginBottom: "10px" }} />
+          </div>
+        </Card>
+      </Fragment>
+    );
+  }
+
   if (isError) return <div>خطا در بارگذاری ساختمان‌ها.</div>;
 
   return (
@@ -227,7 +233,6 @@ const UsersList = () => {
             data={paginatedData}
             subHeaderComponent={
               <CustomHeader
-                data={data}
                 searchQuery={searchQuery}
                 rowsPerPage={rowsPerPage}
                 handleSearch={handleSearch}
@@ -240,7 +245,6 @@ const UsersList = () => {
       </Card>
 
       <AddBuildingModal open={sidebarOpen} handleModal={handleModal} />
-
       <EditBuildingInfo
         showEditModal={showEditModal}
         setShowEditModal={setShowEditModal}

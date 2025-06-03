@@ -8,7 +8,9 @@ import GetCoursesList from "../../../@core/Services/Api/Courses/ManangeCourseUse
 import GetCourseUserList from "../../../@core/Services/Api/Courses/ManangeCourseUser/GetCourseUserList";
 import CustomPagination2 from "../../../@core/components/pagination/index2";
 import HeaderTable2 from "../../../@core/components/table-list/HeaderTable2";
-import debounce from "lodash/debounce"; // نیاز به نصب lodash یا پیاده‌سازی دستی debounce
+import debounce from "lodash/debounce";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const ManageCourseUser = () => {
   const [params, setParams] = useState({
@@ -21,42 +23,37 @@ const ManageCourseUser = () => {
     RowsOfPage: 6,
     Query: "",
   });
-  const searchTermRef = useRef(""); // برای ذخیره مقدار جستجو
-  const [appliedSearchTerm, setAppliedSearchTerm] = useState(""); // برای اعمال جستجو
+  const searchTermRef = useRef("");
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [courseId, setCourseId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch user list for the selected course
   const { data: userList, isLoading: userLoading, error: userError } = GetCourseUserList({
     ...params,
     CourseId: courseId || params.CourseId,
   });
 
-  // Fetch courses list
   const { data: courses, isLoading: courseLoading, error: courseError } = GetCoursesList({
     ...courseParams,
   });
 
-  // Debounced search handler
   const debouncedSearch = useCallback(
     debounce((value) => {
-      setAppliedSearchTerm(value); // به‌روزرسانی state برای اعمال فیلتر
-      setCurrentPage(1); // بازگشت به صفحه اول
+      setAppliedSearchTerm(value);
+      setCurrentPage(1);
     }, 300),
     []
   );
 
-  // Handle search input change
   const handleSearch = useCallback(
     (value) => {
-      searchTermRef.current = value; // ذخیره مقدار جستجو
-      debouncedSearch(value); // اجرای جستجو با تأخیر
+      searchTermRef.current = value;
+      debouncedSearch(value);
     },
     [debouncedSearch]
   );
 
-  // Pagination
   const rowsPerPage = params.RowsOfPage;
   const totalItems = userList?.length || 0;
 
@@ -72,20 +69,17 @@ const ManageCourseUser = () => {
     setCurrentPage(1);
   }, []);
 
-  // Handle course selection
   useEffect(() => {
     if (courseId) {
       setParams((prev) => ({ ...prev, CourseId: courseId }));
     }
   }, [courseId]);
 
-  // Choose Course Modal
   const [chooseCourseModal, setChooseCourseModal] = useState(false);
   const toggleChooseCourseModal = useCallback(() => setChooseCourseModal((prev) => !prev), []);
 
   const courseTableHeader = ["", "نام دوره", "وضعیت", "عملیات"];
 
-  // Memoized filtered and sorted users
   const filteredAndSortedUsers = useMemo(() => {
     if (!userList) return [];
     return userList
@@ -98,7 +92,6 @@ const ManageCourseUser = () => {
       });
   }, [userList, appliedSearchTerm, sortOrder]);
 
-  // Memoized paginated users
   const paginatedUsers = useMemo(() => {
     return filteredAndSortedUsers.slice(
       (currentPage - 1) * rowsPerPage,
@@ -106,9 +99,55 @@ const ManageCourseUser = () => {
     );
   }, [filteredAndSortedUsers, currentPage, rowsPerPage]);
 
-  // Loading and error handling
-  if (userLoading || courseLoading) return <p>در حال بارگزاری اطلاعات</p>;
-  if (userError || courseError) return <p>خطا در بارگزرای اطلاعات</p>;
+  // نمایش اسکلتون در حالت لودینگ
+  if (userLoading || courseLoading) {
+    return (
+      <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+        <div className="app-user-list">
+          <Row>
+            <Col sm="12">
+              <Card className="overflow-hidden">
+                <div className="react-dataTable">
+                  {/* اسکلتون برای هدر جدول */}
+                  <div className="d-flex align-items-center mb-2">
+                    <Skeleton width={300} height={38} borderRadius={6} style={{ marginRight: "14px" }} />
+                    <Skeleton width={120} height={38} borderRadius={6} />
+                  </div>
+                  {/* اسکلتون برای جدول */}
+                  <Table hover>
+                    <thead className="text-center">
+                      <tr>
+                        {headerTable.map((_, index) => (
+                          <th key={index} className="px-0">
+                            <Skeleton width="80%" height={20} borderRadius={4} />
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...Array(5)].map((_, index) => (
+                        <tr key={index}>
+                          {headerTable.map((_, colIndex) => (
+                            <td key={colIndex} className="text-center">
+                              <Skeleton width="90%" height={20} borderRadius={4} />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </SkeletonTheme>
+    );
+  }
+
+  if (userError || courseError) {
+    return <p>خطا در بارگذاری اطلاعات: {userError?.message || courseError?.message}</p>;
+  }
 
   return (
     <div className="app-user-list">

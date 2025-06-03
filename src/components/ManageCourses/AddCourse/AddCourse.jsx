@@ -10,6 +10,8 @@ import GetCreateCourse from "../../../@core/Services/Api/Courses/CourseDetail/Ge
 import GetCategorys from "../../../@core/Services/Api/Courses/AddCourse/GetCategorys";
 import AddCourses from "../../../@core/Services/Api/Courses/AddCourse/AddCourse";
 import toast from "react-hot-toast";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const AddCourse = () => {
   const ref = useRef(null);
@@ -27,57 +29,56 @@ const AddCourse = () => {
   const { mutate, isPending } = AddCourses();
 
   const handleAddCourse = () => {
-  if (firstLevel && secondLevel && thirdLevel && descEditor && Image) {
-    const combinedData = {
-      ...firstLevel,
-      ...secondLevel,
-      ...thirdLevel,
-      ...descEditor,
-    };
+    if (firstLevel && secondLevel && thirdLevel && descEditor && Image) {
+      const combinedData = {
+        ...firstLevel,
+        ...secondLevel,
+        ...thirdLevel,
+        ...descEditor,
+      };
 
-    const formData = new FormData();
+      const formData = new FormData();
 
-    // افزودن فیلدهای متنی
-    Object.entries(combinedData).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        formData.append(key, value);
+      // افزودن فیلدهای متنی
+      Object.entries(combinedData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+
+      // افزودن تصویر
+      if (Image && Image.file) {
+        formData.append("tumbImageAddress", Image.file);
       }
-    });
 
-    // افزودن تصویر
-    if (Image && Image.file) {
-      formData.append("tumbImageAddress", Image.file);
+      console.log("FormData content:");
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
+
+      // ارسال به API
+      mutate(formData, {
+        onSuccess: (data) => {
+          console.log("API response:", data);
+          setCourseId(data.id);
+          toast.success("دوره با موفقیت اضافه شد");
+        },
+        onError: (error) => {
+          console.error("Error adding course:", error.response?.data || error.message);
+          toast.error(`خطا در افزودن دوره: ${error.response?.data?.message || error.message}`);
+        },
+      });
+    } else {
+      console.warn("اطلاعات ناقص:", {
+        firstLevel,
+        secondLevel,
+        thirdLevel,
+        descEditor,
+        Image,
+      });
+      alert("لطفاً همه مراحل را کامل کنید.");
     }
-
-    console.log("FormData content:");
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}:`, pair[1]);
-    }
-
-    // ارسال به API
-    mutate(formData, {
-      onSuccess: (data) => {
-        console.log("API response:", data);
-        setCourseId(data.id);
-        toast.success("دوره با موفقیت اضافه شد");
-      },
-      onError: (error) => {
-        console.error("Error adding course:", error.response?.data || error.message);
-        toast.error(`خطا در افزودن دوره: ${error.response?.data?.message || error.message}`);
-      },
-    });
-  } else {
-    console.warn("اطلاعات ناقص:", {
-      firstLevel,
-      secondLevel,
-      thirdLevel,
-      descEditor,
-      Image,
-    });
-    alert("لطفاً همه مراحل را کامل کنید.");
-  }
-};
-
+  };
 
   useEffect(() => {
     if (createBtn && firstLevel && secondLevel && thirdLevel && descEditor && Image) {
@@ -85,8 +86,57 @@ const AddCourse = () => {
     }
   }, [createBtn, firstLevel, secondLevel, thirdLevel, descEditor, Image]);
 
-  if (courseOptionsLoading || courseTechnologiesLoading) return <p>در حال بارگذاری اطلاعات</p>;
-  if (courseOptionsError || courseTechnologiesError) return <p>خطا در بارگذاری اطلاعات</p>;
+  // نمایش اسکلتون در حالت لودینگ
+  if (courseOptionsLoading || courseTechnologiesLoading) {
+    return (
+      <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+        <div style={{ height: "auto" }} className="modern-vertical-wizard">
+          <div className="d-flex">
+            {/* اسکلتون برای نوار کناری مراحل */}
+            <div className="wizard-sidebar" style={{ width: "300px" }}>
+              {[...Array(6)].map((_, index) => (
+                <Skeleton
+                  key={index}
+                  height={60}
+                  width="100%"
+                  borderRadius={8}
+                  className="shadow-sm"
+                  style={{ marginBottom: "8px" }}
+                />
+              ))}
+            </div>
+            {/* اسکلتون برای محتوای اصلی */}
+            <div className="wizard-content" style={{ flex: 1, padding: "20px" }}>
+              <Skeleton
+                height={50}
+                width="100%"
+                borderRadius={8}
+                className="shadow-sm"
+                style={{ marginBottom: "16px" }}
+              />
+              <Skeleton
+                height={400}
+                width="100%"
+                borderRadius={8}
+                className="shadow-sm"
+                style={{ marginBottom: "16px" }}
+              />
+              <Skeleton
+                height={50}
+                width={200}
+                borderRadius={8}
+                className="shadow-sm"
+              />
+            </div>
+          </div>
+        </div>
+      </SkeletonTheme>
+    );
+  }
+
+  if (courseOptionsError || courseTechnologiesError) {
+    return <p>خطا در بارگذاری اطلاعات: {courseOptionsError?.message || courseTechnologiesError?.message}</p>;
+  }
 
   const steps = [
     {
@@ -164,7 +214,7 @@ const AddCourse = () => {
           courseTechnologies={courseTechnologies}
           courseId={courseId}
           type="wizard-vertical"
-          stepper={stepper} // اضافه کردن stepper
+          stepper={stepper}
         />
       ),
     },

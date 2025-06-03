@@ -3,18 +3,38 @@ import { Row, Col } from 'reactstrap';
 import StatsHorizontal from '@components/widgets/stats/StatsHorizontal';
 import { X, Check, Database } from 'react-feather';
 import { getAllTerms } from '../../@core/Services/Api/Terms/Terms';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Report = () => {
     const { data, isLoading, isError, error } = getAllTerms();
 
-    // بررسی حالت‌های مختلف
+    // نمایش اسکلتون در حالت لودینگ
     if (isLoading) {
-        return <div>در حال بارگذاری...</div>;
+        return (
+            <SkeletonTheme baseColor="#e0e0e0" highlightColor="#f5f5f5">
+                <Row>
+                    {[...Array(3)].map((_, index) => (
+                        <Col key={index} lg="4" sm="6">
+                            <Skeleton
+                                height={100}
+                                width="100%"
+                                borderRadius={8}
+                                className="shadow-sm"
+                                style={{ marginBottom: "16px" }}
+                            />
+                        </Col>
+                    ))}
+                </Row>
+            </SkeletonTheme>
+        );
     }
-    else if (isError) {
+
+    if (isError) {
         return <div>خطا در دریافت داده‌ها: {error?.message || "خطای ناشناخته"}</div>;
     }
-    else if (!data || !Array.isArray(data)) {
+
+    if (!data || !Array.isArray(data)) {
         return <div>داده‌ای برای نمایش وجود ندارد</div>;
     }
 
@@ -30,9 +50,7 @@ const Report = () => {
                     color="primary"
                     statTitle="کل ترم ها"
                     icon={<Database size={20} />}
-                    renderStats={<h3 className="fw-bolder mb-75">
-                        {isLoading ? '...' : data?.length || 0}
-                    </h3>}
+                    renderStats={<h3 className="fw-bolder mb-75">{data?.length || 0}</h3>}
                 />
             </Col>
             {/* administrator */}
@@ -41,9 +59,7 @@ const Report = () => {
                     color="success"
                     statTitle="ترم های منقضی نشده"
                     icon={<Check size={20} />}
-                    renderStats={<h3 className="fw-bolder mb-75">
-                        {isLoading ? '...' : notExpireBuildings?.length || 0}
-                    </h3>}
+                    renderStats={<h3 className="fw-bolder mb-75">{notExpireBuildings?.length || 0}</h3>}
                 />
             </Col>
             {/* teacher */}
@@ -52,9 +68,7 @@ const Report = () => {
                     color="danger"
                     statTitle="ترم های منقضی شده"
                     icon={<X size={20} />}
-                    renderStats={<h3 className="fw-bolder mb-75">
-                        {isLoading ? '...' : expireBuildings?.length || 0}
-                    </h3>}
+                    renderStats={<h3 className="fw-bolder mb-75">{expireBuildings?.length || 0}</h3>}
                 />
             </Col>
         </Row>

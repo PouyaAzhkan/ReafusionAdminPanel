@@ -172,8 +172,8 @@ $search-bar-height: 48px;
   // main Products
   .ecommerce-card {
     &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 25px 0 rgba($black, 0.25);
+      transform: translateY(-8px);
+      box-shadow: 0 8px 25px rgba(147, 31, 255, 0.549);
     }
 
     // ratings

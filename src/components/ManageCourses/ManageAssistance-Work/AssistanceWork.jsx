@@ -75,7 +75,7 @@ const AssistanceWork = () => {
       <Row>
         <Col sm="12">
           <Card className="overflow-hidden">
-            <div className="react-dataTable">
+            <div className="react-dataTable overflow-auto">
               <HeaderTable
                 toggleSidebar={toggleCreateModal}
                 rowOfPage={rowsPerPage}

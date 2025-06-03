@@ -108,7 +108,7 @@ const Dashboard = () => {
             title2="رزرو نشده"
             dataPersent={DashBoardReport.reserveAcceptPercent}
             data2={DashBoardReport.allReserveNotAccept}
-            topic={"درصد کورس های رزرو شده"}
+            topic={"درصد دوره های رزرو شده"}
           />
         </div>
         <div className="goal-card sales-card">

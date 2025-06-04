@@ -120,7 +120,7 @@ export function CreateWorkModal({showEdit, setShowEdit, singleUserId}) {
             >
                 <ModalHeader className="bg-transparent " toggle={closeModal}></ModalHeader>
                 <ModalBody className="px-sm-5 mx-50" style={{paddingBottom: 30}}>
-                    <h1 className="text-center mb-3">
+                    <h1 className="text-center mb-3 text-primary">
                         {showEdit.isEdit ? 'ویرایش وظیفه' : 'تعیین وظیفه جدید'}
                     </h1>
 
@@ -150,7 +150,7 @@ export function CreateWorkModal({showEdit, setShowEdit, singleUserId}) {
                                     render={({field}) => (
                                         <Input
                                             {...field}
-                                            className="text-right"
+                                            className="text-right text-primary"
                                             invalid={errors.worktitle && true}
                                         />
                                     )}
@@ -180,7 +180,7 @@ export function CreateWorkModal({showEdit, setShowEdit, singleUserId}) {
                                     render={({field}) => (
                                         <Cleave
                                             {...field}
-                                            className="form-control"
+                                            className="form-control text-primary"
                                             placeholder="1403-9-15"
                                             options={options}
                                             onChange={e => field.onChange(e.target.value)}
@@ -221,6 +221,7 @@ export function CreateWorkModal({showEdit, setShowEdit, singleUserId}) {
                                     render={({field}) => (
                                         <Input
                                             {...field}
+                                            className='text-primary'
                                             type="textarea"
                                             invalid={errors.workDescribe && true}
                                             name="text"

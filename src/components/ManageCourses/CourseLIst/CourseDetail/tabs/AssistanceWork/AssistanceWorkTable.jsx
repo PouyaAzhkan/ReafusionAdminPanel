@@ -95,7 +95,7 @@ export function AssistanceWorkTable({user, isCurrentUserAssistance, singleCourse
     }
     return (
         <>
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden" style={{ width: '690px' }}>
                 <div className="react-dataTable app-user-list">
                     <DataTable
                         noHeader

@@ -16,65 +16,56 @@ const ChatLog = ({ selectedUser, role }) => {
   const now = new Date();
   const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  // کلید localStorage جدا برای هر نقش و کاربر
   const storageKey = selectedUser ? `chatRoom_${role}_${selectedUser.id}` : null;
 
   useEffect(() => {
-    console.log("useEffect triggered:", { selectedUser, role, storageKey });
-    if (selectedUser && storageKey) {
-      const savedMessages = localStorage.getItem(storageKey);
-      if (savedMessages) {
-        setChatRoom(JSON.parse(savedMessages));
-      } else if (selectedUser.chatRoom && Array.isArray(selectedUser.chatRoom)) {
-        setChatRoom(selectedUser.chatRoom);
-      } else {
-        setChatRoom([]);
-      }
-      setMsg("");
+  if (selectedUser && storageKey) {
+    const savedMessages = localStorage.getItem(storageKey);
+    if (savedMessages) {
+      setChatRoom(JSON.parse(savedMessages));
+    } else if (selectedUser.chatRoom) {
+       setChatRoom(selectedUser.chatRoom);
     } else {
       setChatRoom([]);
     }
-  }, [selectedUser, storageKey, role]);
+    setMsg("");
+  } else {
+    setChatRoom([]);
+  }
+}, [selectedUser, storageKey, role]);
 
-  const scrollToBottom = () => {
-    if (chatArea.current) {
-      chatArea.current.scrollTop = chatArea.current.scrollHeight;
-    }
-  };
 
   const handleSend = async () => {
-    if (!msg.trim() || !selectedUser) return;
+  if (!msg.trim() || !selectedUser) return;
 
-    const newMessage = {
-      id: Date.now(),
-      userId: selectedUser.id,
-      text: msg,
-      messageTime: time,
-      sender: role,
-    };
-
-    try {
-      const res = role === "teacher"
-        ? await AddTeacherMessage({ chatRoom: [...chatRoom, newMessage] })
-        : await AddAdminMessage({ chatRoom: [...chatRoom, newMessage] });
-
-      console.log("API response:", res);
-
-      if (res && res.chatRoom) {
-        const updatedChat = res.chatRoom;
-        setChatRoom(updatedChat);
-        if (storageKey) {
-          localStorage.setItem(storageKey, JSON.stringify(updatedChat));
-          console.log("Stored in localStorage:", localStorage.getItem(storageKey));
-        }
-        setMsg("");
-        scrollToBottom();
-      } else {
-        console.error("API response does not contain chatRoom:", res);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+  const newMessage = {
+    id: Date.now(),
+    userId: selectedUser.id,
+    text: msg,
+    messageTime: time,
+    sender: role,
   };
+
+  const res = role === "teacher"
+    ? await AddTeacherMessage({ chatRoom: [...chatRoom, newMessage] })
+    : await AddAdminMessage({ chatRoom: [...chatRoom, newMessage] });
+
+  if (res) {
+    // فرض کنیم API یک آرایه کامل چت‌های آپدیت شده برمی‌گردونه:
+    // اگر API فقط تایید میکنه، باید یه API جدا بگیری که چت‌ها رو دوباره لود کنه
+    const updatedChat = res.chatRoom || [...chatRoom, newMessage];
+
+    setChatRoom(updatedChat);
+
+    if (storageKey) {
+      localStorage.setItem(storageKey, JSON.stringify(updatedChat));
+    }
+
+    setMsg("");
+    scrollToBottom();
+  }
+};
 
   return (
     <div className="chat-app-window h-100">
@@ -115,7 +106,6 @@ const ChatLog = ({ selectedUser, role }) => {
           >
             {chatRoom.length ? (
               <div className="chats">
-                {console.log("Rendering chatRoom:", chatRoom)}
                 {chatRoom.map((chat) => (
                   <div
                     key={chat.id}
@@ -132,9 +122,7 @@ const ChatLog = ({ selectedUser, role }) => {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div>هیچ پیامی موجود نیست</div>
-            )}
+            ) : null}
           </PerfectScrollbar>
 
           <div className="d-flex">

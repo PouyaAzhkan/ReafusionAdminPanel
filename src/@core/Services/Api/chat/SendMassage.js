@@ -1,24 +1,19 @@
-import toast from "react-hot-toast";
-import Api from "../../interceptor";
+import axios from "axios";
 
-const AddAdminMessage = async (msg) => {
+const BASE_URL = "https://682e27a1746f8ca4a47c199e.mockapi.io/AdminChat/AdminPanel";
+
+const AddAdminMessage = async ({ id, chatRoom }) => {
   try {
-    const response = await toast.promise(
-      Api.post(
-        `https://682e27a1746f8ca4a47c199e.mockapi.io/AdminChat/AdminPanel`,
-        msg
-      ),
-      {
-        error: "پیام شما ارسال نشد",
-        loading: "در حال ارسال پیام...",
-        success: "پیام شما با موفقیت ارسال شد",
-      }
-    );
-    if (response) {
-      return true;
-    }
+    // تلاش برای به‌روزرسانی چت روم (PUT request)
+    const response = await axios.put(`${BASE_URL}/${id}`, { id, chatRoom });
+    return response.data;
   } catch (error) {
-    console.log(error);
+    if (error.response?.status === 404) {
+      // اگر چت روم وجود ندارد، آن را با POST ایجاد می‌کنیم
+      const response = await axios.post(BASE_URL, { id, chatRoom });
+      return response.data;
+    }
+    throw error; // پرتاب سایر خطاها
   }
 };
 

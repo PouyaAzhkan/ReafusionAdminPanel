@@ -4,10 +4,10 @@ import ChangeMoment from "../../../utility/moment";
 const AssWorkTableItems = ({ item, setId, toggle }) => {
   return (
     <tr className="text-center" style={{ whiteSpace: "nowrap" }}>
-      <td className="px-0" style={{ width: "240px" }}>
+      <td className="px-0 w-100" style={{ maxWidth: "100px" }}>
         {item.courseName}
       </td>
-      <td className="px-0" style={{ width: "240px" }}>
+      <td className="px-0" style={{ maxWidth: "100px" }}>
         {item.assistanceName}
       </td>
       <td className="px-0" style={{ width: "150px" }}>

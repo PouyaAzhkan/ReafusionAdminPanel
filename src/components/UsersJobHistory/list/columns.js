@@ -19,7 +19,7 @@ export const columns = (
   {
     name: "کاربر",
     sortable: true,
-    width: "170px",
+    width: "150px",
     sortField: "userName",
     selector: (row) => {
       const { data: user, isLoading, isError } = useUserDetail(row.userId);
@@ -113,7 +113,7 @@ export const columns = (
   },
   {
     name: "وضعیت کار",
-    width: "120px",
+    width: "140px",
     sortable: true,
     sortField: "inWork",
     selector: (row) => row.inWork,

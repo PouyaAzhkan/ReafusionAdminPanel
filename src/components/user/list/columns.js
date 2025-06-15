@@ -23,7 +23,7 @@ export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
   {
     name: "نام کاربر",
     sortable: true,
-    width: "320px",
+    width: "300px",
     sortField: "fname",
     selector: (row) => row.fname,
     cell: (row) => (
@@ -34,6 +34,9 @@ export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
               ? row.pictureAddress.replace(/\\/g, "/")
               : emptyUserImg
           }
+          onError={(e) => {
+            e.currentTarget.src = emptyImg;
+          }}
           className="rounded-circle me-2"
           width="30"
           height="30"
@@ -60,14 +63,14 @@ export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
   {
     name: "نقش ها",
     sortable: true,
-    width: "250px",
+    width: "200px",
     sortField: "userRoles",
     selector: (row) => row.userRoles,
     cell: (row) => renderRole(row),
   },
   {
     name: "جنسیت",
-    width: "100px",
+    width: "120px",
     sortable: true,
     sortField: "gender",
     selector: (row) => row.gender,
@@ -87,7 +90,7 @@ export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
   },
   {
     name: "تکمیل پروفایل",
-    width: "130px",
+    width: "150px",
     sortable: true,
     sortField: "profileCompletionPercentage",
     selector: (row) => row.profileCompletionPercentage,
@@ -95,7 +98,7 @@ export const columns = (setDeleteModal, setUserToDelete, handleEditModal) => [
   },
   {
     name: "وضعیت",
-    width: "100px",
+    width: "120px",
     sortable: true,
     sortField: "active",
     selector: (row) => row.active,

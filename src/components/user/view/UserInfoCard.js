@@ -7,6 +7,7 @@ import { Percent } from "react-feather";
 import { changeUserActivity } from "../../../@core/Services/Api/UserManage/user";
 import moment from "jalali-moment";
 import EditUserModal from "../list/EditUserModal";
+import emptyImg from "../../../assets/images/emptyImage/userImage.jpg";
 
 const MySwal = withReactContent(Swal);
 
@@ -33,7 +34,10 @@ const UserInfoCard = ({ selectedUser, refetch }) => {
           height="110"
           width="110"
           alt=""
-          src={userData.currentPictureAddress}
+          src={userData.currentPictureAddress || emptyImg}
+          onError={(e)=>
+          {e.currentTarget.src = emptyImg}
+          }
           className="img-fluid rounded mt-3 mb-2"
         />
       );

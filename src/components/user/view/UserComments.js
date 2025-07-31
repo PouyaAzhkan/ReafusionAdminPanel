@@ -51,7 +51,7 @@ export const columns = ({
     name: "توضیحات",
     selector: (row) => row.describe,
     sortable: false,
-    width: "250px",
+    width: "230px",
     cell: (row) => (
       <span className="text-truncate">{row.describe || "توضیحات ندارد"}</span>
     ),
@@ -60,7 +60,7 @@ export const columns = ({
     name: "وضعیت",
     selector: (row) => row.accept,
     sortable: true,
-    width: "100px",
+    width: "120px",
     cell: (row) => (
       <Badge color={row.accept ? "light-success" : "light-danger"} pill>
         {row.accept ? "تایید شده" : "تایید نشده"}

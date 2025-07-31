@@ -87,15 +87,17 @@ const Courses = () => {
     const fullName = userDetail ? `${userDetail.fName} ${userDetail.lName}`.trim().replace(/-/g, ' ') : "";
     const query = paramsTab4.Query ? paramsTab4.Query.trim().toLowerCase() : "";
     
-    data = data.filter(course => {
-      // حذف خط تیره و نرمال‌سازی نام کامل مدرس
-      const teacherFullName = course.fullName ? course.fullName.trim().replace(/-/g, ' ') : "";
-      // بررسی تطابق نام کامل مدرس
-      const matchesFullName = teacherFullName.toLowerCase() === fullName.toLowerCase();
-      // بررسی تطابق عبارت جستجو با نام دوره
-      const matchesQuery = query ? course.title?.toLowerCase().includes(query) : true;
-      return matchesFullName && matchesQuery;
-    });
+  data = data.filter(course => {
+  // حذف خط تیره و نرمال‌سازی نام کامل مدرس
+  const teacherFullName = course.fullName ? course.fullName.trim().replace(/-/g, ' ') : "";
+  // نرمال‌سازی نام ورودی
+  const normalizedFullName = fullName ? fullName.trim().replace(/-/g, ' ') : "";
+  // بررسی تطابق نام کامل مدرس (اگر fullName خالی نباشد)
+  const matchesFullName = normalizedFullName ? teacherFullName.toLowerCase() === normalizedFullName.toLowerCase() : true;
+  // بررسی تطابق عبارت جستجو با نام دوره
+  const matchesQuery = query ? course.title?.toLowerCase().includes(query) : true;
+  return matchesFullName && matchesQuery;
+});
     
     // اعمال مرتب‌سازی
     if (sortTypeTab4 === "reserveCount") data.sort((a, b) => b.reserveCount - a.reserveCount);

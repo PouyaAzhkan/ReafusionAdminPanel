@@ -13,7 +13,7 @@ export const columns = [
     name: "عنوان دوره",
     selector: (row) => row.title,
     sortable: true,
-    width: "300px",
+    width: "290px",
     cell: (row) => (
       <div className="d-flex align-items-center">
         <Link to={`/courses/${row.courseId}`}>
@@ -39,7 +39,7 @@ export const columns = [
     name: "آخرین بروزرسانی",
     selector: (row) => row.lastUpdate,
     sortable: true,
-    width: "150px",
+    width: "180px",
     cell: (row) => {
       const date = new Date(row.lastUpdate).toLocaleDateString("fa-IR");
       return <span>{date}</span>;
@@ -49,7 +49,7 @@ export const columns = [
     name: "توضیحات",
     selector: (row) => row.describe,
     sortable: false,
-    width: "350px",
+    width: "330px",
   },
 ];
 

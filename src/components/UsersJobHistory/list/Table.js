@@ -54,7 +54,7 @@ const CustomHeader = ({
               id="search-invoice"
               className="ms-50 w-100"
               type="text"
-              placeholder="جستجو عنوان شغل یا نام شرکت ..."
+              placeholder="جستجو ..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
             />

@@ -22,7 +22,7 @@ export const columns = ({ handlePaymentModal }) => [
     name: "نام گروه",
     selector: (row) => row.groupName,
     sortable: true,
-    width: "180px",
+    width: "170px",
     cell: (row) => (
       <span className="text-truncate">{row.groupName || "بدون عنوان"}</span>
     ),
@@ -47,7 +47,7 @@ export const columns = ({ handlePaymentModal }) => [
     name: "وضعیت",
     selector: (row) => row.accept,
     sortable: true,
-    width: "100px",
+    width: "120px",
     cell: (row) => (
       <Badge color={row.accept ? "light-success" : "light-danger"} pill>
         {row.accept ? "تایید شده" : "تایید نشده"}
@@ -58,7 +58,7 @@ export const columns = ({ handlePaymentModal }) => [
     name: "رسید پرداختی",
     selector: (row) => row.accept,
     sortable: true,
-    width: "130px",
+    width: "150px",
     cell: (row) => (
       <span
         style={{ cursor: "pointer" }}

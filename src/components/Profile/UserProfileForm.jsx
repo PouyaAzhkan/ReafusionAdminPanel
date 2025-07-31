@@ -202,13 +202,13 @@ const UserProfileForm = ({ userData }) => {
             } else if (data.address.trim().length > 100) {
                 errors.address = { message: "آدرس نمی‌تواند بیشتر از ۱۰۰ کاراکتر باشد" };
             }
-            if (data.latitude) {
+            if (data.latitude || 0) {
                 const lat = parseFloat(data.latitude);
                 if (isNaN(lat) || lat < -90 || lat > 90) {
                     errors.latitude = { message: "عرض جغرافیایی باید بین -90 و 90 باشد" };
                 }
             }
-            if (data.longitude) {
+            if (data.longitude || 0) {
                 const lon = parseFloat(data.longitude);
                 if (isNaN(lon) || lon < -180 || lon > 180) {
                     errors.longitude = { message: "طول جغرافیایی باید بین -180 و 180 باشد" };
